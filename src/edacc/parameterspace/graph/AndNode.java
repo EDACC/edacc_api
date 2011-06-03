@@ -1,7 +1,7 @@
-package parameterspace.graph;
+package edacc.parameterspace.graph;
 
-import parameterspace.Parameter;
-import parameterspace.domain.Domain;
+import edacc.parameterspace.Parameter;
+import edacc.parameterspace.domain.Domain;
 
 public class AndNode extends Node {
 	private Domain domain;

@@ -1,4 +1,4 @@
-package parameterspace.domain;
+package edacc.parameterspace.domain;
 
 import java.util.Random;
 

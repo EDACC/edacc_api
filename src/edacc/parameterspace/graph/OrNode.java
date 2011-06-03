@@ -1,6 +1,6 @@
-package parameterspace.graph;
+package edacc.parameterspace.graph;
 
-import parameterspace.Parameter;
+import edacc.parameterspace.Parameter;
 
 public class OrNode extends Node {
 	

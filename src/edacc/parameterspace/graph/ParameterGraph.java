@@ -1,4 +1,4 @@
-package parameterspace.graph;
+package edacc.parameterspace.graph;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import parameterspace.Parameter;
-import parameterspace.ParameterConfiguration;
+import edacc.parameterspace.Parameter;
+import edacc.parameterspace.ParameterConfiguration;
+
+
+
 
 public class ParameterGraph {
 	private AndNode startNode;

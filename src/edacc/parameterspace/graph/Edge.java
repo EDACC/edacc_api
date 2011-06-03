@@ -1,4 +1,4 @@
-package parameterspace.graph;
+package edacc.parameterspace.graph;
 
 public class Edge {
 	private Node source;

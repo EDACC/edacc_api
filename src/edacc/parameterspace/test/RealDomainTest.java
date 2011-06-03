@@ -1,4 +1,4 @@
-package parameterspace.test;
+package edacc.parameterspace.test;
 
 import static org.junit.Assert.*;
 
@@ -6,7 +6,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import parameterspace.domain.RealDomain;
+import edacc.parameterspace.domain.RealDomain;
+
 
 public class RealDomainTest {
 

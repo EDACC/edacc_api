@@ -1,10 +1,11 @@
-package parameterspace;
+package edacc.parameterspace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
@@ -29,15 +30,19 @@ public class ParameterConfiguration {
 		parameter_instances.put(p, v);
 	}
 	
+	public Map<Parameter, Object> getParameter_instances() {
+		return parameter_instances;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		List<Parameter> params = new ArrayList<Parameter>();
 		params.addAll(parameter_instances.keySet());
-		java.util.Collections.sort(params);
 		for (Parameter p: params) {
-			sb.append(p.getPrefix());
-			if (p.isSpaceBeforeValue()) sb.append(" ");
+			sb.append(p.getName());
+			sb.append(": ");
 			sb.append(parameter_instances.get(p));
+			sb.append(" ");
 		}
 		return sb.toString();
 	}

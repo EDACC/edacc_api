@@ -1,11 +1,14 @@
-package parameterspace.domain;
+package edacc.parameterspace.domain;
 
 import java.util.Random;
 
-public class FlagDomain extends Domain {
+public class OptionalDomain extends Domain {
 	public static enum OPTIONS {
-		ON,
-		OFF
+		NOT_SPECIFIED {
+			public String toString() {
+				return "NOT_SPECIFIED";
+			}
+		}
 	}
 	
 	@Override
@@ -22,7 +25,7 @@ public class FlagDomain extends Domain {
 
 	@Override
 	public String toString() {
-		return "{ON, OFF}";
+		return "{<not specified>}";
 	}
 
 }

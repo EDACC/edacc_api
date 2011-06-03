@@ -1,4 +1,4 @@
-package parameterspace.test;
+package edacc.parameterspace.test;
 
 import static org.junit.Assert.*;
 
@@ -11,15 +11,17 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import parameterspace.Parameter;
-import parameterspace.ParameterConfiguration;
-import parameterspace.domain.CategoricalDomain;
-import parameterspace.domain.RealDomain;
-import parameterspace.graph.AndNode;
-import parameterspace.graph.Edge;
-import parameterspace.graph.OrNode;
-import parameterspace.graph.Node;
-import parameterspace.graph.ParameterGraph;
+import edacc.parameterspace.Parameter;
+import edacc.parameterspace.ParameterConfiguration;
+import edacc.parameterspace.domain.CategoricalDomain;
+import edacc.parameterspace.domain.RealDomain;
+import edacc.parameterspace.graph.AndNode;
+import edacc.parameterspace.graph.Edge;
+import edacc.parameterspace.graph.Node;
+import edacc.parameterspace.graph.OrNode;
+import edacc.parameterspace.graph.ParameterGraph;
+
+
 
 public class ParameterGraphTest {
 	private ParameterGraph g = null;
@@ -28,7 +30,7 @@ public class ParameterGraphTest {
 	public void setUp() throws Exception {
 		Set<Parameter> parameters = new HashSet<Parameter>();
 		String[] c = {"atom", "body", "hybrid", "no"};
-		Parameter param_lookahead = new Parameter("lookahead", "--lookahead=", 0, new CategoricalDomain(c), false, false);
+		Parameter param_lookahead = new Parameter("lookahead", new CategoricalDomain(c));
 		parameters.add(param_lookahead);
 		
 		Set<Node> nodes = new HashSet<Node>();
