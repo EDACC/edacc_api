@@ -142,4 +142,9 @@ public class ParameterGraph {
 		
 		return config;
 	}
+	
+	public boolean validateParameterConfiguration(ParameterConfiguration config) {
+		// TODO: implement
+		return false;
+	}
 }
