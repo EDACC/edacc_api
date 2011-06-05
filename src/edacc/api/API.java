@@ -1,6 +1,9 @@
 package edacc.api;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,6 +13,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import edacc.model.*;
 import edacc.parameterspace.domain.*;
@@ -23,8 +31,12 @@ import edacc.parameterspace.ParameterConfiguration;
 public class API {
 	private static DatabaseConnector db = DatabaseConnector.getInstance();
 	
-	public static void main(String[] args) throws InstanceClassMustBeSourceException, SQLException, IOException {
-		Set<edacc.parameterspace.Parameter> parameters = new HashSet<edacc.parameterspace.Parameter>();
+	public static void main(String[] args) throws InstanceClassMustBeSourceException, SQLException, IOException, JAXBException {
+		API api = new API();
+		ParameterGraph pg = api.loadParameterGraph("src/sparrow_parameterspace.xml");
+		System.out.println(pg.getRandomConfiguration(new Random()).toString());
+		
+		/*Set<edacc.parameterspace.Parameter> parameters = new HashSet<edacc.parameterspace.Parameter>();
 		edacc.parameterspace.Parameter param_c1 = new edacc.parameterspace.Parameter("c1", new IntegerDomain(1, 10));
 		parameters.add(param_c1);
 		edacc.parameterspace.Parameter param_c2 = new edacc.parameterspace.Parameter("c2", new IntegerDomain(1, 10));
@@ -69,7 +81,7 @@ public class API {
 					job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 10, run++));
 				}
 			}
-		}
+		}*/
 	}
 	
 	public boolean connect(String hostname, int port, String database, String username, String password) {
@@ -99,7 +111,7 @@ public class API {
 				Parameter db_parameter = null;
 				for (Parameter dbp: parameters) if (dbp.getName().equals(p.getName())) db_parameter = dbp;
 				if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(p))) continue;
-				else if (FlagDomain.OPTIONS.OFF.equals(config.getParameterValue(p))) continue;
+				else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(p))) continue;
 				else {
 					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(db_parameter.getId(), solver_config, config.getParameterValue(p).toString());
 					ParameterInstanceDAO.save(pi);
@@ -149,5 +161,19 @@ public class API {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public ParameterGraph loadParameterGraph(String xmlFileName) throws FileNotFoundException, JAXBException {
+		FileInputStream fis = new FileInputStream(xmlFileName);
+		ParameterGraph unm = unmarshal(ParameterGraph.class, fis);
+		unm.buildAdjacencyList();
+		return unm;
+	}
+	
+	public <T> T unmarshal( Class<T> docClass, InputStream inputStream )
+    	throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance( docClass);
+		Unmarshaller u = jc.createUnmarshaller();
+		return (T)u.unmarshal(inputStream);
 	}
 }

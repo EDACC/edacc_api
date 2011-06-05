@@ -3,7 +3,11 @@ package edacc.parameterspace.domain;
 import java.util.Random;
 
 public class RealDomain extends Domain {
-	private Double low, high;
+	protected Double low, high;
+	
+	private RealDomain() {
+		
+	}
 	
 	public RealDomain(Double low, Double high) {
 		this.low = low;
@@ -30,5 +34,21 @@ public class RealDomain extends Domain {
 	@Override
 	public String toString() {
 		return "[" + this.low + "," + this.high + "]";
+	}
+
+	public Double getLow() {
+		return low;
+	}
+
+	public void setLow(Double low) {
+		this.low = low;
+	}
+
+	public Double getHigh() {
+		return high;
+	}
+
+	public void setHigh(Double high) {
+		this.high = high;
 	}
 }

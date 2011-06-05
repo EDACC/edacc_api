@@ -1,9 +1,15 @@
 package edacc.parameterspace.graph;
 
+import javax.xml.bind.annotation.XmlIDREF;
+
 public class Edge {
-	private Node source;
-	private Node target;
-	private int group;
+	protected Node source;
+	protected Node target;
+	protected int group;
+	
+	private Edge() {
+		
+	}
 	
 	public Edge(Node source, Node target, int group) {
 		this.source = source;
@@ -11,7 +17,7 @@ public class Edge {
 		this.group = group;
 	}
 
-	public Node getSource() {
+	@XmlIDREF public Node getSource() {
 		return source;
 	}
 
@@ -19,7 +25,7 @@ public class Edge {
 		this.source = source;
 	}
 
-	public Node getTarget() {
+	@XmlIDREF public Node getTarget() {
 		return target;
 	}
 

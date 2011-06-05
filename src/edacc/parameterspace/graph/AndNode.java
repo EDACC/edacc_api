@@ -4,7 +4,11 @@ import edacc.parameterspace.Parameter;
 import edacc.parameterspace.domain.Domain;
 
 public class AndNode extends Node {
-	private Domain domain;
+	protected Domain domain;
+	
+	private AndNode() {
+		
+	}
 	
 	public AndNode(Parameter parameter, Domain domain) {
 		this.parameter = parameter;
@@ -18,5 +22,9 @@ public class AndNode extends Node {
 
 	public Domain getDomain() {
 		return domain;
+	}
+
+	public void setDomain(Domain domain) {
+		this.domain = domain;
 	}
 }

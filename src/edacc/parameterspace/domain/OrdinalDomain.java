@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Random;
 
 public class OrdinalDomain extends Domain {
-	List<String> ordered_list;
+	protected List<String> ordered_list;
+	
+	private OrdinalDomain() {
+		
+	}
 	
 	public OrdinalDomain(List<String> ordered_list) {
 		this.ordered_list = ordered_list;
@@ -33,4 +37,11 @@ public class OrdinalDomain extends Domain {
 		return sb.toString();
 	}
 
+	public List<String> getOrdered_list() {
+		return ordered_list;
+	}
+
+	public void setOrdered_list(List<String> ordered_list) {
+		this.ordered_list = ordered_list;
+	}
 }

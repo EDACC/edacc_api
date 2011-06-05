@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Random;
 
 public class MixedDomain extends Domain {
-	List<Domain> domains;
+	protected List<Domain> domains;
+	
+	private MixedDomain() {
+		
+	}
 	
 	public MixedDomain(List<Domain> domains) {
 		this.domains = domains;
@@ -34,4 +38,11 @@ public class MixedDomain extends Domain {
 		return sb.toString();
 	}
 
+	public List<Domain> getDomains() {
+		return domains;
+	}
+
+	public void setDomains(List<Domain> domains) {
+		this.domains = domains;
+	}
 }

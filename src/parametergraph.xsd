@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="parameterspace" type="parameterGraph"/>
+
+  <xs:complexType name="andNode">
+    <xs:complexContent>
+      <xs:extension base="node">
+        <xs:sequence>
+          <xs:element name="domain" type="domain" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="node" abstract="true">
+    <xs:sequence>
+      <xs:element name="id" type="xs:ID" minOccurs="0"/>
+      <xs:element name="parameter" type="xs:IDREF" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="domain" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="categoricalDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="categories" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="flagDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="values" type="flags" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="integerDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="high" type="xs:int" minOccurs="0"/>
+          <xs:element name="low" type="xs:int" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="mixedDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="domains" type="domain" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="optionalDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="realDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="high" type="xs:double" minOccurs="0"/>
+          <xs:element name="low" type="xs:double" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="parameter">
+    <xs:sequence>
+      <xs:element name="domain" type="domain" minOccurs="0"/>
+      <xs:element name="name" type="xs:ID" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="orNode">
+    <xs:complexContent>
+      <xs:extension base="node">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="edge">
+    <xs:sequence>
+      <xs:element name="group" type="xs:int"/>
+      <xs:element name="source" type="xs:IDREF" minOccurs="0"/>
+      <xs:element name="target" type="xs:IDREF" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="parameterGraph">
+    <xs:sequence>
+      <xs:element name="startNode" type="xs:IDREF" minOccurs="0"/>
+      <xs:element name="nodes" type="node" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="parameters" type="parameter" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="edges" type="edge" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ordinalDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="ordered_list" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="flags">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ON"/>
+      <xs:enumeration value="OFF"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="options">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NOT_SPECIFIED"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

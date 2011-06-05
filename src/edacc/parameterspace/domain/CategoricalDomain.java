@@ -5,8 +5,12 @@ import java.util.Random;
 import java.util.Set;
 
 public class CategoricalDomain extends Domain {
-	private Set<String> categories;
+	protected Set<String> categories;
 	
+	private CategoricalDomain() {
+		
+	}
+
 	public CategoricalDomain(String[] categories) {
 		this.categories = new HashSet<String>();
 		for (String s: categories) {
@@ -40,5 +44,12 @@ public class CategoricalDomain extends Domain {
 		sb.append("}");
 		return sb.toString();
 	}
+	
+	public Set<String> getCategories() {
+		return categories;
+	}
 
+	public void setCategories(Set<String> categories) {
+		this.categories = categories;
+	}
 }

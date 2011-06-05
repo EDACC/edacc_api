@@ -3,7 +3,11 @@ package edacc.parameterspace.domain;
 import java.util.Random;
 
 public class IntegerDomain extends Domain {
-	private Integer low, high;
+	protected Integer low, high;
+	
+	private IntegerDomain() {
+		
+	}
 	
 	public IntegerDomain(Integer low, Integer high) {
 		this.low = low;
@@ -26,5 +30,21 @@ public class IntegerDomain extends Domain {
 	@Override
 	public String toString() {
 		return "[" + this.low + "," + this.high + "]";
+	}
+
+	public Integer getLow() {
+		return low;
+	}
+
+	public void setLow(Integer low) {
+		this.low = low;
+	}
+
+	public Integer getHigh() {
+		return high;
+	}
+
+	public void setHigh(Integer high) {
+		this.high = high;
 	}
 }

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameterspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="parametergraph.xsd">
+	<startNode>startnode</startNode>
+	<nodes xsi:type="andNode">
+		<id>startnode</id>
+	</nodes>
+	<nodes xsi:type="orNode">
+		<id>c1_node</id>
+		<parameter>c1</parameter>
+	</nodes>
+	<nodes xsi:type="andNode">
+		<id>c1_vals</id>
+		<parameter>c1</parameter>
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+	</nodes>
+	<nodes xsi:type="orNode">
+		<id>c2_node</id>
+		<parameter>c2</parameter>
+	</nodes>
+	<nodes xsi:type="andNode">
+		<id>c2_vals</id>
+		<parameter>c2</parameter>
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+	</nodes>
+	<nodes xsi:type="orNode">
+		<id>c3_node</id>
+		<parameter>c3</parameter>
+	</nodes>
+	<nodes xsi:type="andNode">
+		<id>c3_vals</id>
+		<parameter>c3</parameter>
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+	</nodes>
+	<nodes xsi:type="orNode">
+		<id>ps_node</id>
+		<parameter>ps</parameter>
+	</nodes>
+	<nodes xsi:type="andNode">
+		<id>ps_vals</id>
+		<parameter>ps</parameter>
+		<domain xsi:type="realDomain">
+			<high>1.0</high>
+			<low>0.0</low>
+		</domain>
+	</nodes>
+	
+	
+	
+	<parameters>
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+		<name>c1</name>
+	</parameters>
+	
+	<parameters>
+	
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+		<name>c2</name>
+	</parameters>
+	
+	<parameters>
+		<domain xsi:type="integerDomain">
+			<high>10</high>
+			<low>0</low>
+		</domain>
+		<name>c3</name>
+	</parameters>
+	
+	<parameters>
+		<domain xsi:type="realDomain">
+			<high>1.0</high>
+			<low>0.0</low>
+		</domain>
+		<name>ps</name>
+	</parameters>
+	
+	
+	
+	<edges>
+		<group>0</group>
+		<source>startnode</source>
+		<target>c1_node</target>
+	</edges>
+	<edges>
+		<group>0</group>
+		<source>c1_node</source>
+		<target>c1_vals</target>
+	</edges>
+	
+	<edges>
+		<group>0</group>
+		<source>startnode</source>
+		<target>c2_node</target>
+	</edges>
+	<edges>
+		<group>0</group>
+		<source>c2_node</source>
+		<target>c2_vals</target>
+	</edges>
+	
+	<edges>
+		<group>0</group>
+		<source>startnode</source>
+		<target>c3_node</target>
+	</edges>
+	<edges>
+		<group>0</group>
+		<source>c3_node</source>
+		<target>c3_vals</target>
+	</edges>
+	
+	<edges>
+		<group>0</group>
+		<source>startnode</source>
+		<target>ps_node</target>
+	</edges>
+	<edges>
+		<group>0</group>
+		<source>ps_node</source>
+		<target>ps_vals</target>
+	</edges>
+</parameterspace>

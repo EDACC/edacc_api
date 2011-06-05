@@ -8,33 +8,45 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 
-
-
-
+@XmlRootElement( name="parameterspace" )
 public class ParameterGraph {
-	private AndNode startNode;
-	private Map<Node, List<Edge>> edges; // adjacency list
-	private Set<Node> nodes;
-	private Set<Parameter> parameters;
+	@XmlIDREF public AndNode startNode;
+	public Set<Node> nodes;
+	public Set<Parameter> parameters;
+	public List<Edge> edges;
+	
+	private Map<Node, List<Edge>> adjacenct_edges; // internal adjacency list
+	
+	private ParameterGraph() {
+		
+	}
 	
 	public ParameterGraph(Set<Node> nodes, List<Edge> edges, Set<Parameter> parameters, AndNode startNode) {
 		this.startNode = startNode;
 		this.nodes = nodes;
-		this.edges = new HashMap<Node, List<Edge>>();
-		for (Edge e: edges) {
-			if (!this.edges.containsKey(e.getSource())) this.edges.put(e.getSource(), new LinkedList<Edge>());
-			this.edges.get(e.getSource()).add(e);
-		}
+		this.edges = edges;
 		this.parameters = parameters;
+		buildAdjacencyList();
+	}
+	
+	public void buildAdjacencyList() {
+		this.adjacenct_edges = new HashMap<Node, List<Edge>>();
+		for (Edge e: edges) {
+			if (!this.adjacenct_edges.containsKey(e.getSource())) this.adjacenct_edges.put(e.getSource(), new LinkedList<Edge>());
+			this.adjacenct_edges.get(e.getSource()).add(e);
+		}
 	}
 	
 	private Set<Node> adjacentNodes(Node node) {
 		Set<Node> nodes = new HashSet<Node>();
-		if (!edges.containsKey(node)) return nodes;
-		for (Edge e: edges.get(node)) {
+		if (!adjacenct_edges.containsKey(node)) return nodes;
+		for (Edge e: adjacenct_edges.get(node)) {
 			nodes.add(e.getTarget());
 		}
 		return nodes;
@@ -44,7 +56,7 @@ public class ParameterGraph {
 		Set<Node> nodes = new HashSet<Node>();
 		for (Node n: this.nodes) {
 			if (!(n instanceof OrNode)) continue;
-			for (Edge e: edges.get(n)) {
+			for (Edge e: adjacenct_edges.get(n)) {
 				if (e.getTarget().equals(node)) nodes.add(n);
 			}
 		}
@@ -54,7 +66,7 @@ public class ParameterGraph {
 	private Node preecedingNode(AndNode node) {
 		for (Node n: this.nodes) {
 			if (!(n instanceof OrNode)) continue;
-			for (Edge e: edges.get(n)) {
+			for (Edge e: adjacenct_edges.get(n)) {
 				if (e.getTarget().equals(node)) return n;
 			}
 		}
@@ -64,8 +76,8 @@ public class ParameterGraph {
 	private List<Edge> incomingEdges(Node node) {
 		List<Edge> edges = new LinkedList<Edge>();
 		for (Node n: this.nodes) {
-			if (!this.edges.containsKey(n)) continue;
-			for (Edge e: this.edges.get(n)) {
+			if (!this.adjacenct_edges.containsKey(n)) continue;
+			for (Edge e: this.adjacenct_edges.get(n)) {
 				if (e.getTarget().equals(node)) edges.add(e);
 			}
 		}

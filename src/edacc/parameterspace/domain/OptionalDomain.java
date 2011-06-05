@@ -11,6 +11,10 @@ public class OptionalDomain extends Domain {
 		}
 	}
 	
+	private OptionalDomain() {
+		
+	}
+	
 	@Override
 	public boolean contains(Object value) {
 		if (!(value instanceof OPTIONS)) return false;

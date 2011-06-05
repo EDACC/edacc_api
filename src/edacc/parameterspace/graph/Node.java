@@ -1,11 +1,17 @@
 package edacc.parameterspace.graph;
 
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlSeeAlso;
+
 import edacc.parameterspace.Parameter;
 
+@XmlSeeAlso({AndNode.class, OrNode.class})
 public abstract class Node {
+	protected String id;
 	protected Parameter parameter;
 	
-	public Parameter getParameter() {
+	@XmlIDREF public Parameter getParameter() {
 		return parameter;
 	}
 
@@ -19,8 +25,7 @@ public abstract class Node {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((parameter == null) ? 0 : parameter.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -33,11 +38,19 @@ public abstract class Node {
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (parameter == null) {
-			if (other.parameter != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!parameter.equals(other.parameter))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@XmlID public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }

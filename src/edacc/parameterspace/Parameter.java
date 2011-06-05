@@ -1,22 +1,20 @@
 package edacc.parameterspace;
 
+import javax.xml.bind.annotation.XmlID;
+
 import edacc.parameterspace.domain.Domain;
 
 public class Parameter {
 	private String name;
 	private Domain domain;
 	
+	public Parameter() {
+		
+	}
+	
 	public Parameter(String name, Domain domain) {
 		this.name = name;
 		this.domain = domain;
-	}
-	
-	public String getName() {
-		return name;
-	}
-
-	public Domain getDomain() {
-		return domain;
 	}
 	
 	@Override
@@ -43,5 +41,20 @@ public class Parameter {
 			return false;
 		return true;
 	}
-	
+
+	@XmlID public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Domain getDomain() {
+		return domain;
+	}
+
+	public void setDomain(Domain domain) {
+		this.domain = domain;
+	}
 }
