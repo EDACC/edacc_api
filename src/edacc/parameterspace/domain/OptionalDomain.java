@@ -32,4 +32,10 @@ public class OptionalDomain extends Domain {
 		return "{<not specified>}";
 	}
 
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		return OPTIONS.NOT_SPECIFIED;
+	}
+
 }

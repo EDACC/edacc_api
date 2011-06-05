@@ -47,4 +47,11 @@ public class IntegerDomain extends Domain {
 	public void setHigh(Integer high) {
 		this.high = high;
 	}
+
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		double r = rng.nextGaussian() * ((high - low) * 0.2);
+		return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
+	}
 }

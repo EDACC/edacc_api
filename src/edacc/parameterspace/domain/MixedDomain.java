@@ -45,4 +45,11 @@ public class MixedDomain extends Domain {
 	public void setDomains(List<Domain> domains) {
 		this.domains = domains;
 	}
+
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		int dom = rng.nextInt(domains.size());
+		return domains.get(dom).mutatedValue(rng, value);
+	}
 }

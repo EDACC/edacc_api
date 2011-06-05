@@ -11,4 +11,6 @@ public abstract class Domain {
 	public abstract Object randomValue(Random rng);
 
 	public abstract String toString();
+	
+	public abstract Object mutatedValue(Random rng, Object value);
 }

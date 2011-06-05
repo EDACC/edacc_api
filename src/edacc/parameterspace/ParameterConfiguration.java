@@ -46,4 +46,12 @@ public class ParameterConfiguration {
 		}
 		return sb.toString();
 	}
+	
+	public ParameterConfiguration(ParameterConfiguration other) {
+		// TODO: ensure that other.getParameterValue(p) makes a copy in all cases
+		this.parameter_instances = new HashMap<Parameter, Object>();
+		for (Parameter p: other.parameter_instances.keySet()) {
+			parameter_instances.put(p, other.getParameterValue(p));
+		}
+	}
 }

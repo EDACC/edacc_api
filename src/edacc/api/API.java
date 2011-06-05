@@ -33,57 +33,101 @@ import edacc.parameterspace.ParameterConfiguration;
 public class API {
 	private static DatabaseConnector db = DatabaseConnector.getInstance();
 	
-	public static void main(String[] args) throws InstanceClassMustBeSourceException, SQLException, IOException, JAXBException {
-		API api = new API();
-		ParameterGraph pg = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
-		System.out.println(pg.getRandomConfiguration(new Random()).toString());
-		
-		/*Set<edacc.parameterspace.Parameter> parameters = new HashSet<edacc.parameterspace.Parameter>();
-		edacc.parameterspace.Parameter param_c1 = new edacc.parameterspace.Parameter("c1", new IntegerDomain(1, 10));
-		parameters.add(param_c1);
-		edacc.parameterspace.Parameter param_c2 = new edacc.parameterspace.Parameter("c2", new IntegerDomain(1, 10));
-		parameters.add(param_c2);
-		edacc.parameterspace.Parameter param_c3 = new edacc.parameterspace.Parameter("c3", new IntegerDomain(1, 10));
-		parameters.add(param_c3);
-		edacc.parameterspace.Parameter param_ps = new edacc.parameterspace.Parameter("ps", new RealDomain(0.0, 1.0));
-		parameters.add(param_ps);
-		
-		Set<Node> nodes = new HashSet<Node>();
-		AndNode start = new AndNode(null, null); nodes.add(start);
-		OrNode c1 = new OrNode(param_c1); nodes.add(c1);
-		OrNode c2 = new OrNode(param_c2); nodes.add(c2);
-		OrNode c3 = new OrNode(param_c3); nodes.add(c3);
-		OrNode ps = new OrNode(param_ps); nodes.add(ps);
-		AndNode c1_vals = new AndNode(param_c1, param_c1.getDomain()); nodes.add(c1_vals);
-		AndNode c2_vals = new AndNode(param_c2, param_c2.getDomain()); nodes.add(c2_vals);
-		AndNode c3_vals = new AndNode(param_c3, param_c3.getDomain()); nodes.add(c3_vals);
-		AndNode ps_vals = new AndNode(param_ps, param_ps.getDomain()); nodes.add(ps_vals);
-		
-		List<Edge> edges = new LinkedList<Edge>();
-		edges.add(new Edge(start, c1, 0));
-		edges.add(new Edge(start, c2, 0));
-		edges.add(new Edge(start, c3, 0));
-		edges.add(new Edge(start, ps, 0));
-		edges.add(new Edge(c1, c1_vals, 0));
-		edges.add(new Edge(c2, c2_vals, 0));
-		edges.add(new Edge(c3, c3_vals, 0));
-		edges.add(new Edge(ps, ps_vals, 0));
-		ParameterGraph pspace = new ParameterGraph(nodes, edges, parameters, start);
-		Random rng = new Random();
-		
-		API api = new API();
-		api.connect("localhost", 3306, "EDACC", "edacc", "edaccteam");
+	public static double cost_func(API api, ParameterConfiguration config, Random rng) throws Exception {
 		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(8);
 		LinkedList<Integer> job_ids = new LinkedList<Integer>();
-		for (int i = 0; i < 100; i++) {
+		int solver_config_id = api.createSolverConfig(8, 10, config, 0);
+		for (Instance inst: instances) {
+			int run = 0;
+			for (int j = 0; j < 1; j++) {
+				job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 5, run++));
+			}
+		}
+		while (true) {
+			//System.out.println("awaiting results ...");
+			Thread.sleep(2000);
+			boolean all_done = true;
+			for (int id: job_ids) {
+				ExperimentResult res = api.getJob(id);
+				all_done &= res.getStatus().getStatusCode() >= 1;
+			}
+			if (all_done) break;
+		}
+		
+		double total_time = 0.0;
+		for (int id: job_ids) {
+			ExperimentResult res = api.getJob(id);
+			total_time += res.getResultTime();
+		}
+		return total_time / job_ids.size();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		API api = new API();
+		api.connect("localhost", 3306, "EDACC", "edacc", "edaccteam");
+		
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+		Random rng = new Random();
+		
+		int pop_size = 10, generations = 10;
+		double best_cost = Double.MAX_VALUE;
+		ParameterConfiguration best_configuration = null;
+		Vector<Double> cost = new Vector<Double>();
+		Vector<ParameterConfiguration> population = new Vector<ParameterConfiguration>();
+		for (int i = 0; i < pop_size; i++) {
+			population.add(pspace.getRandomConfiguration(rng));
+			cost.add(cost_func(api, population.get(i), rng));
+			if (cost.get(i) < best_cost) {
+				best_cost = cost.get(i);
+				best_configuration = new ParameterConfiguration(population.get(i));
+			}
+		}
+		System.out.println("initial generation:");
+		for (int i = 0; i < pop_size; i++) {
+			System.out.println(population.get(i).toString() + " (cost: " + cost.get(i) + ")");
+		}
+		
+		for (int g = 0; g < generations; g++) {
+			Vector<ParameterConfiguration> children = new Vector<ParameterConfiguration>();
+			for (int i = 0; i < pop_size; i++) {
+				children.add(new ParameterConfiguration(population.get(i)));
+				pspace.mutateParameterConfiguration(rng, children.get(i));
+				double child_cost = cost_func(api, children.get(i), rng);
+				if (child_cost < cost.get(i)) { // replace parent
+					population.set(i, children.get(i));
+					cost.set(i, child_cost);
+				}
+				
+				if (cost.get(i) < best_cost) {
+					best_cost = cost.get(i);
+					best_configuration = new ParameterConfiguration(population.get(i));
+				}
+			}
+			
+			System.out.println("new generation:");
+			for (int i = 0; i < pop_size; i++) {
+				System.out.println(population.get(i).toString() + " (cost: " + cost.get(i) + ")");
+			}
+			
+			System.out.println("best configuration found so far:" + best_configuration.toString() + " (cost " + best_cost + ")");
+		}
+		
+		System.out.println("best configuration:" + best_configuration.toString() + " (cost " + best_cost + ")");
+		
+		/*
+		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(8);
+		LinkedList<Integer> job_ids = new LinkedList<Integer>();
+		for (int i = 0; i < 200; i++) {
 			int solver_config_id = api.createSolverConfig(8, 10, pspace.getRandomConfiguration(rng), i);
 			for (Instance inst: instances) {
 				int run = 0;
 				for (int j = 0; j < 1; j++) {
-					job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 10, run++));
+					job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 5, run++));
 				}
 			}
 		}*/
+		
+		api.disconnect();
 	}
 	
 	public boolean connect(String hostname, int port, String database, String username, String password) {

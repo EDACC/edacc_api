@@ -13,7 +13,7 @@
 		<id>c1_vals</id>
 		<parameter>c1</parameter>
 		<domain xsi:type="integerDomain">
-			<high>10</high>
+			<high>50</high>
 			<low>0</low>
 		</domain>
 	</nodes>
@@ -25,7 +25,7 @@
 		<id>c2_vals</id>
 		<parameter>c2</parameter>
 		<domain xsi:type="integerDomain">
-			<high>10</high>
+			<high>50</high>
 			<low>0</low>
 		</domain>
 	</nodes>
@@ -37,8 +37,8 @@
 		<id>c3_vals</id>
 		<parameter>c3</parameter>
 		<domain xsi:type="integerDomain">
-			<high>10</high>
-			<low>0</low>
+			<high>300000</high>
+			<low>10000</low>
 		</domain>
 	</nodes>
 	<nodes xsi:type="orNode">
@@ -58,7 +58,7 @@
 	
 	<parameters>
 		<domain xsi:type="integerDomain">
-			<high>10</high>
+			<high>50</high>
 			<low>0</low>
 		</domain>
 		<name>c1</name>
@@ -67,7 +67,7 @@
 	<parameters>
 	
 		<domain xsi:type="integerDomain">
-			<high>10</high>
+			<high>50</high>
 			<low>0</low>
 		</domain>
 		<name>c2</name>
@@ -75,8 +75,8 @@
 	
 	<parameters>
 		<domain xsi:type="integerDomain">
-			<high>10</high>
-			<low>0</low>
+			<high>300000</high>
+			<low>10000</low>
 		</domain>
 		<name>c3</name>
 	</parameters>

@@ -52,4 +52,10 @@ public class CategoricalDomain extends Domain {
 	public void setCategories(Set<String> categories) {
 		this.categories = categories;
 	}
+
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		return randomValue(rng);
+	}
 }

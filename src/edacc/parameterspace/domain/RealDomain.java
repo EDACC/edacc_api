@@ -51,4 +51,11 @@ public class RealDomain extends Domain {
 	public void setHigh(Double high) {
 		this.high = high;
 	}
+	
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		double r = rng.nextGaussian() * ((high - low) * 0.2);
+		return Math.min(Math.max(this.low, ((Number)value).doubleValue() + r), this.high);
+	}
 }

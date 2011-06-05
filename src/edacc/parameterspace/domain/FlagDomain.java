@@ -63,4 +63,10 @@ public class FlagDomain extends Domain {
 		}
 	}
 
+	@Override
+	public Object mutatedValue(Random rng, Object value) {
+		if (!contains(value)) return value;
+		return randomValue(rng);
+	}
+
 }

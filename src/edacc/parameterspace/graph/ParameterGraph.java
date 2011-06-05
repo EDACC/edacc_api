@@ -158,6 +158,21 @@ public class ParameterGraph {
 		return config;
 	}
 	
+	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
+		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
+		for (Node n: this.nodes) {
+			if (n == startNode || !(n instanceof AndNode)) continue;
+			if (config.getParameter_instances().containsKey(((AndNode)n).parameter) &&
+				((AndNode)n).getDomain().contains(config.getParameterValue(((AndNode)n).parameter))) {
+				assigned_and_nodes.add((AndNode)n);
+			}
+		}
+		
+		for (AndNode n: assigned_and_nodes) {
+			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter())));
+		}
+	}
+	
 	public boolean validateParameterConfiguration(ParameterConfiguration config) {
 		// TODO: implement
 		return false;
