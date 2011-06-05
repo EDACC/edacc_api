@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,7 +35,7 @@ public class API {
 	
 	public static void main(String[] args) throws InstanceClassMustBeSourceException, SQLException, IOException, JAXBException {
 		API api = new API();
-		ParameterGraph pg = api.loadParameterGraph("src/sparrow_parameterspace.xml");
+		ParameterGraph pg = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
 		System.out.println(pg.getRandomConfiguration(new Random()).toString());
 		
 		/*Set<edacc.parameterspace.Parameter> parameters = new HashSet<edacc.parameterspace.Parameter>();
@@ -163,14 +165,43 @@ public class API {
 		return null;
 	}
 	
-	public ParameterGraph loadParameterGraph(String xmlFileName) throws FileNotFoundException, JAXBException {
+	public ParameterGraph loadParameterGraphFromDB(int solverID) {
+		try {
+            Statement st = db.getConn().createStatement();
+    
+            ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ParameterGraph WHERE Solver_idSolver = " + solverID);
+            try {
+                if (rs.next()) {
+                    return unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
+                }
+            } catch (JAXBException e) {
+				e.printStackTrace();
+				return null;
+			} finally {
+            	rs.close();
+                st.close();
+            }
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
+	
+	public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws FileNotFoundException {
 		FileInputStream fis = new FileInputStream(xmlFileName);
-		ParameterGraph unm = unmarshal(ParameterGraph.class, fis);
+		ParameterGraph unm;
+		try {
+			unm = unmarshal(ParameterGraph.class, fis);
+		} catch (JAXBException e) {
+			e.printStackTrace();
+			return null;
+		}
 		unm.buildAdjacencyList();
 		return unm;
 	}
 	
-	public <T> T unmarshal( Class<T> docClass, InputStream inputStream )
+	private <T> T unmarshal( Class<T> docClass, InputStream inputStream )
     	throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance( docClass);
 		Unmarshaller u = jc.createUnmarshaller();
