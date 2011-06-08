@@ -21,7 +21,7 @@ public class ParameterGraph {
 	public Set<Parameter> parameters;
 	public List<Edge> edges;
 	
-	private Map<Node, List<Edge>> adjacenct_edges; // internal adjacency list
+	private Map<Node, List<Edge>> adjacent_edges; // internal adjacency list
 	
 	private ParameterGraph() {
 		
@@ -36,17 +36,17 @@ public class ParameterGraph {
 	}
 	
 	public void buildAdjacencyList() {
-		this.adjacenct_edges = new HashMap<Node, List<Edge>>();
+		this.adjacent_edges = new HashMap<Node, List<Edge>>();
 		for (Edge e: edges) {
-			if (!this.adjacenct_edges.containsKey(e.getSource())) this.adjacenct_edges.put(e.getSource(), new LinkedList<Edge>());
-			this.adjacenct_edges.get(e.getSource()).add(e);
+			if (!this.adjacent_edges.containsKey(e.getSource())) this.adjacent_edges.put(e.getSource(), new LinkedList<Edge>());
+			this.adjacent_edges.get(e.getSource()).add(e);
 		}
 	}
 	
 	private Set<Node> adjacentNodes(Node node) {
 		Set<Node> nodes = new HashSet<Node>();
-		if (!adjacenct_edges.containsKey(node)) return nodes;
-		for (Edge e: adjacenct_edges.get(node)) {
+		if (!adjacent_edges.containsKey(node)) return nodes;
+		for (Edge e: adjacent_edges.get(node)) {
 			nodes.add(e.getTarget());
 		}
 		return nodes;
@@ -56,7 +56,7 @@ public class ParameterGraph {
 		Set<Node> nodes = new HashSet<Node>();
 		for (Node n: this.nodes) {
 			if (!(n instanceof OrNode)) continue;
-			for (Edge e: adjacenct_edges.get(n)) {
+			for (Edge e: adjacent_edges.get(n)) {
 				if (e.getTarget().equals(node)) nodes.add(n);
 			}
 		}
@@ -66,7 +66,7 @@ public class ParameterGraph {
 	private Node preecedingNode(AndNode node) {
 		for (Node n: this.nodes) {
 			if (!(n instanceof OrNode)) continue;
-			for (Edge e: adjacenct_edges.get(n)) {
+			for (Edge e: adjacent_edges.get(n)) {
 				if (e.getTarget().equals(node)) return n;
 			}
 		}
@@ -76,8 +76,8 @@ public class ParameterGraph {
 	private List<Edge> incomingEdges(Node node) {
 		List<Edge> edges = new LinkedList<Edge>();
 		for (Node n: this.nodes) {
-			if (!this.adjacenct_edges.containsKey(n)) continue;
-			for (Edge e: this.adjacenct_edges.get(n)) {
+			if (!this.adjacent_edges.containsKey(n)) continue;
+			for (Edge e: this.adjacent_edges.get(n)) {
 				if (e.getTarget().equals(node)) edges.add(e);
 			}
 		}

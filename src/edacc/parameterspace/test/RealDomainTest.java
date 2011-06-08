@@ -36,6 +36,7 @@ public class RealDomainTest {
 	@Test
 	public void testRealDomain() {
 		RealDomain r = new RealDomain(0, 1);
+		r.contains(0.5d);
 	}
 
 }

@@ -26,6 +26,8 @@ public abstract class Node {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result
+				+ ((parameter == null) ? 0 : parameter.hashCode());
 		return result;
 	}
 
@@ -42,6 +44,11 @@ public abstract class Node {
 			if (other.id != null)
 				return false;
 		} else if (!id.equals(other.id))
+			return false;
+		if (parameter == null) {
+			if (other.parameter != null)
+				return false;
+		} else if (!parameter.equals(other.parameter))
 			return false;
 		return true;
 	}

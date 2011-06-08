@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
 	
