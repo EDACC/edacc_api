@@ -1,5 +1,6 @@
 package edacc.parameterspace.domain;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -51,5 +52,12 @@ public class MixedDomain extends Domain {
 		if (!contains(value)) return value;
 		int dom = rng.nextInt(domains.size());
 		return domains.get(dom).mutatedValue(rng, value);
+	}
+
+	@Override
+	public List<Object> getDiscreteValues() {
+		List<Object> values = new LinkedList<Object>();
+		values.addAll(domains);
+		return values;
 	}
 }

@@ -1,5 +1,7 @@
 package edacc.parameterspace.domain;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class IntegerDomain extends Domain {
@@ -53,5 +55,14 @@ public class IntegerDomain extends Domain {
 		if (!contains(value)) return value;
 		double r = rng.nextGaussian() * ((high - low) * 0.2);
 		return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
+	}
+
+	@Override
+	public List<Object> getDiscreteValues() {
+		List<Object> values = new LinkedList<Object>();
+		for (int i = this.low; i < this.high; i++) {
+			values.add(i);
+		}
+		return values;
 	}
 }

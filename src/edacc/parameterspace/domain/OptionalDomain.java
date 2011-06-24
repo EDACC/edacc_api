@@ -1,5 +1,7 @@
 package edacc.parameterspace.domain;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class OptionalDomain extends Domain {
@@ -38,4 +40,10 @@ public class OptionalDomain extends Domain {
 		return OPTIONS.NOT_SPECIFIED;
 	}
 
+	@Override
+	public List<Object> getDiscreteValues() {
+		List<Object> values = new LinkedList<Object>();
+		values.add(OPTIONS.NOT_SPECIFIED);
+		return values;
+	}
 }

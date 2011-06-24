@@ -29,6 +29,34 @@ public class ParameterConfiguration {
 		parameter_instances.put(p, v);
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((parameter_instances == null) ? 0 : parameter_instances
+						.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ParameterConfiguration other = (ParameterConfiguration) obj;
+		if (parameter_instances == null) {
+			if (other.parameter_instances != null)
+				return false;
+		} else if (!parameter_instances.equals(other.parameter_instances)) // set comparison
+			return false;
+		return true;
+	}
+
 	public Map<Parameter, Object> getParameter_instances() {
 		return parameter_instances;
 	}

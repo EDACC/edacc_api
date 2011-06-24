@@ -37,8 +37,8 @@
 		<id>c3_vals</id>
 		<parameter>c3</parameter>
 		<domain xsi:type="integerDomain">
-			<high>300000</high>
-			<low>10000</low>
+			<high>30</high>
+			<low>10</low>
 		</domain>
 	</nodes>
 	<nodes xsi:type="orNode">
@@ -75,8 +75,8 @@
 	
 	<parameters>
 		<domain xsi:type="integerDomain">
-			<high>300000</high>
-			<low>10000</low>
+			<high>30</high>
+			<low>10</low>
 		</domain>
 		<name>c3</name>
 	</parameters>

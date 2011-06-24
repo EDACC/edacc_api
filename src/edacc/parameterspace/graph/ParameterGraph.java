@@ -63,9 +63,8 @@ public class ParameterGraph {
 		return nodes;
 	}
 	
-	private Node preecedingNode(AndNode node) {
-		for (Node n: this.nodes) {
-			if (!(n instanceof OrNode)) continue;
+	private OrNode preceedingNode(AndNode node) {
+		for (OrNode n: getOrNodes()) {
 			for (Edge e: adjacent_edges.get(n)) {
 				if (e.getTarget().equals(node)) return n;
 			}
@@ -82,6 +81,22 @@ public class ParameterGraph {
 			}
 		}
 		return edges;
+	}
+	
+	private Set<OrNode> getOrNodes() {
+		Set<OrNode> s = new HashSet<OrNode>();
+		for (Node n: this.nodes) {
+			if (n instanceof OrNode) s.add((OrNode)n);
+		}
+		return s;
+	}
+	
+	private Set<AndNode> getAndNodes() {
+		Set<AndNode> s = new HashSet<AndNode>();
+		for (Node n: this.nodes) {
+			if (n instanceof AndNode) s.add((AndNode)n);
+		}
+		return s;
 	}
 	
 	private boolean incomingEdgesDone(Node node, Set<AndNode> doneAndNodes) {
@@ -156,6 +171,54 @@ public class ParameterGraph {
 		}
 		
 		return config;
+	}
+	
+	public List<ParameterConfiguration> getNeighbourhood(ParameterConfiguration config) {
+		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
+		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
+		for (Parameter p: config.getParameter_instances().keySet()) {
+    		for (AndNode n: getAndNodes()) {
+    			if (n == startNode) continue;
+    			if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
+    				assigned_or_nodes.add(preceedingNode(n));
+    				assigned_and_nodes.add(n);
+    			}
+    		}
+		}
+		
+		List<ParameterConfiguration> nbh = new LinkedList<ParameterConfiguration>();
+		for (AndNode node: assigned_and_nodes) {
+			for (Object value: preceedingNode(node).getParameter().getDomain().getDiscreteValues()) {
+				if (node.getDomain().contains(value)) { // same subdomain
+					ParameterConfiguration neighbour = new ParameterConfiguration(config);
+					neighbour.setParameterValue(node.getParameter(), value);
+					nbh.add(neighbour);
+				}
+			}
+			
+		}
+		
+		return nbh;
+	}
+	
+	public ParameterConfiguration getRandomNeighbour(ParameterConfiguration config, Random rng) {
+		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
+		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
+		for (Parameter p: config.getParameter_instances().keySet()) {
+    		for (AndNode n: getAndNodes()) {
+    			if (n == startNode) continue;
+    			if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
+    				assigned_or_nodes.add(preceedingNode(n));
+    				assigned_and_nodes.add(n);
+    			}
+    		}
+		}
+		
+		AndNode node = randomElement(assigned_and_nodes, rng);
+		List<Object> vals = node.getDomain().getDiscreteValues();
+		ParameterConfiguration n = new ParameterConfiguration(config);
+		n.setParameterValue(node.getParameter(), vals.get(rng.nextInt(vals.size())));
+		return n;
 	}
 	
 	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {

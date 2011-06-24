@@ -2,6 +2,7 @@ package edacc.parameterspace.test;
 
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import edacc.api.API;
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.CategoricalDomain;
@@ -51,6 +53,23 @@ public class ParameterGraphTest {
 		ParameterConfiguration p = g.getRandomConfiguration(rng);
 		assertTrue(p != null);
 		System.out.println(p);
+	}
+	
+	@Test
+	public void testGetNeighbourhood() {
+		Random rng = new Random();
+		API api = new API();
+		try {
+			ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+			ParameterConfiguration config = pspace.getRandomConfiguration(rng);
+			System.out.println("original: " + config.toString());
+			for (ParameterConfiguration c: pspace.getNeighbourhood(config)) {
+				System.out.println(c);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

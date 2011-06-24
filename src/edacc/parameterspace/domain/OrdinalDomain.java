@@ -1,5 +1,6 @@
 package edacc.parameterspace.domain;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -52,5 +53,12 @@ public class OrdinalDomain extends Domain {
 		double r = rng.nextGaussian() * (ordered_list.size() * 0.2);
 		int n = Math.min((int)Math.max(Math.round(ix + r), ordered_list.size()), 0);
 		return ordered_list.get(n);
+	}
+	
+	@Override
+	public List<Object> getDiscreteValues() {
+		List<Object> values = new LinkedList<Object>();
+		values.addAll(ordered_list);
+		return values;
 	}
 }

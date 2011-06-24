@@ -1,6 +1,8 @@
 package edacc.parameterspace.domain;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -57,5 +59,12 @@ public class CategoricalDomain extends Domain {
 	public Object mutatedValue(Random rng, Object value) {
 		if (!contains(value)) return value;
 		return randomValue(rng);
+	}
+
+	@Override
+	public List<Object> getDiscreteValues() {
+		List<Object> values = new LinkedList<Object>();
+		values.addAll(categories);
+		return values;
 	}
 }

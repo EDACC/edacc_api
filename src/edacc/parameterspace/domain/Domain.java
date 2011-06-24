@@ -1,5 +1,6 @@
 package edacc.parameterspace.domain;
 
+import java.util.List;
 import java.util.Random;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
@@ -13,4 +14,6 @@ public abstract class Domain {
 	public abstract String toString();
 	
 	public abstract Object mutatedValue(Random rng, Object value);
+	
+	public abstract List<Object> getDiscreteValues();
 }
