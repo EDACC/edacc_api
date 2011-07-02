@@ -53,6 +53,7 @@ public class ParameterGraphTest {
 		ParameterConfiguration p = g.getRandomConfiguration(rng);
 		assertTrue(p != null);
 		System.out.println(p);
+		System.out.println(new String(p.getChecksum()));
 	}
 	
 	@Test

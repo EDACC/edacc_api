@@ -175,6 +175,7 @@ public class ParameterGraph {
 			}
 		}
 		
+		config.updateChecksum();
 		return config;
 	}
 	
@@ -203,6 +204,7 @@ public class ParameterGraph {
 				if (node.getDomain().contains(value)) { // same subdomain
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(node.getParameter(), value);
+					neighbour.updateChecksum();
 					nbh.add(neighbour);
 				}
 			}
@@ -236,6 +238,7 @@ public class ParameterGraph {
 		List<Object> vals = node.getDomain().getDiscreteValues();
 		ParameterConfiguration n = new ParameterConfiguration(config);
 		n.setParameterValue(node.getParameter(), vals.get(rng.nextInt(vals.size())));
+		n.updateChecksum();
 		return n;
 	}
 	
@@ -258,6 +261,7 @@ public class ParameterGraph {
 		for (AndNode n: assigned_and_nodes) {
 			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter())));
 		}
+		config.updateChecksum();
 	}
 	
 	public boolean validateParameterConfiguration(ParameterConfiguration config) {

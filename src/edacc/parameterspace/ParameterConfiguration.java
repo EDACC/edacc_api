@@ -1,5 +1,7 @@
 package edacc.parameterspace;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,10 +10,29 @@ import java.util.Set;
 
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
+	byte[] checksum;
 	
 	public ParameterConfiguration(Set<Parameter> parameters) {
+		this.checksum = null;
 		this.parameter_instances = new HashMap<Parameter, Object>();
 		for (Parameter p: parameters) parameter_instances.put(p, null);
+	}
+	
+	public byte[] getChecksum() {
+		return checksum;
+	}
+	
+	public void updateChecksum() {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			for (Parameter p: parameter_instances.keySet()) {
+				md.update(parameter_instances.get(p).toString().getBytes());
+			}
+			this.checksum = md.digest();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public Object getParameterValue(Parameter p) {
@@ -77,6 +98,7 @@ public class ParameterConfiguration {
 	public ParameterConfiguration(ParameterConfiguration other) {
 		// TODO: ensure that other.getParameterValue(p) makes a copy in all cases
 		this.parameter_instances = new HashMap<Parameter, Object>();
+		this.checksum = other.checksum.clone();
 		for (Parameter p: other.parameter_instances.keySet()) {
 			parameter_instances.put(p, other.getParameterValue(p));
 		}
