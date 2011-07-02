@@ -60,7 +60,7 @@ public class IntegerDomain extends Domain {
 	@Override
 	public List<Object> getDiscreteValues() {
 		List<Object> values = new LinkedList<Object>();
-		for (int i = this.low; i < this.high; i++) {
+		for (int i = this.low; i <= this.high; i++) {
 			values.add(i);
 		}
 		return values;

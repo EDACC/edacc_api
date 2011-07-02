@@ -4,11 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -32,6 +32,15 @@ public class API {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (DBVersionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DBVersionUnknownException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DBEmptyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -40,40 +49,39 @@ public class API {
 		db.disconnect();
 	}
 	
-	/**
-	 * Erstellt eine DB-SolverConfiguration aus einer experiment_id und einer ParameterConfiguration
-	 * und gibt eine eindeutige ID zurück.
-	 * Bisher sind auch noch solver_binary_id und seed_group anzugeben, das sollte aber dann wegfallen
-	 * wenn diese Infos auch in der DB an dem Experiment hängen.  
-	 */
-	public int createSolverConfig(int experiment_id, int solver_binary_id, ParameterConfiguration config, int seed_group) {
+	public int createSolverConfig(int experiment_id, ParameterConfiguration config) {
 		try {
-			SolverBinaries solver_binary = SolverBinariesDAO.getById(solver_binary_id);
-			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, experiment_id, seed_group, solver_binary.getBinaryName() + String.valueOf(seed_group), 0);
-			Vector<Parameter> parameters = ParameterDAO.getParameterFromSolverId(solver_binary.getIdSolver()); 
-			for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
-				Parameter db_parameter = null;
-				for (Parameter dbp: parameters) if (dbp.getName().equals(p.getName())) db_parameter = dbp;
-				if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(p))) continue;
-				else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(p))) continue;
-				else {
-					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(db_parameter.getId(), solver_config, config.getParameterValue(p).toString());
+			ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(experiment_id);
+			SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
+			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, experiment_id, 0, solver_binary.getBinaryName());
+
+			for (ConfigurationScenarioParameter param: cs.getParameters()) {
+				if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
+					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
 					ParameterInstanceDAO.save(pi);
 				}
-			}
-			for (Parameter db_parameter: parameters) {
-				// check if parameter is part of the search space
-				boolean search_param = false;
-				for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
-					if (p.getName().equals(db_parameter.getName())) search_param = true; 
+				else if (!param.isConfigurable()) {
+					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, param.getFixedValue());
+					ParameterInstanceDAO.save(pi);
 				}
-				if (!search_param) {
-					if ("instance".equals(db_parameter.getName()) || "seed".equals(db_parameter.getName()) || db_parameter.isMandatory()) {
-						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(db_parameter.getId(), solver_config, "");
+				else {
+					edacc.parameterspace.Parameter config_param = null;
+					for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
+						if (p.getName().equals(param.getParameter().getName())) {
+							config_param = p;
+							break;
+						}
+					}
+					
+					if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param))) continue;
+					else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param))) continue;
+					else {
+						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, config.getParameterValue(config_param).toString());
 						ParameterInstanceDAO.save(pi);
 					}
 				}
 			}
+			
 			return solver_config.getId();
 		}
 		catch (Exception e) {
@@ -82,16 +90,9 @@ public class API {
 		return 0;
 	}
 
-	/**
-	 * Startet einen Job im gegebenen Experiment für die DB-SolverConfiguration (referenziert durch solver_config_id) auf
-	 * der Instanz (instance_id). Die run Zahl wird benutzt, falls mehrere Durchläufe pro Instanz und SolverConfig gemacht werden
-	 * und kann später auch noch automatisch von der DB ermittelt und gesetzt werden.
-	 * 
-	 * Gibt eine eindeutige ID für diesen Job zurück
-	 */
-	public int launchJob(int experiment_id, int solver_config_id, int instance_id, BigInteger seed, int cpu_time_limit, int run) {
+	public int launchJob(int experiment_id, int solver_config_id, int instance_id, BigInteger seed, int cpu_time_limit) {
 		try {
-			ExperimentResult job = ExperimentResultDAO.createExperimentResult(run, 0, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, solver_config_id, experiment_id, instance_id, null, cpu_time_limit, -1, -1, -1, -1, -1);
+			ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(solver_config_id, instance_id) + 1, 0, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, solver_config_id, experiment_id, instance_id, null, cpu_time_limit, -1, -1, -1, -1, -1);
 			ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
 			l.add(job);
 			ExperimentResultDAO.batchSave(l);
@@ -103,10 +104,6 @@ public class API {
 		return 0;
 	}
 	
-	/**
-	 * Job nach ID aus der DB laden. Siehe die Klasse edacc.models.ExperimentResult aus der EDACC GUI (eingebunden über JAR).
-	 * Dazu könnte noch eine eigene Wrapperklasse um ExperimentResult geschrieben werden, die für Konfiguratoren unwichtige Dinge weglässt.
-	 */
 	public ExperimentResult getJob(int job_id) {
 		try {
 			return ExperimentResultDAO.getById(job_id);
@@ -121,11 +118,11 @@ public class API {
 	 * Lädt eine Parameterspace Beschreibung (also eine Instanz eines Parametergraphs) aus der DB.
 	 * Das wird dann statt über solverID auch direkt über Experiment ID gehen.
 	 */
-	public ParameterGraph loadParameterGraphFromDB(int solverID) {
+	public ParameterGraph loadParameterGraphFromDB(int experiment_id) {
 		try {
             Statement st = db.getConn().createStatement();
     
-            ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ParameterGraph WHERE Solver_idSolver = " + solverID);
+            ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ConfigurationScenario JOIN SolverBinaries ON SolverBinaries_idSolverBinary=idSolverBinary JOIN ParameterGraph ON SolverBinaries.idSolver=ParameterGraph.Solver_idSolver WHERE Experiment_idExperiment = " + experiment_id);
             try {
                 if (rs.next()) {
                     return unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
@@ -166,5 +163,21 @@ public class API {
 		JAXBContext jc = JAXBContext.newInstance( docClass);
 		Unmarshaller u = jc.createUnmarshaller();
 		return (T)u.unmarshal(inputStream);
+	}
+	
+	private int getCurrentMaxRun(int solver_config_id, int instance_id) {
+		try {
+    		PreparedStatement ps = db.getConn().prepareStatement("SELECT MAX(run) FROM ExperimentResults WHERE SolverConfig_idSolverConfig=? AND Instances_idInstance=?");
+    		ps.setInt(1, solver_config_id);
+    		ps.setInt(2, instance_id);
+    		ResultSet rs = ps.executeQuery();
+    		if (rs.next()) {
+    			return rs.getInt(1);
+    		}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return -1;
+		}
+		return -1;
 	}
 }

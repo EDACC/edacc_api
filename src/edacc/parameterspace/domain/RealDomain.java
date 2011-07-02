@@ -64,7 +64,7 @@ public class RealDomain extends Domain {
 	@Override
 	public List<Object> getDiscreteValues() {
 		List<Object> values = new LinkedList<Object>();
-		for (double d = low; d < high; d += (high - low) / 100.0f) {
+		for (double d = low; d <= high; d += (high - low) / 100.0f) {
 			values.add(d);
 		}
 		return values;

@@ -80,11 +80,10 @@ public class EvolutionStrategyConfigurator {
 		// get experiment instance-IDs will be provided by API instead of direct DAO access.
 		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(8);
 		LinkedList<Integer> job_ids = new LinkedList<Integer>();
-		int solver_config_id = api.createSolverConfig(8, 10, config, 0); // hard coded experiment 8, solver binary 10
+		int solver_config_id = api.createSolverConfig(8, config); // hard coded experiment 8
 		for (Instance inst: instances) {
-			int run = 0;
 			for (int j = 0; j < 1; j++) {
-				job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 5, run++));
+				job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 5));
 			}
 		}
 		while (true) {
