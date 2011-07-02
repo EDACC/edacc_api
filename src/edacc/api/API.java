@@ -51,8 +51,14 @@ public class API {
 					ParameterInstanceDAO.save(pi);
 				}
 				else if (!param.isConfigurable()) {
-					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, param.getFixedValue());
-					ParameterInstanceDAO.save(pi);
+					if (param.getParameter().getHasValue()) {
+						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, param.getFixedValue());
+						ParameterInstanceDAO.save(pi);
+					}
+					else { // flag
+						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
+						ParameterInstanceDAO.save(pi);
+					}
 				}
 				else {
 					edacc.parameterspace.Parameter config_param = null;
