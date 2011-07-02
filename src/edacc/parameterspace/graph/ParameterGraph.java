@@ -132,6 +132,11 @@ public class ParameterGraph {
 		return null;
 	}
 	
+	/**
+	 * Creates a random parameter configuration.
+	 * @param rng Random number generator instance
+	 * @return random parameter configuration
+	 */
 	public ParameterConfiguration getRandomConfiguration(Random rng) {
 		ParameterConfiguration config = new ParameterConfiguration(this.parameters);
 		
@@ -173,6 +178,12 @@ public class ParameterGraph {
 		return config;
 	}
 	
+	/**
+	 * Returns all parameter configurations that are considered neighbours of the given configuration.
+	 * TODO: use generalized algorithm instead of the "same-AND-node" constrained neighbourhood. 
+	 * @param config The configuration of which the neighbourhood should be generated.
+	 * @return list of all neighbouring configurations
+	 */
 	public List<ParameterConfiguration> getNeighbourhood(ParameterConfiguration config) {
 		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
@@ -201,6 +212,13 @@ public class ParameterGraph {
 		return nbh;
 	}
 	
+	/**
+	 * Generates a random neighbour
+	 * TODO: use generalized algorithm instead of the "same-AND-node" constrained neighbourhood. 
+	 * @param config The configuration of which a random neighbour should be returned
+	 * @param rng Random number generator instance
+	 * @return random neighbour of the passed configuration
+	 */
 	public ParameterConfiguration getRandomNeighbour(ParameterConfiguration config, Random rng) {
 		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
@@ -221,6 +239,12 @@ public class ParameterGraph {
 		return n;
 	}
 	
+	/**
+	 * mutate a configuration in each parameter.
+	 * TODO: generalize ...
+	 * @param rng
+	 * @param config
+	 */
 	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
 		for (Node n: this.nodes) {

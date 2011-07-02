@@ -2,6 +2,7 @@ package edacc.api;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -18,6 +19,7 @@ import edacc.model.*;
 import edacc.parameterspace.domain.*;
 import edacc.parameterspace.graph.ParameterGraph;
 import edacc.parameterspace.ParameterConfiguration;
+import edacc.properties.PropertyTypeNotExistException;
 
 public class API {
 	private static DatabaseConnector db = DatabaseConnector.getInstance();
@@ -109,6 +111,125 @@ public class API {
 			return ExperimentResultDAO.getById(job_id);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public ExperimentResult killJob(int job_id) {
+		try {
+			ExperimentResult er = ExperimentResultDAO.getById(job_id);
+			if (!(er.getStatus().equals(StatusCode.NOT_STARTED) || er.getStatus().equals(StatusCode.RUNNING))) return er;
+			if (er.getIdClient() != null) {
+				ClientDAO.sendMessage(er.getIdClient(), "kill " + er.getId());
+			}
+			return null;
+		} catch (NoConnectionToDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExperimentResultNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyTypeNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ComputationMethodDoesNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExpResultHasSolvPropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StatusCodeNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ResultCodeNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public boolean deleteResult(int job_id) {
+		try {
+			ExperimentResult er = ExperimentResultDAO.getById(job_id);
+			if (er == null) return false;
+			ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
+			l.add(er);
+			ExperimentResultDAO.deleteExperimentResults(l);
+			return true;
+		} catch (NoConnectionToDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExperimentResultNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyTypeNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ComputationMethodDoesNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExpResultHasSolvPropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StatusCodeNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ResultCodeNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+	
+	public ArrayList<ExperimentResult> getRuns(int solver_config_id) {
+		try {
+			return ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(solver_config_id));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PropertyTypeNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ComputationMethodDoesNotExistException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExpResultHasSolvPropertyNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExperimentResultNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StatusCodeNotInDBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ResultCodeNotInDBException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
