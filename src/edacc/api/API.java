@@ -28,19 +28,7 @@ public class API {
 		try {
 			db.connect(hostname, port, username, database, password, false, false, 8);
 			return true;
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DBVersionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DBVersionUnknownException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DBEmptyException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -124,34 +112,7 @@ public class API {
 				ClientDAO.sendMessage(er.getIdClient(), "kill " + er.getId());
 			}
 			return null;
-		} catch (NoConnectionToDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExperimentResultNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyTypeNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ComputationMethodDoesNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExpResultHasSolvPropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (StatusCodeNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ResultCodeNotInDBException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -166,34 +127,7 @@ public class API {
 			l.add(er);
 			ExperimentResultDAO.deleteExperimentResults(l);
 			return true;
-		} catch (NoConnectionToDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExperimentResultNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyTypeNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ComputationMethodDoesNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExpResultHasSolvPropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (StatusCodeNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ResultCodeNotInDBException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -204,41 +138,13 @@ public class API {
 	public ArrayList<ExperimentResult> getRuns(int solver_config_id) {
 		try {
 			return ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(solver_config_id));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PropertyTypeNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ComputationMethodDoesNotExistException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExpResultHasSolvPropertyNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExperimentResultNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (StatusCodeNotInDBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ResultCodeNotInDBException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	/**
-	 * Lädt eine Parameterspace Beschreibung (also eine Instanz eines Parametergraphs) aus der DB.
-	 * Das wird dann statt über solverID auch direkt über Experiment ID gehen.
-	 */
 	public ParameterGraph loadParameterGraphFromDB(int experiment_id) {
 		try {
             Statement st = db.getConn().createStatement();
@@ -261,10 +167,7 @@ public class API {
 		}
 		return null;
 	}
-	
-	/**
-	 * .. aus einer Datei zum Testen.
-	 */
+
 	public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws FileNotFoundException {
 		FileInputStream fis = new FileInputStream(xmlFileName);
 		ParameterGraph unm;
