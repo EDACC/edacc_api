@@ -26,7 +26,9 @@ public class ParameterConfiguration {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			for (Parameter p: parameter_instances.keySet()) {
-				md.update(parameter_instances.get(p).toString().getBytes());
+				if (parameter_instances.get(p) != null) {
+					md.update(parameter_instances.get(p).toString().getBytes());
+				}
 			}
 			this.checksum = md.digest();
 		} catch (NoSuchAlgorithmException e) {
