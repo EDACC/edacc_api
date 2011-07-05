@@ -25,7 +25,8 @@ public class ParameterConfiguration {
 	public void updateChecksum() {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
-			for (Parameter p: parameter_instances.keySet()) {
+			List<Parameter> sortedKeys = new ArrayList(parameter_instances.keySet());
+			for (Parameter p: sortedKeys) {
 				if (parameter_instances.get(p) != null) {
 					md.update(parameter_instances.get(p).toString().getBytes());
 				}
