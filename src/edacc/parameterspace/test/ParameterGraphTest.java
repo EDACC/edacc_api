@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,12 +36,12 @@ public class ParameterGraphTest {
 	public void setUp() throws Exception {
 		Set<Parameter> parameters = new HashSet<Parameter>();
 		String[] c = {"atom", "body", "hybrid", "no"};
-		Parameter param_lookahead = new Parameter("lookahead", new CategoricalDomain(c));
+		Parameter param_lookahead = new Parameter("lookahead", null);
 		parameters.add(param_lookahead);
 		
 		Set<Node> nodes = new HashSet<Node>();
 		AndNode start = new AndNode(null, null); nodes.add(start);
-		OrNode lookahead = new OrNode(param_lookahead); nodes.add(lookahead);
+		OrNode lookahead = new OrNode(param_lookahead, param_lookahead.getDomain()); nodes.add(lookahead);
 		AndNode lookahead_vals = new AndNode(param_lookahead, param_lookahead.getDomain()); nodes.add(lookahead_vals);
 		
 		List<Edge> edges = new LinkedList<Edge>();
@@ -52,8 +56,14 @@ public class ParameterGraphTest {
 		Random rng = new Random();
 		ParameterConfiguration p = g.getRandomConfiguration(rng);
 		assertTrue(p != null);
-		System.out.println(p);
-		System.out.println(new String(p.getChecksum()));
+		//System.out.println(p);
+		//System.out.println(new String(p.getChecksum()));
+	}
+	
+	private static <T> void marshall(Class<T> docClass, T object) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(docClass);
+		Marshaller m = jc.createMarshaller();
+		m.marshal(object, System.out);
 	}
 	
 	@Test
@@ -62,12 +72,16 @@ public class ParameterGraphTest {
 		API api = new API();
 		try {
 			ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+			marshall(ParameterGraph.class, pspace);
 			ParameterConfiguration config = pspace.getRandomConfiguration(rng);
-			System.out.println("original: " + config.toString());
-			for (ParameterConfiguration c: pspace.getNeighbourhood(config)) {
-				System.out.println(c);
-			}
+			//System.out.println("original: " + config.toString());
+			//for (ParameterConfiguration c: pspace.getNeighbourhood(config)) {
+			//	System.out.println(c);
+			//}
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

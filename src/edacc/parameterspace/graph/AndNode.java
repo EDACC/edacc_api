@@ -2,9 +2,9 @@ package edacc.parameterspace.graph;
 
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.domain.Domain;
+import java.io.Serializable;
 
-public class AndNode extends Node {
-	protected Domain domain;
+public class AndNode extends Node implements Serializable {
 	
 	private AndNode() {
 		
@@ -18,13 +18,5 @@ public class AndNode extends Node {
 	@Override
 	public String toString() {
 		return "AndNode [" + domain + "]";
-	}
-
-	public Domain getDomain() {
-		return domain;
-	}
-
-	public void setDomain(Domain domain) {
-		this.domain = domain;
 	}
 }

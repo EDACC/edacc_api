@@ -57,4 +57,12 @@ public class Parameter {
 	public void setDomain(Domain domain) {
 		this.domain = domain;
 	}
+
+    @Override
+    public String toString() {
+        return "Parameter{" + "name=" + name + ", domain=" + domain + '}';
+    }
+
+        
+        
 }

@@ -13,7 +13,7 @@ public class OptionalDomain extends Domain {
 		}
 	}
 	
-	private OptionalDomain() {
+	public OptionalDomain() {
 		
 	}
 	
