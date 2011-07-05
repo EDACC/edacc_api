@@ -36,7 +36,7 @@ public class ParameterGraphTest {
 	public void setUp() throws Exception {
 		Set<Parameter> parameters = new HashSet<Parameter>();
 		String[] c = {"atom", "body", "hybrid", "no"};
-		Parameter param_lookahead = new Parameter("lookahead", null);
+		Parameter param_lookahead = new Parameter("lookahead", new CategoricalDomain(c));
 		parameters.add(param_lookahead);
 		
 		Set<Node> nodes = new HashSet<Node>();
@@ -56,32 +56,18 @@ public class ParameterGraphTest {
 		Random rng = new Random();
 		ParameterConfiguration p = g.getRandomConfiguration(rng);
 		assertTrue(p != null);
-		//System.out.println(p);
-		//System.out.println(new String(p.getChecksum()));
 	}
-	
-	private static <T> void marshall(Class<T> docClass, T object) throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance(docClass);
-		Marshaller m = jc.createMarshaller();
-		m.marshal(object, System.out);
-	}
-	
+
 	@Test
 	public void testGetNeighbourhood() {
 		Random rng = new Random();
 		API api = new API();
 		try {
 			ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
-			marshall(ParameterGraph.class, pspace);
 			ParameterConfiguration config = pspace.getRandomConfiguration(rng);
-			//System.out.println("original: " + config.toString());
-			//for (ParameterConfiguration c: pspace.getNeighbourhood(config)) {
-			//	System.out.println(c);
-			//}
+			pspace.getNeighbourhood(config);
+			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

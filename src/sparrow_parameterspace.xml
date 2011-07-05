@@ -8,6 +8,10 @@
 	<nodes xsi:type="orNode">
 		<id>c1_node</id>
 		<parameter>c1</parameter>
+		<domain xsi:type="integerDomain">
+			<high>50</high>
+			<low>0</low>
+		</domain>
 	</nodes>
 	<nodes xsi:type="andNode">
 		<id>c1_vals</id>
@@ -20,6 +24,10 @@
 	<nodes xsi:type="orNode">
 		<id>c2_node</id>
 		<parameter>c2</parameter>
+		<domain xsi:type="integerDomain">
+			<high>50</high>
+			<low>0</low>
+		</domain>
 	</nodes>
 	<nodes xsi:type="andNode">
 		<id>c2_vals</id>
@@ -32,6 +40,10 @@
 	<nodes xsi:type="orNode">
 		<id>c3_node</id>
 		<parameter>c3</parameter>
+		<domain xsi:type="integerDomain">
+			<high>30</high>
+			<low>10</low>
+		</domain>
 	</nodes>
 	<nodes xsi:type="andNode">
 		<id>c3_vals</id>
@@ -44,6 +56,10 @@
 	<nodes xsi:type="orNode">
 		<id>ps_node</id>
 		<parameter>ps</parameter>
+		<domain xsi:type="realDomain">
+			<high>1.0</high>
+			<low>0.0</low>
+		</domain>
 	</nodes>
 	<nodes xsi:type="andNode">
 		<id>ps_vals</id>
