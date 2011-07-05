@@ -256,7 +256,20 @@ public class ParameterGraph {
 		AndNode node = randomElement(assigned_and_nodes, rng);
 		List<Object> vals = node.getDomain().getDiscreteValues();
 		ParameterConfiguration n = new ParameterConfiguration(config);
-		n.setParameterValue(node.getParameter(), vals.get(rng.nextInt(vals.size())));
+		
+		int tried = 0;
+		int num_vals = vals.size();
+		while (tried++ < num_vals) {
+			Object val = vals.get(rng.nextInt(vals.size()));
+			vals.remove(val);
+			if (val instanceof Double || val instanceof Float) {
+				double cur_val = (Double)n.getParameterValue(node.getParameter());
+				if (cur_val - 0.00000001 < (Double)val && (Double)val < cur_val + 0.00000001) continue;
+			}
+			else if (val.equals(n.getParameterValue(node.getParameter()))) continue;
+			n.setParameterValue(node.getParameter(), val);
+			break;
+		}
 		n.updateChecksum();
 		return n;
 	}

@@ -61,7 +61,7 @@ public class ParameterGraphTest {
 	@Test
 	public void testGetNeighbourhood() throws FileNotFoundException {
 		API api = new API();
-		ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
 		config.setParameterValue("ps", 0.2);
 		config.setParameterValue("c1", 10);
@@ -90,6 +90,21 @@ public class ParameterGraphTest {
 	
 		assertTrue(nbh.size() == 100 + 51 + 51 + 21 - 4); // 100 ps, 51 c1, 51 c2, 21 c3 values, minus 4 fixed values from config
 		assertFalse(nbh.contains(config));
+	}
+	
+	@Test
+	public void testGetRandomNeighbour() throws FileNotFoundException {
+		Random rng = new Random();
+		API api = new API();
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
+		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
+		config.setParameterValue("ps", 0.2);
+		config.setParameterValue("c1", 1);
+		config.setParameterValue("c2", 2);
+		config.setParameterValue("c3", 15);
+		
+		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
+		for (int i = 0; i < 100; i++) assertTrue(nbh.contains(pspace.getRandomNeighbour(config, rng)));
 	}
 
 }
