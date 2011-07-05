@@ -59,18 +59,37 @@ public class ParameterGraphTest {
 	}
 
 	@Test
-	public void testGetNeighbourhood() {
-		Random rng = new Random();
+	public void testGetNeighbourhood() throws FileNotFoundException {
 		API api = new API();
-		try {
-			ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
-			ParameterConfiguration config = pspace.getRandomConfiguration(rng);
-			pspace.getNeighbourhood(config);
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
+		config.setParameterValue("ps", 0.2);
+		config.setParameterValue("c1", 10);
+		config.setParameterValue("c2", 20);
+		config.setParameterValue("c3", 20);
+		
+		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
+		
+		ParameterConfiguration neighbour1 = new ParameterConfiguration(config);
+		neighbour1.setParameterValue("c1", 11);
+		
+		ParameterConfiguration neighbour2 = new ParameterConfiguration(config);
+		neighbour2.setParameterValue("c1", 50);
+		
+		ParameterConfiguration neighbour3 = new ParameterConfiguration(config);
+		neighbour3.setParameterValue("ps", 0.5);
+		
+		ParameterConfiguration nonneighbour1 = new ParameterConfiguration(config);
+		nonneighbour1.setParameterValue("c1", 11);
+		nonneighbour1.setParameterValue("c2", 19);
+		
+		assertTrue(nbh.contains(neighbour1));
+		assertTrue(nbh.contains(neighbour2));
+		assertTrue(nbh.contains(neighbour3));
+		assertFalse(nbh.contains(nonneighbour1));
+	
+		assertTrue(nbh.size() == 100 + 51 + 51 + 21 - 4); // 100 ps, 51 c1, 51 c2, 21 c3 values, minus 4 fixed values from config
+		assertFalse(nbh.contains(config));
 	}
 
 }
