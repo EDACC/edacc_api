@@ -40,7 +40,7 @@ public class API {
 	 */
 	public boolean connect(String hostname, int port, String database, String username, String password) {
 		try {
-			db.connect(hostname, port, username, database, password, false, false, 8);
+			db.connect(hostname, port, username, database, password, false, false, 8, false);
 			return true;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -66,11 +66,11 @@ public class API {
 	 * @param config parameter configuration object that specifies the values of parameters.
 	 * @return unique database ID > 0 of the created solver configuration, 0 on errors.
 	 */
-	public int createSolverConfig(int idExperiment, ParameterConfiguration config) {
+	public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) {
 		try {
 			ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 			SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
-			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, solver_binary.getBinaryName());
+			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name);
 
 			for (ConfigurationScenarioParameter param: cs.getParameters()) {
 				if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
@@ -83,17 +83,22 @@ public class API {
 						ParameterInstanceDAO.save(pi);
 					}
 					else { // flag
+						System.out.println("flag" + param.getParameter().getName());
 						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
 						ParameterInstanceDAO.save(pi);
 					}
 				}
-				else {
+				else if (param.isConfigurable()) {
 					edacc.parameterspace.Parameter config_param = null;
 					for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
 						if (p.getName().equals(param.getParameter().getName())) {
 							config_param = p;
 							break;
 						}
+					}
+					if (config_param == null) {
+						System.out.println("no parameterspace param corresponding to " + param.getParameter().getName());
+						continue;
 					}
 					
 					if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param))) continue;
@@ -229,7 +234,9 @@ public class API {
             ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ConfigurationScenario JOIN SolverBinaries ON SolverBinaries_idSolverBinary=idSolverBinary JOIN ParameterGraph ON SolverBinaries.idSolver=ParameterGraph.Solver_idSolver WHERE Experiment_idExperiment = " + idExperiment);
             try {
                 if (rs.next()) {
-                    return unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
+                    ParameterGraph pg = unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
+                    pg.buildAdjacencyList();
+                    return pg;
                 }
             } catch (JAXBException e) {
 				e.printStackTrace();
@@ -293,6 +300,7 @@ public class API {
     		ps.setInt(2, idInstance);
     		ResultSet rs = ps.executeQuery();
     		if (rs.next()) {
+    			if (rs.getObject(1) == null) return -1;
     			return rs.getInt(1);
     		}
 		} catch (SQLException e) {

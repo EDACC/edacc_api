@@ -53,7 +53,7 @@ public class IntegerDomain extends Domain {
 	@Override
 	public Object mutatedValue(Random rng, Object value) {
 		if (!contains(value)) return value;
-		double r = rng.nextGaussian() * ((high - low) * 0.2);
+		double r = rng.nextGaussian() * ((high - low) * 0.1);
 		return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
 	}
 

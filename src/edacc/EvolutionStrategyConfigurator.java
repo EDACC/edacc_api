@@ -1,6 +1,7 @@
 package edacc;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
@@ -18,23 +19,30 @@ import edacc.parameterspace.graph.ParameterGraph;
  *
  */
 public class EvolutionStrategyConfigurator {
+	static int idExperiment = 12;
+	static int numruns = 2;
+	static ArrayList<BigInteger> seeds = new ArrayList<BigInteger>();
 
 	public static void main(String[] args) throws Exception {
 		API api = new API();
 		api.connect("localhost", 3306, "EDACC", "edacc", "edaccteam");
 		
-		ParameterGraph pspace = api.loadParameterGraphFromFile("src/sparrow_parameterspace.xml");
+		ParameterGraph pspace = api.loadParameterGraphFromDB(idExperiment);
 		Random rng = new Random();
+		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(idExperiment);
+		for (Instance i: instances) {
+			for (int j = 0; j < numruns; j++) seeds.add(BigInteger.valueOf(rng.nextInt(234567892)));
+		}
 		
 		// generate initial population
-		int pop_size = 10, generations = 10;
+		int pop_size = 5, generations = 100;
 		double best_cost = Double.MAX_VALUE;
 		ParameterConfiguration best_configuration = null;
 		Vector<Double> cost = new Vector<Double>();
 		Vector<ParameterConfiguration> population = new Vector<ParameterConfiguration>();
 		for (int i = 0; i < pop_size; i++) {
 			population.add(pspace.getRandomConfiguration(rng));
-			cost.add(cost_func(api, population.get(i), rng));
+			cost.add(cost_func(api, population.get(i), rng, 0, i));
 			if (cost.get(i) < best_cost) {
 				best_cost = cost.get(i);
 				best_configuration = new ParameterConfiguration(population.get(i));
@@ -46,12 +54,12 @@ public class EvolutionStrategyConfigurator {
 		}
 		
 		// evolve ...
-		for (int g = 0; g < generations; g++) {
+		for (int g = 1; g <= generations; g++) {
 			Vector<ParameterConfiguration> children = new Vector<ParameterConfiguration>();
 			for (int i = 0; i < pop_size; i++) {
 				children.add(new ParameterConfiguration(population.get(i)));
 				pspace.mutateParameterConfiguration(rng, children.get(i));
-				double child_cost = cost_func(api, children.get(i), rng);
+				double child_cost = cost_func(api, children.get(i), rng, g, i);
 				if (child_cost < cost.get(i)) { // replace parent if child is better
 					population.set(i, children.get(i));
 					cost.set(i, child_cost);
@@ -76,19 +84,20 @@ public class EvolutionStrategyConfigurator {
 		api.disconnect();
 	}
 	
-	public static double cost_func(API api, ParameterConfiguration config, Random rng) throws Exception {
+	public static double cost_func(API api, ParameterConfiguration config, Random rng, int gen, int num) throws Exception {
 		// get experiment instance-IDs will be provided by API instead of direct DAO access.
-		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(8);
+		LinkedList<Instance> instances = InstanceDAO.getAllByExperimentId(idExperiment);
 		LinkedList<Integer> job_ids = new LinkedList<Integer>();
-		int solver_config_id = api.createSolverConfig(8, config); // hard coded experiment 8
+		int solver_config_id = api.createSolverConfig(idExperiment, config, "Config " + gen + "/" + num);
+		int k = 0;
 		for (Instance inst: instances) {
-			for (int j = 0; j < 1; j++) {
-				job_ids.add(api.launchJob(8, solver_config_id, inst.getId(), BigInteger.valueOf(rng.nextInt(234567892)), 5));
+			for (int j = 0; j < numruns; j++) {
+				job_ids.add(api.launchJob(idExperiment, solver_config_id, inst.getId(), seeds.get(k++), 15));
 			}
 		}
 		while (true) {
 			// poll DB for job status every 2 seconds
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 			boolean all_done = true;
 			for (int id: job_ids) {
 				ExperimentResult res = api.getJob(id);

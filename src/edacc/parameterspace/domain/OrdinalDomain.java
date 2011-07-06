@@ -50,7 +50,7 @@ public class OrdinalDomain extends Domain {
 	public Object mutatedValue(Random rng, Object value) {
 		if (!contains(value)) return value;
 		int ix = ordered_list.indexOf(value);
-		double r = rng.nextGaussian() * (ordered_list.size() * 0.2);
+		double r = rng.nextGaussian() * (ordered_list.size() * 0.1);
 		int n = Math.min((int)Math.max(Math.round(ix + r), ordered_list.size()), 0);
 		return ordered_list.get(n);
 	}
