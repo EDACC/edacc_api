@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,14 +16,11 @@ import edacc.api.API;
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.CategoricalDomain;
-import edacc.parameterspace.domain.RealDomain;
 import edacc.parameterspace.graph.AndNode;
 import edacc.parameterspace.graph.Edge;
 import edacc.parameterspace.graph.Node;
 import edacc.parameterspace.graph.OrNode;
 import edacc.parameterspace.graph.ParameterGraph;
-
-
 
 public class ParameterGraphTest {
 	private ParameterGraph g = null;
@@ -41,7 +34,7 @@ public class ParameterGraphTest {
 		
 		Set<Node> nodes = new HashSet<Node>();
 		AndNode start = new AndNode(null, null); nodes.add(start);
-		OrNode lookahead = new OrNode(param_lookahead, param_lookahead.getDomain()); nodes.add(lookahead);
+		OrNode lookahead = new OrNode(param_lookahead); nodes.add(lookahead);
 		AndNode lookahead_vals = new AndNode(param_lookahead, param_lookahead.getDomain()); nodes.add(lookahead_vals);
 		
 		List<Edge> edges = new LinkedList<Edge>();

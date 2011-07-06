@@ -213,7 +213,7 @@ public class ParameterGraph {
 		
 		List<ParameterConfiguration> nbh = new LinkedList<ParameterConfiguration>();
 		for (AndNode node: assigned_and_nodes) {
-			for (Object value: preceedingNode(node).getDomain().getDiscreteValues()) {
+			for (Object value: preceedingNode(node).getParameter().getDomain().getDiscreteValues()) {
 				if (node.getDomain().contains(value)) { // same subdomain, different value
 					if (value instanceof Double || value instanceof Float) {
 						double cur_val = (Double)config.getParameterValue(node.getParameter());
