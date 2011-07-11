@@ -145,6 +145,17 @@ public class ParameterGraph {
 		return null;
 	}
 	
+	private boolean valuesEqual(Object v1, Object v2) {
+		if (v1 instanceof Double || v1 instanceof Float) {
+			if (!(v2 instanceof Number)) return false;
+			double cur_val = (Double)v2;
+			double val = (Double)v1;
+			if (cur_val - 0.00000001 < val && val < cur_val + 0.00000001) return true;
+		}
+		
+		return v1.equals(v2);
+	}
+	
 	/**
 	 * Creates a random parameter configuration.
 	 * @param rng Random number generator instance
@@ -215,12 +226,7 @@ public class ParameterGraph {
 		for (AndNode node: assigned_and_nodes) {
 			for (Object value: preceedingNode(node).getParameter().getDomain().getDiscreteValues()) {
 				if (node.getDomain().contains(value)) { // same subdomain, different value
-					if (value instanceof Double || value instanceof Float) {
-						double cur_val = (Double)config.getParameterValue(node.getParameter());
-						double val = (Double)value;
-						if (cur_val - 0.00000001 < val && val < cur_val + 0.00000001) continue;
-					}
-					else if (value.equals(config.getParameterValue(node.getParameter()))) continue;
+					if (valuesEqual(value, config.getParameterValue(node.getParameter()))) continue;
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(node.getParameter(), value);
 					neighbour.updateChecksum();
@@ -230,6 +236,45 @@ public class ParameterGraph {
 			
 		}
 		
+		return nbh;
+	}
+	
+	/**
+	 * Returns the full neighbourhood of the given parameter configuration.
+	 * @param config
+	 * @return
+	 */
+	public List<ParameterConfiguration> getFullNeighbourhood(ParameterConfiguration config) {
+		Map<Parameter, OrNode> assigned_or_nodes = new HashMap<Parameter, OrNode>();
+		Map<Parameter, AndNode> assigned_and_nodes = new HashMap<Parameter, AndNode>();
+		for (Parameter p: config.getParameter_instances().keySet()) {
+    		for (AndNode n: getAndNodes()) {
+    			if (n == startNode) continue;
+    			if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
+    				assigned_or_nodes.put(p, preceedingNode(n));
+    				assigned_and_nodes.put(p, n);
+    			}
+    		}
+		}
+		
+		List<ParameterConfiguration> nbh = new LinkedList<ParameterConfiguration>();
+		for (Parameter p: config.getParameter_instances().keySet()) {
+			for (Object v: p.getDomain().getDiscreteValues()) {
+				if (assigned_and_nodes.get(p).getDomain().contains(v)) { // same AND node
+					if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
+					ParameterConfiguration neighbour = new ParameterConfiguration(config);
+					neighbour.setParameterValue(p, v);
+					neighbour.updateChecksum();
+					nbh.add(neighbour);
+				} else { // different AND node
+					// TODO
+					// find now unsatisfied OR nodes via DFS starting at the old AND node
+					// build sets with OR and AND nodes that are done
+					// build random partial configuration starting at new AND node
+				}
+			}
+		}
+
 		return nbh;
 	}
 	
@@ -262,11 +307,7 @@ public class ParameterGraph {
 		while (tried++ < num_vals) {
 			Object val = vals.get(rng.nextInt(vals.size()));
 			vals.remove(val);
-			if (val instanceof Double || val instanceof Float) {
-				double cur_val = (Double)n.getParameterValue(node.getParameter());
-				if (cur_val - 0.00000001 < (Double)val && (Double)val < cur_val + 0.00000001) continue;
-			}
-			else if (val.equals(n.getParameterValue(node.getParameter()))) continue;
+			if (valuesEqual(val, config.getParameterValue(node.getParameter()))) continue;
 			n.setParameterValue(node.getParameter(), val);
 			break;
 		}
