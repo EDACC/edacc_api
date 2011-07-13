@@ -28,6 +28,24 @@ import edacc.parameterspace.ParameterConfiguration;
  */
 public class API {
 	private static DatabaseConnector db = DatabaseConnector.getInstance();
+	
+	public static enum COST_FUNCTIONS {
+		// Enumeration of cost functions.
+		// This enumeration (i.e. the values of the toString methods)
+		// should match the enumeration specified in the database schema
+		AVERAGE {
+			@Override
+			public String toString() {
+				return "average";
+			}
+		},
+		MIN {
+			@Override
+			public String toString() {
+				return "min";
+			}
+		}
+	}
 
 	/**
 	 * Establishes the database connection.
@@ -136,6 +154,86 @@ public class API {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		return 0;
+	}
+	
+	/**
+	 * Creates a new job for the given solver configuration
+	 * in the instance-seed parcour of the given experiment.
+	 */
+	public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit) {
+		// TODO: implement
+		// find next Instance-Seed pair in the parcour, create job.
+		// Count jobs of the solver configuration -> n jobs, find the (n+1)th parcour
+		// item. if that doesn't exist extend the parcour, otherwise create new job with
+		// that instance/seed pair
+		return 0;
+	}
+	
+	/**
+	 * Returns the parameter configuration corresponding to the given solver configuration in the DB.
+	 * @param idExperiment
+	 * @param idSolverConfig
+	 */
+	public synchronized ParameterConfiguration getParameterConfiguration(int idSolverConfig) {
+		// TODO: implement
+		return null;
+	}
+	
+	/**
+	 * If the given parameter configuration already has a corresponding solver configuration
+	 * in the given experiment this function will return the ID of the solver configuration and
+	 * 0 otherwise. 
+	 * @param idExperiment
+	 * @param config
+	 * @return
+	 */
+	public synchronized int exists(int idExperiment, ParameterConfiguration config) {
+		// TODO: implement
+		// - naive: retrieve all solver configurations from DB, check against parameter configuration for match
+		// - improved: add hash value to solver configuration table, find the one matching the param config's hash
+		return 0;
+	}
+	
+	/**
+	 * return the current number of jobs of the given solver configuration
+	 * @param idSolverConfig
+	 * @return
+	 */
+	public synchronized int getNumJobs(int idSolverConfig) {
+		// TODO implement
+		// select count() ..
+		return 0;
+	}
+	
+	/**
+	 * Updates the cost of the given solver configuration.
+	 * The cost function is also saved in the table.
+	 * @param idSolverConfig
+	 * @param cost
+	 * @param func
+	 */
+	public synchronized void updateSolverConfigurationCost(int idSolverConfig, double cost, COST_FUNCTIONS func) {
+		// TODO: implement
+	}
+	
+	/**
+	 * Returns the cost function of the given solver configuration as saved in the database
+	 * @param idSolverConfig
+	 * @return
+	 */
+	public synchronized COST_FUNCTIONS getCostFunction(int idSolverConfig) {
+		// TODO: implement
+		return null;
+	}
+	
+	/**
+	 * Returns the current cost value of the solver configuration as saved in the database.
+	 * @param idSolverConfig
+	 * @return
+	 */
+	public synchronized double getSolverConfigurationCost(int idSolverConfig) {
+		// TODO: implement
 		return 0;
 	}
 	

@@ -30,10 +30,6 @@ public class MixedDomainTest {
 		assertFalse(m.contains(101));
 		assertTrue(m.contains(50));
 		
-		for (Object o: m.getDiscreteValues()) {
-			System.out.println(o.toString());
-		}
-		
 		assertTrue(m.getDiscreteValues().contains(10));
 		assertTrue(m.getDiscreteValues().contains(1));
 		assertTrue(m.getDiscreteValues().contains("yes"));
