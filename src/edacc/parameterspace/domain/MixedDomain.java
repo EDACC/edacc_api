@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class MixedDomain extends Domain {
 	protected List<Domain> domains;
-	
+	public static final String name = "Mixed";
 	private MixedDomain() {
 		
 	}
@@ -62,4 +62,9 @@ public class MixedDomain extends Domain {
 		}
 		return values;
 	}
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }
