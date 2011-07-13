@@ -38,7 +38,7 @@ public class API {
 	 * @param password
 	 * @return
 	 */
-	public boolean connect(String hostname, int port, String database, String username, String password) {
+	public synchronized boolean connect(String hostname, int port, String database, String username, String password) {
 		try {
 			db.connect(hostname, port, username, database, password, false, false, 8, false);
 			return true;
@@ -52,7 +52,7 @@ public class API {
 	/**
 	 * Closes the database connection.
 	 */
-	public void disconnect() {
+	public synchronized void disconnect() {
 		db.disconnect();
 	}
 	
@@ -66,7 +66,7 @@ public class API {
 	 * @param config parameter configuration object that specifies the values of parameters.
 	 * @return unique database ID > 0 of the created solver configuration, 0 on errors.
 	 */
-	public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) {
+	public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) {
 		try {
 			ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 			SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
@@ -83,7 +83,6 @@ public class API {
 						ParameterInstanceDAO.save(pi);
 					}
 					else { // flag
-						System.out.println("flag" + param.getParameter().getName());
 						ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
 						ParameterInstanceDAO.save(pi);
 					}
@@ -97,7 +96,6 @@ public class API {
 						}
 					}
 					if (config_param == null) {
-						System.out.println("no parameterspace param corresponding to " + param.getParameter().getName());
 						continue;
 					}
 					
@@ -127,7 +125,7 @@ public class API {
 	 * @param cpuTimeLimit time limit of the job in CPU seconds.
 	 * @return unique database ID > 0 of the created job, 0 on errors.
 	 */
-	public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit) {
+	public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit) {
 		try {
 			ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(idSolverConfig, idInstance) + 1, 0, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit, -1, -1, -1, -1, -1);
 			ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
@@ -147,7 +145,7 @@ public class API {
 	 * @param idJob ID of the job
 	 * @return the job as edacc.model.ExperimentResult object.
 	 */
-	public ExperimentResult getJob(int idJob) {
+	public synchronized ExperimentResult getJob(int idJob) {
 		try {
 			return ExperimentResultDAO.getById(idJob);
 		}
@@ -169,7 +167,7 @@ public class API {
 	 * @param idJob ID of the job to kill.
 	 * @return
 	 */
-	public ExperimentResult killJob(int idJob) {
+	public synchronized ExperimentResult killJob(int idJob) {
 		try {
 			ExperimentResult er = ExperimentResultDAO.getById(idJob);
 			if (!(er.getStatus().equals(StatusCode.NOT_STARTED) || er.getStatus().equals(StatusCode.RUNNING))) return er;
@@ -189,7 +187,7 @@ public class API {
 	 * @param idJob ID of the job to delete.
 	 * @return
 	 */
-	public boolean deleteResult(int idJob) {
+	public synchronized boolean deleteResult(int idJob) {
 		try {
 			ExperimentResult er = ExperimentResultDAO.getById(idJob);
 			if (er == null) return false;
@@ -210,7 +208,7 @@ public class API {
 	 * @param idSolverConfig
 	 * @return
 	 */
-	public ArrayList<ExperimentResult> getRuns(int idSolverConfig) {
+	public synchronized ArrayList<ExperimentResult> getRuns(int idSolverConfig) {
 		try {
 			return ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
 		} catch (Exception e) {
@@ -227,7 +225,7 @@ public class API {
 	 * @param idExperiment ID of the configuration experiment
 	 * @return parameter graph object providing parameter space methods.
 	 */
-	public ParameterGraph loadParameterGraphFromDB(int idExperiment) {
+	public synchronized ParameterGraph loadParameterGraphFromDB(int idExperiment) {
 		try {
             Statement st = db.getConn().createStatement();
     
@@ -258,7 +256,7 @@ public class API {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws FileNotFoundException {
+	public synchronized ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws FileNotFoundException {
 		FileInputStream fis = new FileInputStream(xmlFileName);
 		ParameterGraph unm;
 		try {
@@ -293,7 +291,7 @@ public class API {
 	 * @param idInstance
 	 * @return
 	 */
-	private int getCurrentMaxRun(int idSolverConfig, int idInstance) {
+	private synchronized int getCurrentMaxRun(int idSolverConfig, int idInstance) {
 		try {
     		PreparedStatement ps = db.getConn().prepareStatement("SELECT MAX(run) FROM ExperimentResults WHERE SolverConfig_idSolverConfig=? AND Instances_idInstance=?");
     		ps.setInt(1, idSolverConfig);

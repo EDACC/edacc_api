@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edacc.parameterspace.domain.FlagDomain;
+import edacc.parameterspace.domain.OptionalDomain;
+
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
 	byte[] checksum;
@@ -22,12 +25,19 @@ public class ParameterConfiguration {
 		return checksum;
 	}
 	
+	/**
+	 * Updates the checksum of the parameter configuration in canonical representation, i.e.
+	 * parameters are sorted by their name and the string representation of their
+	 * values are fed to a hash function one after another. 
+	 */
 	public void updateChecksum() {
 		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance("SHA");
 			List<Parameter> sortedKeys = new ArrayList<Parameter>(parameter_instances.keySet());
 			for (Parameter p: sortedKeys) {
-				if (parameter_instances.get(p) != null) {
+				if (parameter_instances.get(p) != null && 
+					!(parameter_instances.get(p) instanceof OptionalDomain.OPTIONS) &&
+					!(parameter_instances.get(p).equals(FlagDomain.FLAGS.OFF))) {
 					md.update(parameter_instances.get(p).toString().getBytes());
 				}
 			}
