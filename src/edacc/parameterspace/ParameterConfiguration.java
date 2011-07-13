@@ -13,7 +13,7 @@ import edacc.parameterspace.domain.OptionalDomain;
 
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
-	byte[] checksum;
+	private byte[] checksum;
 	
 	public ParameterConfiguration(Set<Parameter> parameters) {
 		this.checksum = null;
