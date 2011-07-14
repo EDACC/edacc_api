@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -88,7 +90,8 @@ public class API {
 		try {
 			ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 			SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
-			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name);
+			config.updateChecksum(); // TODO: needed here?
+			SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, null, null, toHex(config.getChecksum()));
 
 			for (ConfigurationScenarioParameter param: cs.getParameters()) {
 				if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
@@ -175,8 +178,54 @@ public class API {
 	 * @param idExperiment
 	 * @param idSolverConfig
 	 */
-	public synchronized ParameterConfiguration getParameterConfiguration(int idSolverConfig) {
-		// TODO: implement
+	public synchronized ParameterConfiguration getParameterConfiguration(int idExperiment, int idSolverConfig) {
+		try {
+			ParameterGraph graph = loadParameterGraphFromDB(idExperiment);
+			ParameterConfiguration config = new ParameterConfiguration(graph.getParameterSet());
+			ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+			SolverConfiguration solver_config = SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig);
+			
+			// map ParameterID -> Parameter
+			Map<Integer, Parameter> parameter_map = new HashMap<Integer, Parameter>();
+			for (Parameter p: ParameterDAO.getParameterFromSolverId(solver_config.getSolverBinary().getIdSolver())) {
+				parameter_map.put(p.getId(), p);
+			}
+			
+			// map Parameter name -> Parameter Instance (value)
+			Map<String, ParameterInstance> solver_config_param_map = new HashMap<String, ParameterInstance>();
+			for (ParameterInstance p: ParameterInstanceDAO.getBySolverConfig(solver_config)) {
+				solver_config_param_map.put(parameter_map.get(p.getParameter_id()).getName(), p);
+			}
+			
+			for (ConfigurationScenarioParameter param: cs.getParameters()) {
+				if (param.isConfigurable()) {
+					String parameter_name = param.getParameter().getName();
+					if (!param.getParameter().getHasValue()) { // this is a flag which is ON in this solver config
+						config.setParameterValue(parameter_name, FlagDomain.FLAGS.ON);
+					}
+					else { // standard parameter with a value
+						String value = solver_config_param_map.get(param.getParameter().getName()).getValue();
+						try {
+							int i = Integer.valueOf(value);
+							config.setParameterValue(parameter_name, i);
+						} catch (NumberFormatException e) {
+							try {
+								double f = Double.valueOf(value);
+								config.setParameterValue(parameter_name, f);
+							}
+							catch (NumberFormatException e2) {
+								config.setParameterValue(parameter_name, value);
+							}
+						}
+					}
+				}
+			}
+			config.updateChecksum();
+			return config;
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -189,20 +238,27 @@ public class API {
 	 * @return
 	 */
 	public synchronized int exists(int idExperiment, ParameterConfiguration config) {
-		// TODO: implement
-		// - naive: retrieve all solver configurations from DB, check against parameter configuration for match
-		// - improved: add hash value to solver configuration table, find the one matching the param config's hash
+		try {
+			SolverConfiguration sc = SolverConfigurationDAO.getByParameterHash(idExperiment, toHex(config.getChecksum()));
+			if (sc != null) return sc.getId();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return 0;
 	}
 	
 	/**
-	 * return the current number of jobs of the given solver configuration
+	 * return the current number of jobs of the given solver configuration and 0, if it doesn't exist
 	 * @param idSolverConfig
 	 * @return
 	 */
 	public synchronized int getNumJobs(int idSolverConfig) {
-		// TODO implement
-		// select count() ..
+		try {
+			return ExperimentResultDAO.getNumJobsBySolverConfigurationId(idSolverConfig);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return 0;
 	}
 	
@@ -213,8 +269,16 @@ public class API {
 	 * @param cost
 	 * @param func
 	 */
-	public synchronized void updateSolverConfigurationCost(int idSolverConfig, double cost, COST_FUNCTIONS func) {
-		// TODO: implement
+	public synchronized void updateSolverConfigurationCost(int idSolverConfig, float cost, COST_FUNCTIONS func) {
+		try {
+			PreparedStatement st = db.getConn().prepareStatement("UPDATE SolverConfig SET cost=?, cost_function=? WHERE idSolverConfig=?");
+			st.setFloat(1, cost);
+			st.setString(2, func.toString());
+			st.setInt(3, idSolverConfig);
+			st.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -223,18 +287,51 @@ public class API {
 	 * @return
 	 */
 	public synchronized COST_FUNCTIONS getCostFunction(int idSolverConfig) {
-		// TODO: implement
+		try {
+			PreparedStatement st = db.getConn().prepareStatement("SELECT cost_function FROM SolverConfig WHERE idSolverConfig=?");
+			st.setInt(1, idSolverConfig);
+			ResultSet rs = st.executeQuery();
+			if (rs.next()) {
+				String func = rs.getString("cost_function");
+				for (COST_FUNCTIONS f: COST_FUNCTIONS.values()) {
+					if (f.equals(func)) {
+						rs.close();
+						st.close();
+						return f;
+					}
+				}
+			}
+			rs.close();
+			st.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
 	/**
 	 * Returns the current cost value of the solver configuration as saved in the database.
+	 * Can return null if the DB value is NULL.
 	 * @param idSolverConfig
 	 * @return
 	 */
-	public synchronized double getSolverConfigurationCost(int idSolverConfig) {
-		// TODO: implement
-		return 0;
+	public synchronized Float getSolverConfigurationCost(int idSolverConfig) {
+		try {
+			PreparedStatement st = db.getConn().prepareStatement("SELECT cost FROM SolverConfig WHERE idSolverConfig=?");
+			st.setInt(1, idSolverConfig);
+			ResultSet rs = st.executeQuery();
+			if (rs.next()) {
+				float cost = rs.getFloat("cost");
+				rs.close();
+				st.close();
+				return cost;
+			}
+			rs.close();
+			st.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
@@ -405,4 +502,11 @@ public class API {
 		}
 		return -1;
 	}
+
+	public String toHex(byte[] bytes) {
+		if (bytes == null) return "";
+	    BigInteger bi = new BigInteger(1, bytes);
+	    return String.format("%0" + (bytes.length << 1) + "X", bi);
+	}
+
 }

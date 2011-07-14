@@ -58,7 +58,7 @@ public class ParameterConfiguration {
 		if (!parameter_instances.containsKey(p))
 			throw new IllegalArgumentException("The parameter has to be part of a solver configuration");
 		if (!p.getDomain().contains(v)) {
-			throw new IllegalArgumentException("Parameter domain does not contain the given value");
+			throw new IllegalArgumentException("Domain of parameter " + p.getName() + " does not contain the given value " + v);
 		}
 		parameter_instances.put(p, v);
 	}
@@ -71,7 +71,7 @@ public class ParameterConfiguration {
 		if (param == null) return;
 		
 		if (!param.getDomain().contains(v)) {
-			throw new IllegalArgumentException("Parameter domain does not contain the given value");
+			throw new IllegalArgumentException("Domain of parameter " + param.getName() + " does not contain the given value " + v);
 		}
 		parameter_instances.put(param, v);
 	}
