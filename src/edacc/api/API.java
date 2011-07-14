@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -411,6 +412,23 @@ public class API {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns a map with all jobs from the database with IDs specified in the ids argument.
+	 * @param ids
+	 * @return map with (job_id -> ExperimentResult) mapping
+	 */
+	public synchronized Map<Integer, ExperimentResult> getJobsByIDs(Collection<Integer> ids) {
+		Map<Integer, ExperimentResult> jobs = new HashMap<Integer, ExperimentResult>();
+		try {
+    		for (Integer id: ids) {
+    			jobs.put(id, ExperimentResultDAO.getById(id)); // TODO: optimize
+    		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jobs;
 	}
 	
 	/**

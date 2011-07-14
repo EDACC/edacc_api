@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameterspace>
+    <startNode>2</startNode>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>2</id>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>16</id>
+        <parameter>flag</parameter>
+        <domain xsi:type="flagDomain">
+            <values>ON</values>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>55</id>
+        <parameter>cat</parameter>
+        <domain xsi:type="categoricalDomain">
+            <categories>0</categories>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>25</id>
+        <parameter>cat</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>64</id>
+        <parameter>prob</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>28</id>
+        <parameter>method</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>10</id>
+        <parameter>flag</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>13</id>
+        <parameter>flag</parameter>
+        <domain xsi:type="flagDomain">
+            <values>OFF</values>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>70</id>
+        <parameter>method</parameter>
+        <domain xsi:type="categoricalDomain">
+            <categories>atom</categories>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>67</id>
+        <parameter>prob</parameter>
+        <domain xsi:type="realDomain">
+            <high>1.0</high>
+            <low>0.0</low>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>4</id>
+        <parameter>c1</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>22</id>
+        <parameter>ps</parameter>
+        <domain xsi:type="realDomain">
+            <high>1.0</high>
+            <low>0.0</low>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="orNode">
+        <id>7</id>
+        <parameter>ps</parameter>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>52</id>
+        <parameter>cat</parameter>
+        <domain xsi:type="categoricalDomain">
+            <categories>3</categories>
+            <categories>2</categories>
+            <categories>1</categories>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>19</id>
+        <parameter>c1</parameter>
+        <domain xsi:type="integerDomain">
+            <high>10</high>
+            <low>0</low>
+        </domain>
+    </nodes>
+    <nodes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="andNode">
+        <id>61</id>
+        <parameter>method</parameter>
+        <domain xsi:type="categoricalDomain">
+            <categories>hybrid</categories>
+        </domain>
+    </nodes>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="integerDomain">
+            <high>10</high>
+            <low>0</low>
+        </domain>
+        <name>c1</name>
+    </parameters>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="categoricalDomain">
+            <categories>3</categories>
+            <categories>2</categories>
+            <categories>1</categories>
+            <categories>0</categories>
+        </domain>
+        <name>cat</name>
+    </parameters>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="categoricalDomain">
+            <categories>atom</categories>
+            <categories>hybrid</categories>
+        </domain>
+        <name>method</name>
+    </parameters>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="flagDomain">
+            <values>OFF</values>
+            <values>ON</values>
+        </domain>
+        <name>flag</name>
+    </parameters>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="realDomain">
+            <high>1.0</high>
+            <low>0.0</low>
+        </domain>
+        <name>ps</name>
+    </parameters>
+    <parameters>
+        <domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="realDomain">
+            <high>1.0</high>
+            <low>0.0</low>
+        </domain>
+        <name>prob</name>
+    </parameters>
+    <edges>
+        <group>0</group>
+        <source>2</source>
+        <target>4</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>4</source>
+        <target>19</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>2</source>
+        <target>7</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>7</source>
+        <target>22</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>2</source>
+        <target>10</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>10</source>
+        <target>13</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>10</source>
+        <target>16</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>16</source>
+        <target>25</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>25</source>
+        <target>52</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>25</source>
+        <target>55</target>
+    </edges>
+    <edges>
+        <group>1</group>
+        <source>55</source>
+        <target>64</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>64</source>
+        <target>67</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>16</source>
+        <target>28</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>28</source>
+        <target>61</target>
+    </edges>
+    <edges>
+        <group>1</group>
+        <source>61</source>
+        <target>64</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>64</source>
+        <target>67</target>
+    </edges>
+    <edges>
+        <group>0</group>
+        <source>28</source>
+        <target>70</target>
+    </edges>
+</parameterspace>

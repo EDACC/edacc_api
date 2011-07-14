@@ -16,6 +16,7 @@ import edacc.api.API;
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.CategoricalDomain;
+import edacc.parameterspace.domain.FlagDomain;
 import edacc.parameterspace.graph.AndNode;
 import edacc.parameterspace.graph.Edge;
 import edacc.parameterspace.graph.Node;
@@ -83,6 +84,39 @@ public class ParameterGraphTest {
 	
 		assertTrue(nbh.size() == 100 + 51 + 51 + 21 - 4); // 100 ps, 51 c1, 51 c2, 21 c3 values, minus 4 fixed values from config
 		assertFalse(nbh.contains(config));
+	}
+	
+	@Test
+	public void testGetFullNeighbourhood() throws FileNotFoundException {
+		API api = new API();
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
+		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
+		config.setParameterValue("c1", 5);
+		config.setParameterValue("ps", 0.1);
+		config.setParameterValue("flag", FlagDomain.FLAGS.ON);
+		config.setParameterValue("method", "hybrid");
+		config.setParameterValue("cat", "1");
+		assertTrue("c1: 5 cat: 1 method: hybrid flag: ON ps: 0.1 prob: null ".equals(config.toString()));
+		
+		List<ParameterConfiguration> nbh = pspace.getFullNeighbourhood(config);
+		
+		ParameterConfiguration nb1 = new ParameterConfiguration(config);		
+		nb1.setParameterValue("method", "atom");
+		assertTrue(nbh.contains(nb1));
+		
+		ParameterConfiguration nb2 = new ParameterConfiguration(config);
+		nb2.setParameterValue("flag", FlagDomain.FLAGS.OFF);
+		assertFalse(nbh.contains(nb2)); // flag -> off should lead to method and cat being removed
+		nb2.unsetParameter("cat");
+		nb2.unsetParameter("method");
+		assertTrue(nbh.contains(nb2));
+		
+		ParameterConfiguration nb3 = new ParameterConfiguration(config);
+		nb3.setParameterValue("c1", 6);
+		assertTrue(nbh.contains(nb3));
+		nb3.setParameterValue("c1", 5); // same config
+		assertFalse(nbh.contains(nb3));
+		
 	}
 	
 	@Test

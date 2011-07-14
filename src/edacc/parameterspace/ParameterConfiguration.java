@@ -76,6 +76,21 @@ public class ParameterConfiguration {
 		parameter_instances.put(param, v);
 	}
 	
+	public void unsetParameter(Parameter p) {
+		if (!parameter_instances.containsKey(p)) return;
+		parameter_instances.put(p, null);
+	}
+	
+	public void unsetParameter(String parameter_name) {
+		Parameter param = null;
+		for (Parameter p: parameter_instances.keySet()) {
+			if (p.getName().equals(parameter_name)) param = p;
+		}
+		if (param == null) return;
+		
+		parameter_instances.put(param, null);
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -103,6 +118,16 @@ public class ParameterConfiguration {
 			return false;
 		else {
 			for (Parameter p: parameter_instances.keySet()) {
+				if (parameter_instances.get(p) == null && other.getParameterValue(p) == null) continue;
+				
+				if (parameter_instances.get(p) == null && other.getParameterValue(p).equals(FlagDomain.FLAGS.OFF)) continue;
+				if (parameter_instances.get(p) == null && other.getParameterValue(p).equals(OptionalDomain.OPTIONS.NOT_SPECIFIED)) continue;
+				
+				if (other.getParameterValue(p) == null && parameter_instances.get(p).equals(FlagDomain.FLAGS.OFF)) continue;
+				if (other.getParameterValue(p) == null && parameter_instances.get(p).equals(OptionalDomain.OPTIONS.NOT_SPECIFIED)) continue;
+				
+				if (parameter_instances.get(p) == null) return false;
+				
 				if (parameter_instances.get(p) instanceof Double || parameter_instances.get(p) instanceof Float) {
 					double this_val = (Double)parameter_instances.get(p);
 					double other_val = (Double)other.getParameterValue(p);
