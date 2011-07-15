@@ -161,6 +161,23 @@ public class ParameterGraph {
 	}
 	
 	/**
+	 * Color (assign integers) the nodes of the transitive closure starting at currentNode.]
+	 * @param currentNode
+	 * @param color
+	 * @param colors
+	 * @return
+	 */
+	private int colorDFS(Node currentNode, int color, Map<Node, Integer> colors) {
+		if (colors.containsKey(currentNode) && colors.get(currentNode) != color) return colors.get(currentNode);
+		colors.put(currentNode, color);
+		for (Node n: adjacentNodes(currentNode)) {
+			int c = colorDFS(n, color, colors);
+			if (c != color) return c;
+		}
+		return color;
+	}
+	
+	/**
 	 * Creates a random parameter configuration.
 	 * @param rng Random number generator instance
 	 * @return random parameter configuration
@@ -209,11 +226,12 @@ public class ParameterGraph {
 	
 	/**
 	 * Returns all parameter configurations that are considered neighbours of the given configuration.
-	 * TODO: use generalized algorithm instead of the "same-AND-node" constrained neighbourhood. 
-	 * @param config The configuration of which the neighbourhood should be generated.
-	 * @return list of all neighbouring configurations
+	 * This neighbourhood is constrained to values that are located in the same AND-nodes as the values
+	 * of the given configuration. 
+	 * @param config
+	 * @return (constrained) list of all neighbouring configurations
 	 */
-	public List<ParameterConfiguration> getNeighbourhood(ParameterConfiguration config) {
+	public List<ParameterConfiguration> getConstrainedNeighbourhood(ParameterConfiguration config) {
 		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
 		for (Parameter p: config.getParameter_instances().keySet()) {
@@ -244,11 +262,11 @@ public class ParameterGraph {
 	}
 	
 	/**
-	 * Returns the full neighbourhood of the given parameter configuration.
-	 * @param config
-	 * @return
+	 * Returns all parameter configurations that are considered neighbours of the given configuration.
+	 * @param config The configuration of which the neighbourhood should be generated.
+	 * @return list of all neighbouring configurations
 	 */
-	public List<ParameterConfiguration> getFullNeighbourhood(ParameterConfiguration config) {
+	public List<ParameterConfiguration> getNeighbourhood(ParameterConfiguration config) {
 		//Map<Parameter, OrNode> assigned_or_nodes = new HashMap<Parameter, OrNode>();
 		Map<Parameter, AndNode> old_assigned_and_nodes = new HashMap<Parameter, AndNode>();
 		for (Parameter p: config.getParameter_instances().keySet()) {
@@ -430,6 +448,43 @@ public class ParameterGraph {
 			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter())));
 		}
 		config.updateChecksum();
+	}
+	
+	/**
+	 * Simple crossover operator
+	 * @param config1
+	 * @param config2
+	 * @param rng
+	 * @return
+	 */
+	public ParameterConfiguration crossover(ParameterConfiguration config1, ParameterConfiguration config2, Random rng) {
+		Map<Node, Integer> colors = new HashMap<Node, Integer>();
+		int currentColor = 1;
+		for (Node node: adjacentNodes(startNode)) {
+			int c = colorDFS(node, currentColor, colors);
+			if (c == currentColor) currentColor++;
+		}
+
+		ParameterConfiguration result = new ParameterConfiguration(parameters);
+		
+		for (int col = 1; col < currentColor; col++) {
+			if (rng.nextFloat() < 0.5) {
+				for (Node n: colors.keySet()) {
+					if (colors.get(n) == col) {
+						result.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+					}
+				}
+			} else {
+				for (Node n: colors.keySet()) {
+					if (colors.get(n) == col) {
+						result.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+					}
+				}
+			}
+		}
+		
+		result.updateChecksum();
+		return result;
 	}
 	
 	public boolean validateParameterConfiguration(ParameterConfiguration config) {

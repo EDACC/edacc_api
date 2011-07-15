@@ -53,7 +53,7 @@ public class ParameterGraphTest {
 	}
 
 	@Test
-	public void testGetNeighbourhood() throws FileNotFoundException {
+	public void testGetConstrainedNeighbourhood() throws FileNotFoundException {
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
@@ -62,7 +62,7 @@ public class ParameterGraphTest {
 		config.setParameterValue("c2", 20);
 		config.setParameterValue("c3", 20);
 		
-		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
+		List<ParameterConfiguration> nbh = pspace.getConstrainedNeighbourhood(config);
 		
 		ParameterConfiguration neighbour1 = new ParameterConfiguration(config);
 		neighbour1.setParameterValue("c1", 11);
@@ -98,7 +98,7 @@ public class ParameterGraphTest {
 		config.setParameterValue("cat", "1");
 		assertTrue("c1: 5 cat: 1 method: hybrid flag: ON ps: 0.1 prob: null ".equals(config.toString()));
 		
-		List<ParameterConfiguration> nbh = pspace.getFullNeighbourhood(config);
+		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
 		
 		ParameterConfiguration nb1 = new ParameterConfiguration(config);		
 		nb1.setParameterValue("method", "atom");
@@ -130,8 +130,33 @@ public class ParameterGraphTest {
 		config.setParameterValue("c2", 2);
 		config.setParameterValue("c3", 15);
 		
-		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
+		List<ParameterConfiguration> nbh = pspace.getConstrainedNeighbourhood(config);
 		for (int i = 0; i < 100; i++) assertTrue(nbh.contains(pspace.getRandomNeighbour(config, rng)));
+	}
+	
+	@Test
+	public void testCrossover() throws FileNotFoundException {
+		Random rng = new Random();
+		API api = new API();
+		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
+		ParameterConfiguration config1 = new ParameterConfiguration(pspace.getParameterSet());
+		config1.setParameterValue("ps", 0.1);
+		config1.setParameterValue("c1", 1);
+		config1.setParameterValue("c2", 1);
+		config1.setParameterValue("c3", 11);
+		
+		ParameterConfiguration config2 = new ParameterConfiguration(pspace.getParameterSet());
+		config2.setParameterValue("ps", 0.2);
+		config2.setParameterValue("c1", 2);
+		config2.setParameterValue("c2", 2);
+		config2.setParameterValue("c3", 22);
+		
+		ParameterConfiguration cross = pspace.crossover(config1, config2, rng);
+		
+		for (Parameter p: pspace.parameters) {
+			Object p_val = cross.getParameterValue(p);
+			assertTrue(config1.getParameterValue(p).equals(p_val) || config2.getParameterValue(p).equals(p_val));
+		}
 	}
 
 }
