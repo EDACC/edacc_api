@@ -15,7 +15,7 @@ import edacc.parameterspace.graph.ParameterGraph;
 public class ParameterConfigurationTest {
 
 	@Test
-	public void testEqualsObject() throws FileNotFoundException {
+	public void testEqualsObject() throws Exception {
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());

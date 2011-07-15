@@ -53,7 +53,7 @@ public class ParameterGraphTest {
 	}
 
 	@Test
-	public void testGetConstrainedNeighbourhood() throws FileNotFoundException {
+	public void testGetConstrainedNeighbourhood() throws Exception {
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
@@ -87,7 +87,7 @@ public class ParameterGraphTest {
 	}
 	
 	@Test
-	public void testGetFullNeighbourhood() throws FileNotFoundException {
+	public void testGetFullNeighbourhood() throws Exception {
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
@@ -120,7 +120,7 @@ public class ParameterGraphTest {
 	}
 	
 	@Test
-	public void testGetRandomNeighbour() throws FileNotFoundException {
+	public void testGetRandomNeighbour() throws Exception {
 		Random rng = new Random();
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
@@ -135,7 +135,7 @@ public class ParameterGraphTest {
 	}
 	
 	@Test
-	public void testCrossover() throws FileNotFoundException {
+	public void testCrossover() throws Exception {
 		Random rng = new Random();
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");

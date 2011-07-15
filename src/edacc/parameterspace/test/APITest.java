@@ -7,7 +7,7 @@ import edacc.parameterspace.ParameterConfiguration;
  * random tests
  */
 public class APITest {
-	public static void main(String ... args) {
+	public static void main(String ... args) throws Exception {
 		API api = new API();
 		api.connect("localhost", 3306, "EDACC", "edacc", "edaccteam");
 		ParameterConfiguration config = api.getParameterConfiguration(15, 1013);
