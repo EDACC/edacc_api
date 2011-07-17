@@ -300,7 +300,7 @@ public class API {
 	 * @return the job as edacc.model.ExperimentResult object.
 	 */
 	public synchronized ExperimentResult getJob(int idJob) throws Exception {
-			return ExperimentResultDAO.getById(idJob);
+	    return ExperimentResultDAO.getByIdWithoutAssign(idJob);
 	}
 	
 	/**
@@ -330,7 +330,7 @@ public class API {
 	 * @return
 	 */
 	public synchronized boolean deleteResult(int idJob) throws Exception {
-		ExperimentResult er = ExperimentResultDAO.getById(idJob);
+		ExperimentResult er = ExperimentResultDAO.getByIdWithoutAssign(idJob);
 		if (er == null) return false;
 		ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
 		l.add(er);
@@ -355,7 +355,7 @@ public class API {
 	public synchronized Map<Integer, ExperimentResult> getJobsByIDs(Collection<Integer> ids) throws Exception {
 		Map<Integer, ExperimentResult> jobs = new HashMap<Integer, ExperimentResult>();
 		for (Integer id: ids) {
-			jobs.put(id, ExperimentResultDAO.getById(id)); // TODO: optimize
+			jobs.put(id, ExperimentResultDAO.getByIdWithoutAssign(id)); // TODO: optimize
 		}
 		return jobs;
 	}
