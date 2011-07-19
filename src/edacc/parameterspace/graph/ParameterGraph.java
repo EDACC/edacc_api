@@ -435,8 +435,9 @@ public class ParameterGraph {
 	 * @param rng
 	 * @param config
 	 * @param stdDevFactor standard deviation of the gaussian distribution will be <size of domain> * stdDevFactor
+	 * @param mutationProb the probability of mutation each parameter
 	 */
-	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config, float stdDevFactor) {
+	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config, float stdDevFactor, float mutationProb) {
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
 		for (Node n: this.nodes) {
 			if (n == startNode || !(n instanceof AndNode)) continue;
@@ -447,13 +448,15 @@ public class ParameterGraph {
 		}
 		
 		for (AndNode n: assigned_and_nodes) {
-			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter()), stdDevFactor));
+		    if (rng.nextFloat() < mutationProb) {
+		        config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter()), stdDevFactor));
+		    }
 		}
 		config.updateChecksum();
 	}
 	
     public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
-        mutateParameterConfiguration(rng, config, 0.1f);
+        mutateParameterConfiguration(rng, config, 0.1f, 0.05f);
     }
 	
 	/**
