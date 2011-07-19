@@ -49,10 +49,15 @@ public class MixedDomain extends Domain {
 
 	@Override
 	public Object mutatedValue(Random rng, Object value) {
-		if (!contains(value)) return value;
-		int dom = rng.nextInt(domains.size());
-		return domains.get(dom).mutatedValue(rng, value);
+	    return mutatedValue(rng, value, 0.1f);
 	}
+	
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        if (!contains(value)) return value;
+        int dom = rng.nextInt(domains.size());
+        return domains.get(dom).mutatedValue(rng, value, stdDevFactor);
+    }
 
 	@Override
 	public List<Object> getDiscreteValues() {

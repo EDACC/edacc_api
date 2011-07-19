@@ -61,6 +61,11 @@ public class CategoricalDomain extends Domain {
 		if (!contains(value)) return value;
 		return randomValue(rng);
 	}
+	
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        return mutatedValue(rng, value);
+    }
 
 	@Override
 	public List<Object> getDiscreteValues() {

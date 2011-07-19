@@ -52,10 +52,15 @@ public class IntegerDomain extends Domain {
 
 	@Override
 	public Object mutatedValue(Random rng, Object value) {
-		if (!contains(value)) return value;
-		double r = rng.nextGaussian() * ((high - low) * 0.1);
-		return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
+		return mutatedValue(rng, value, 0.1f);
 	}
+	
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        if (!contains(value)) return value;
+        double r = rng.nextGaussian() * ((high - low) * stdDevFactor);
+        return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
+    }
 
 	@Override
 	public List<Object> getDiscreteValues() {

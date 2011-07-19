@@ -48,12 +48,17 @@ public class OrdinalDomain extends Domain {
 
 	@Override
 	public Object mutatedValue(Random rng, Object value) {
-		if (!contains(value)) return value;
-		int ix = ordered_list.indexOf(value);
-		double r = rng.nextGaussian() * (ordered_list.size() * 0.1);
-		int n = Math.min((int)Math.max(Math.round(ix + r), ordered_list.size()), 0);
-		return ordered_list.get(n);
+	    return mutatedValue(rng, value, 0.1f);
 	}
+	
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        if (!contains(value)) return value;
+        int ix = ordered_list.indexOf(value);
+        double r = rng.nextGaussian() * (ordered_list.size() * stdDevFactor);
+        int n = Math.min((int)Math.max(Math.round(ix + r), ordered_list.size()), 0);
+        return ordered_list.get(n);
+    }
 	
 	@Override
 	public List<Object> getDiscreteValues() {

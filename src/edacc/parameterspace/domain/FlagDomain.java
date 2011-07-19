@@ -77,6 +77,11 @@ public class FlagDomain extends Domain {
 		return randomValue(rng);
 	}
 
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        return mutatedValue(rng, value);
+    }
+
 	@Override
 	public List<Object> getDiscreteValues() {
 		List<Object> values = new LinkedList<Object>();

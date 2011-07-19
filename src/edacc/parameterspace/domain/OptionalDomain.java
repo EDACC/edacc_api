@@ -44,6 +44,11 @@ public class OptionalDomain extends Domain {
 		if (!contains(value)) return value;
 		return OPTIONS.NOT_SPECIFIED;
 	}
+	
+    @Override
+    public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
+        return mutatedValue(rng, value);
+    }
 
 	@Override
 	public List<Object> getDiscreteValues() {

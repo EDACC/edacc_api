@@ -429,12 +429,14 @@ public class ParameterGraph {
 	}
 	
 	/**
-	 * mutate a configuration in each parameter.
+	 * mutate a configuration in each parameter according to a gaussian distribution around the
+	 * current parameter value, if the domain allows it.
 	 * TODO: generalize ...
 	 * @param rng
 	 * @param config
+	 * @param stdDevFactor standard deviation of the gaussian distribution will be <size of domain> * stdDevFactor
 	 */
-	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
+	public void mutateParameterConfiguration(Random rng, ParameterConfiguration config, float stdDevFactor) {
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
 		for (Node n: this.nodes) {
 			if (n == startNode || !(n instanceof AndNode)) continue;
@@ -445,10 +447,14 @@ public class ParameterGraph {
 		}
 		
 		for (AndNode n: assigned_and_nodes) {
-			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter())));
+			config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter()), stdDevFactor));
 		}
 		config.updateChecksum();
 	}
+	
+    public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
+        mutateParameterConfiguration(rng, config, 0.1f);
+    }
 	
 	/**
 	 * Simple crossover operator
