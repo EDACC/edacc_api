@@ -9,12 +9,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.OrdinalDomain;
+import edacc.util.MersenneTwister;
 
 public class OrdinalDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		List<String> l = new LinkedList<String>();
 		l.add("1");
 		l.add("2");

@@ -159,6 +159,24 @@ public class API {
 	}
 	
 	/**
+	 * Creates numberRuns new jobs for the given solver configuration
+	 * in the given experiment.
+	 * @param idExperiment
+	 * @param idSolverConfig
+	 * @param cpuTimeLimit
+	 * @param numberRuns
+	 * @return
+	 * @throws Exception
+	 */
+	public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns) throws Exception {
+	    List<Integer> ids = new ArrayList<Integer>();
+	    for (int i = 0; i < numberRuns; i++) {
+	        ids.add(launchJob(idExperiment, idSolverConfig, cpuTimeLimit[i]));
+	    }
+	    return ids;
+	}
+	
+	/**
 	 * Returns the parameter configuration corresponding to the given solver configuration in the DB.
 	 * @param idExperiment
 	 * @param idSolverConfig
@@ -360,9 +378,38 @@ public class API {
 		return jobs;
 	}
 	
+	/**
+	 * Returns the instances of the given experiment as list.
+	 * @param idExperiment
+	 * @return
+	 * @throws Exception
+	 */
 	public synchronized List<Instance> getExperimentInstances(int idExperiment) throws Exception {
 		return InstanceDAO.getAllByExperimentId(idExperiment);
 	}
+	
+	/**
+	 * Returns the ID of the best configuration with cost function @func of the given experiment.
+	 * Returns 0 if there's no configuration with the given cost function 
+	 * @param idExperiment
+	 * @param func
+	 * @return
+	 */
+	public synchronized int getBestConfiguration(int idExperiment, COST_FUNCTIONS func) throws Exception {
+        PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE Experiment_idExperiment=? AND cost_function=? AND cost IS NOT NULL ORDER BY cost LIMIT 1");
+        st.setInt(1, idExperiment);
+        st.setString(2, func.toString());
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            int id = rs.getInt("idSolverConfig");
+            rs.close();
+            st.close();
+            return id;
+        }
+        rs.close();
+        st.close();
+        return 0;
+    }
 	
 	/**
 	 * Loads the parameter graph object of the solver binary selected in the configuration experiment
@@ -379,6 +426,8 @@ public class API {
             if (rs.next()) {
                 ParameterGraph pg = unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
                 pg.buildAdjacencyList();
+                rs.close();
+                st.close();
                 return pg;
             }
         } catch (JAXBException e) {

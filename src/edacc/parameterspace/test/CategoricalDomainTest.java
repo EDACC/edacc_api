@@ -7,12 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.CategoricalDomain;
+import edacc.util.MersenneTwister;
 
 public class CategoricalDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		CategoricalDomain c = new CategoricalDomain(new String[] {"yes", "no", "1", "2"});
 		assertTrue(c.contains("yes"));
 		assertTrue(c.contains("no"));

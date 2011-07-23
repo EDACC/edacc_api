@@ -22,6 +22,7 @@ import edacc.parameterspace.graph.Edge;
 import edacc.parameterspace.graph.Node;
 import edacc.parameterspace.graph.OrNode;
 import edacc.parameterspace.graph.ParameterGraph;
+import edacc.util.MersenneTwister;
 
 public class ParameterGraphTest {
 	private ParameterGraph g = null;
@@ -47,7 +48,7 @@ public class ParameterGraphTest {
 
 	@Test
 	public void testGetRandomConfiguration() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		ParameterConfiguration p = g.getRandomConfiguration(rng);
 		assertTrue(p != null);
 	}
@@ -121,7 +122,7 @@ public class ParameterGraphTest {
 	
 	@Test
 	public void testGetRandomNeighbour() throws Exception {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
@@ -136,7 +137,7 @@ public class ParameterGraphTest {
 	
 	@Test
 	public void testCrossover() throws Exception {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		API api = new API();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config1 = new ParameterConfiguration(pspace.getParameterSet());

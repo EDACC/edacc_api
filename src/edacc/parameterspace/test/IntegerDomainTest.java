@@ -7,12 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.IntegerDomain;
+import edacc.util.MersenneTwister;
 
 public class IntegerDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		IntegerDomain d = new IntegerDomain(10, 1000);
 		
 		assertTrue(d.contains(10));

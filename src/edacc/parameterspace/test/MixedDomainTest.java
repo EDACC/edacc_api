@@ -12,12 +12,13 @@ import edacc.parameterspace.domain.CategoricalDomain;
 import edacc.parameterspace.domain.Domain;
 import edacc.parameterspace.domain.IntegerDomain;
 import edacc.parameterspace.domain.MixedDomain;
+import edacc.util.MersenneTwister;
 
 public class MixedDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		List<Domain> l = new LinkedList<Domain>();
 		l.add(new CategoricalDomain(new String[] {"yes", "no", "1", "2"}));
 		l.add(new IntegerDomain(0, 100));

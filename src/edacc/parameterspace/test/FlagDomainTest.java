@@ -7,12 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.FlagDomain;
+import edacc.util.MersenneTwister;
 
 public class FlagDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		FlagDomain full = new FlagDomain(true, true);
 		
 		assertTrue(full.contains(FlagDomain.FLAGS.ON));

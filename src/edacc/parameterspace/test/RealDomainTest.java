@@ -7,6 +7,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.RealDomain;
+import edacc.util.MersenneTwister;
 
 
 public class RealDomainTest {
@@ -22,7 +23,7 @@ public class RealDomainTest {
 	@Test
 	public void testRandomValue() {
 		RealDomain r = new RealDomain(0, 100);
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		for (int i = 0; i < 1000; i++)
 			assertTrue(r.contains(r.randomValue(rng)));
 	}

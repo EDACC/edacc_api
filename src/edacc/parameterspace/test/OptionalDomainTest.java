@@ -7,12 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import edacc.parameterspace.domain.OptionalDomain;
+import edacc.util.MersenneTwister;
 
 public class OptionalDomainTest {
 
 	@Test
 	public void test() {
-		Random rng = new Random();
+		Random rng = new MersenneTwister();
 		OptionalDomain o = new OptionalDomain();
 		
 		assertTrue(o.contains(OptionalDomain.OPTIONS.NOT_SPECIFIED));
