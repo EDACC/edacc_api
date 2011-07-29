@@ -418,10 +418,11 @@ public class API {
 	 * @param ids
 	 * @return map with (job_id -> ExperimentResult) mapping
 	 */
-	public synchronized Map<Integer, ExperimentResult> getJobsByIDs(Collection<Integer> ids) throws Exception {
+	public synchronized Map<Integer, ExperimentResult> getJobsByIDs(List<Integer> ids) throws Exception {
 		Map<Integer, ExperimentResult> jobs = new HashMap<Integer, ExperimentResult>();
-		for (Integer id: ids) {
-			jobs.put(id, ExperimentResultDAO.getByIdWithoutAssign(id)); // TODO: optimize
+		List<ExperimentResult> results = ExperimentResultDAO.getByIds(ids);
+		for (ExperimentResult result: results) {
+			jobs.put(result.getId(), result);
 		}
 		return jobs;
 	}
