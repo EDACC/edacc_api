@@ -3,6 +3,7 @@ package edacc.parameterspace;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class ParameterConfiguration {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA");
 			List<Parameter> sortedKeys = new ArrayList<Parameter>(parameter_instances.keySet());
+			Collections.sort(sortedKeys);
 			for (Parameter p: sortedKeys) {
 				if (parameter_instances.get(p) != null && 
 					!(parameter_instances.get(p) instanceof OptionalDomain.OPTIONS) &&

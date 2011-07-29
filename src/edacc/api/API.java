@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import javax.xml.bind.Unmarshaller;
 import edacc.model.*;
 import edacc.parameterspace.domain.*;
 import edacc.parameterspace.graph.ParameterGraph;
+import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 
 /**
@@ -74,6 +76,51 @@ public class API {
 	}
 	
 	/**
+	 * Returns a canonical name of the given parameter configuration in the context
+	 * of the configuration experiment.
+	 * This means only values that are to be configured are actually appearing in the name.
+	 * @param idExperiment
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	public String getCanonicalName(int idExperiment, ParameterConfiguration config) throws Exception {
+	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+	    StringBuilder name = new StringBuilder();
+	    List<ConfigurationScenarioParameter> params = cs.getParameters();
+	    Collections.sort(params);
+	    for (ConfigurationScenarioParameter param: params) {
+	        if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) continue;
+	        if (param.isConfigurable()) {
+                edacc.parameterspace.Parameter config_param = null;
+                for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
+                    if (p.getName().equals(param.getParameter().getName())) {
+                        config_param = p;
+                        break;
+                    }
+                }
+                if (config_param == null) {
+                    continue;
+                }
+                
+                if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param))) continue;
+                else if (FlagDomain.FLAGS.ON.equals(config.getParameterValue(config_param))) {
+                    name.append(param.getParameter().getPrefix());
+                    if (param != params.get(params.size() - 1)) name.append(" ");
+                }
+                else {
+                    name.append(param.getParameter().getPrefix());
+                    if (param.getParameter().getSpace()) name.append(" ");
+                    name.append(config.getParameterValue(config_param).toString());
+                    if (param != params.get(params.size() - 1)) name.append(" ");
+                }
+	        }
+	        
+	    }
+	    return name.toString();
+	}
+	
+	/**
 	 * Creates a new solver configuration in the database for the experiment specified by the idExperiment argument.
 	 * The solver binary of the configuration is determined by the configuration scenario that the user created in the GUI.
 	 * The parameters values are assigned by looping over the parameters that were chosen in the GUI for the configuration scenario.
@@ -81,6 +128,7 @@ public class API {
 	 * take on the values that are specified in the ParameterConfiguration config that is passed to this function.
 	 * @param idExperiment ID of the experiment for which to create a solver configuration.
 	 * @param config parameter configuration object that specifies the values of parameters.
+	 * @param name name for the new solver configuration (used to display)
 	 * @return unique database ID > 0 of the created solver configuration, 0 on errors.
 	 */
 	public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
@@ -189,8 +237,8 @@ public class API {
 		if (solver_config == null) return null;
 		
 		// map ParameterID -> Parameter
-		Map<Integer, Parameter> parameter_map = new HashMap<Integer, Parameter>();
-		for (Parameter p: ParameterDAO.getParameterFromSolverId(solver_config.getSolverBinary().getIdSolver())) {
+		Map<Integer, edacc.model.Parameter> parameter_map = new HashMap<Integer, edacc.model.Parameter>();
+		for (edacc.model.Parameter p: ParameterDAO.getParameterFromSolverId(solver_config.getSolverBinary().getIdSolver())) {
 			parameter_map.put(p.getId(), p);
 		}
 		
