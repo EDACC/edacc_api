@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -84,7 +85,7 @@ public class API {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getCanonicalName(int idExperiment, ParameterConfiguration config) throws Exception {
+	public synchronized String getCanonicalName(int idExperiment, ParameterConfiguration config) throws Exception {
 	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 	    StringBuilder name = new StringBuilder();
 	    List<ConfigurationScenarioParameter> params = cs.getParameters();
@@ -134,9 +135,34 @@ public class API {
 	public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
 		ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 		SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
-		config.updateChecksum(); // TODO: needed here?
-		SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, null, null, toHex(config.getChecksum()));
-
+		MessageDigest md = MessageDigest.getInstance("SHA");
+		
+        List<ConfigurationScenarioParameter> params = cs.getParameters();
+        Collections.sort(params);
+        for (ConfigurationScenarioParameter param: params) {
+            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) continue;
+            if (param.isConfigurable()) {
+                edacc.parameterspace.Parameter config_param = null;
+                for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
+                    if (p.getName().equals(param.getParameter().getName())) {
+                        config_param = p;
+                        break;
+                    }
+                }
+                if (config_param == null) {
+                    continue;
+                }
+                
+                if (config.getParameterValue(config_param) != null && 
+                        !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS) &&
+                        !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
+                        md.update(config.getParameterValue(config_param).toString().getBytes());
+                }
+            }
+        }
+        
+        SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, null, null, toHex(md.digest()));
+		
 		for (ConfigurationScenarioParameter param: cs.getParameters()) {
 			if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
 				ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
@@ -163,6 +189,12 @@ public class API {
 				if (config_param == null) {
 					continue;
 				}
+				
+                if (config.getParameterValue(config_param) != null && 
+                        !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS) &&
+                        !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
+                        md.update(config.getParameterValue(config_param).toString().getBytes());
+                }
 				
 				if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param))) continue;
 				else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param))) continue;
@@ -284,7 +316,34 @@ public class API {
 	 * @return
 	 */
 	public synchronized int exists(int idExperiment, ParameterConfiguration config) throws Exception {
-		SolverConfiguration sc = SolverConfigurationDAO.getByParameterHash(idExperiment, toHex(config.getChecksum()));
+	    MessageDigest md = MessageDigest.getInstance("SHA");
+        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        List<ConfigurationScenarioParameter> params = cs.getParameters();
+        Collections.sort(params);
+        for (ConfigurationScenarioParameter param: params) {
+            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) continue;
+            if (param.isConfigurable()) {
+                edacc.parameterspace.Parameter config_param = null;
+                for (edacc.parameterspace.Parameter p: config.getParameter_instances().keySet()) {
+                    if (p.getName().equals(param.getParameter().getName())) {
+                        config_param = p;
+                        break;
+                    }
+                }
+                if (config_param == null) {
+                    continue;
+                }
+                
+                if (config.getParameterValue(config_param) != null && 
+                        !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS) &&
+                        !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
+                        md.update(config.getParameterValue(config_param).toString().getBytes());
+                }
+            }
+            
+        }
+        
+		SolverConfiguration sc = SolverConfigurationDAO.getByParameterHash(idExperiment, toHex(md.digest()));
 		if (sc != null) return sc.getId();
 		return 0;
 	}
@@ -435,6 +494,18 @@ public class API {
 	 */
 	public synchronized List<Instance> getExperimentInstances(int idExperiment) throws Exception {
 		return InstanceDAO.getAllByExperimentId(idExperiment);
+	}
+	
+	/**
+	 * Returns the name of the configuration with the given ID,
+	 * or null, if it doesn't exist
+	 * @param idSolverConfig
+	 * @return
+	 */
+	public synchronized String getSolverConfigName(int idSolverConfig) throws Exception {
+	    SolverConfiguration config = SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig);
+	    if (config != null) return config.getName();
+	    return null;
 	}
 	
 	/**
