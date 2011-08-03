@@ -2,7 +2,6 @@ package edacc.parameterspace.test;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edacc.api.API;
+import edacc.api.APIImpl;
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.CategoricalDomain;
@@ -55,7 +55,7 @@ public class ParameterGraphTest {
 
 	@Test
 	public void testGetConstrainedNeighbourhood() throws Exception {
-		API api = new API();
+		API api = new APIImpl();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
 		config.setParameterValue("ps", 0.2);
@@ -89,7 +89,7 @@ public class ParameterGraphTest {
 	
 	@Test
 	public void testGetFullNeighbourhood() throws Exception {
-		API api = new API();
+	    API api = new APIImpl();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
 		config.setParameterValue("c1", 5);
@@ -123,7 +123,7 @@ public class ParameterGraphTest {
 	@Test
 	public void testGetRandomNeighbour() throws Exception {
 		Random rng = new MersenneTwister();
-		API api = new API();
+		API api = new APIImpl();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
 		config.setParameterValue("ps", 0.2);
@@ -138,7 +138,7 @@ public class ParameterGraphTest {
 	@Test
 	public void testCrossover() throws Exception {
 		Random rng = new MersenneTwister();
-		API api = new API();
+		API api = new APIImpl();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
 		ParameterConfiguration config1 = new ParameterConfiguration(pspace.getParameterSet());
 		config1.setParameterValue("ps", 0.1);

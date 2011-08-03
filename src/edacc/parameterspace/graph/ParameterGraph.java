@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
-import edacc.parameterspace.domain.RealDomain;
 
 @XmlRootElement( name="parameterspace" )
 public class ParameterGraph {

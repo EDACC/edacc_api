@@ -2,12 +2,9 @@ package edacc.parameterspace.test;
 
 import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.util.Random;
-
 import org.junit.Test;
 
-import edacc.api.API;
+import edacc.api.APIImpl;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.FlagDomain;
 import edacc.parameterspace.graph.ParameterGraph;
@@ -16,7 +13,7 @@ public class ParameterConfigurationTest {
 
 	@Test
 	public void testEqualsObject() throws Exception {
-		API api = new API();
+		APIImpl api = new APIImpl();
 		ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
 		ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
 		config.setParameterValue("c1", 5);

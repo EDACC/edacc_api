@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 import edacc.parameterspace.Parameter;
-import edacc.parameterspace.domain.Domain;
 
 @XmlSeeAlso({AndNode.class, OrNode.class})
 public abstract class Node {
