@@ -13,11 +13,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import edacc.api.API.COST_FUNCTIONS;
 import edacc.model.*;
 import edacc.parameterspace.domain.*;
 import edacc.parameterspace.graph.ParameterGraph;
@@ -258,28 +260,41 @@ public class APIImpl implements API {
 			solver_config_param_map.put(parameter_map.get(p.getParameter_id()).getName(), p);
 		}
 		
+		Map<String, edacc.parameterspace.Parameter> pgraph_map = graph.getParameterMap();
+		
 		for (ConfigurationScenarioParameter param: cs.getParameters()) {
-			if (param.isConfigurable()) {
+			if (param.isConfigurable() && !"instance".equals(param.getParameter().getName()) && !"seed".equals(param.getParameter().getName())) {
 				String parameter_name = param.getParameter().getName();
 				if (!param.getParameter().getHasValue()) { // this is a flag which is ON in this solver config
 					config.setParameterValue(parameter_name, FlagDomain.FLAGS.ON);
 				}
 				else { // standard parameter with a value
 					String value = solver_config_param_map.get(param.getParameter().getName()).getValue();
-					try {
-						int i = Integer.valueOf(value);
-						config.setParameterValue(parameter_name, i);
-					} catch (NumberFormatException e) {
-						try {
-							double f = Double.valueOf(value);
-							config.setParameterValue(parameter_name, f);
-						}
-						catch (NumberFormatException e2) {
-							config.setParameterValue(parameter_name, value);
-						}
+					if (pgraph_map.get(param.getParameter().getName()).getDomain().contains(value)) {
+					    // string should be fine for this domain
+					    config.setParameterValue(parameter_name, value);
+					} else {
+    					try {
+    						int i = Integer.valueOf(value);
+    						config.setParameterValue(parameter_name, i);
+    					} catch (NumberFormatException e) {
+    						try {
+    							double f = Double.valueOf(value);
+    							config.setParameterValue(parameter_name, f);
+    						}
+    						catch (NumberFormatException e2) {
+    							config.setParameterValue(parameter_name, value);
+    						}
+    					}
 					}
 				}
 			}
+		}
+		Random rng = new Random();
+		// set parameters that are not part of the configuration scenario to some
+		// random values since they should not matter (will be replaced by fixed values or not appear at all)
+		for (edacc.parameterspace.Parameter p: pgraph_map.values()) {
+		    if (config.getParameterValue(p) == null) config.setParameterValue(p, p.getDomain().randomValue(rng));
 		}
 		config.updateChecksum();
 		return config;
@@ -508,8 +523,31 @@ public class APIImpl implements API {
         st.close();
         return 0;
     }
-	
-	/**
+
+    /**
+     * Returns the IDs of the #no best configuration with cost function @func of the given experiment.
+     * @param idExperiment
+     * @param func
+     * @param no how many
+     * @return
+     */
+    public List<Integer> getBestConfigurations(int idExperiment,
+            COST_FUNCTIONS func, int no) throws Exception {
+        PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE Experiment_idExperiment=? AND cost_function=? AND cost IS NOT NULL ORDER BY cost LIMIT ?");
+        st.setInt(1, idExperiment);
+        st.setString(2, func.toString());
+        st.setInt(3, no);
+        ResultSet rs = st.executeQuery();
+        List<Integer> best = new ArrayList<Integer>(); 
+        while (rs.next()) {
+            best.add(rs.getInt("idSolverConfig"));
+        }
+        rs.close();
+        st.close();
+        return best;
+    }
+
+    /**
 	 * Loads the parameter graph object of the solver binary selected in the configuration experiment
 	 * specified by the idExperiment argument. Parameter graphs objects provide methods
 	 * to build, modify and validate solver parameters.

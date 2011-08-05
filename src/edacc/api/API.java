@@ -229,6 +229,15 @@ public interface API {
     public int getBestConfiguration(int idExperiment, COST_FUNCTIONS func) throws Exception;
     
     /**
+     * Returns the IDs of the #no best configuration with cost function @func of the given experiment.
+     * @param idExperiment
+     * @param func
+     * @param no how many
+     * @return
+     */
+    public List<Integer> getBestConfigurations(int idExperiment, COST_FUNCTIONS func, int no) throws Exception;
+    
+    /**
      * Loads the parameter graph object of the solver binary selected in the configuration experiment
      * specified by the idExperiment argument. Parameter graphs objects provide methods
      * to build, modify and validate solver parameters.
