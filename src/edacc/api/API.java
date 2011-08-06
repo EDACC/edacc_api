@@ -190,6 +190,13 @@ public interface API {
     public boolean deleteResult(int idJob) throws Exception;
     
     /**
+     * reset the job with the given ID to "not started".
+     * @param idJob
+     * @throws Exception
+     */
+    public void restartJob(int idJob, int CPUTimeLimit) throws Exception;
+    
+    /**
      * Returns all jobs of the solver configuration specified by the idSolverConfig argument.
      * @param idSolverConfig
      * @return

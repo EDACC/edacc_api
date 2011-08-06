@@ -442,7 +442,24 @@ public class APIImpl implements API {
 		return null;
 	}
 	
-	/**
+    /**
+     * reset the job with the given ID to "not started".
+     * @param idJob
+     * @throws Exception
+     */
+    public void restartJob(int idJob, int CPUTimeLimit) throws Exception {
+        // TODO Auto-generated method stub
+        ExperimentResult er = ExperimentResultDAO.getById(idJob);
+        if (er == null) return;
+        er.setCPUTimeLimit(CPUTimeLimit);
+        er.setModified();
+        ArrayList<ExperimentResult> jobs = new ArrayList<ExperimentResult>();
+        jobs.add(er);
+        ExperimentResultDAO.batchSave(jobs);
+        ExperimentResultDAO.batchUpdateStatus(jobs, StatusCode.NOT_STARTED);
+    }
+
+    /**
 	 * Deletes a job no matter its computation status.
 	 * @param idJob ID of the job to delete.
 	 * @return
