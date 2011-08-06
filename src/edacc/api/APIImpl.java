@@ -448,7 +448,6 @@ public class APIImpl implements API {
      * @throws Exception
      */
     public void restartJob(int idJob, int CPUTimeLimit) throws Exception {
-        // TODO Auto-generated method stub
         ExperimentResult er = ExperimentResultDAO.getById(idJob);
         if (er == null) return;
         er.setCPUTimeLimit(CPUTimeLimit);

@@ -15,14 +15,15 @@
   <xs:complexType name="andNode">
     <xs:complexContent>
       <xs:extension base="node">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="domain" type="domain" minOccurs="0"/>
+        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="node" abstract="true">
     <xs:sequence>
-      <xs:element name="domain" type="domain" minOccurs="0"/>
       <xs:element name="id" type="xs:ID" minOccurs="0"/>
       <xs:element name="parameter" type="xs:IDREF" minOccurs="0"/>
     </xs:sequence>
@@ -92,6 +93,16 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="ordinalDomain">
+    <xs:complexContent>
+      <xs:extension base="domain">
+        <xs:sequence>
+          <xs:element name="ordered_list" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="parameter">
     <xs:sequence>
       <xs:element name="domain" type="domain" minOccurs="0"/>
@@ -119,6 +130,12 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="ON"/>
       <xs:enumeration value="OFF"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="options">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NOT_SPECIFIED"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
