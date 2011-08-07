@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
+import edacc.util.Pair;
 
 @XmlRootElement( name="parameterspace" )
 public class ParameterGraph {
@@ -459,7 +460,10 @@ public class ParameterGraph {
     }
 	
 	/**
-	 * Simple crossover operator
+	 * Random uniform crossover. The parameter graph is split into connected
+	 * components by removing the start AND node. Of each group, either all parameter values of
+	 * the first configuration or all parameter values of the second configuration are copied to
+	 * the resulting configuration.
 	 * @param config1
 	 * @param config2
 	 * @param rng
@@ -493,6 +497,46 @@ public class ParameterGraph {
 		
 		result.updateChecksum();
 		return result;
+	}
+	
+	/**
+	 * Two point crossover operator
+	 * @param config1
+	 * @param config2
+	 * @param rng
+	 * @return
+	 */
+	public Pair<ParameterConfiguration, ParameterConfiguration> crossover2Point(ParameterConfiguration config1, ParameterConfiguration config2, Random rng) {
+        Map<Node, Integer> colors = new HashMap<Node, Integer>();
+        int currentColor = 1;
+        for (Node node: adjacentNodes(startNode)) {
+            int c = colorDFS(node, currentColor, colors);
+            if (c == currentColor) currentColor++;
+        }
+
+        ParameterConfiguration c1 = new ParameterConfiguration(parameters);
+        ParameterConfiguration c2 = new ParameterConfiguration(parameters);
+        int crossoverFirstColor = rng.nextInt(currentColor / 2) + 1;
+        int crossoverSecondColor = rng.nextInt(currentColor / 2 + 1) + 1 + currentColor / 2;
+        
+        for (int col = 1; col < currentColor; col++) {
+            for (Node n: colors.keySet()) {
+                if (colors.get(n) == col) {
+                    if (col <= crossoverFirstColor) { // first section (unchanged)
+                        c1.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+                        c2.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+                    } else if (col <= crossoverSecondColor) { // second section (swap)
+                        c1.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+                        c2.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+                    } else { // third section (unchanged)
+                        c1.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+                        c2.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+                    }
+                }
+            }
+        }
+        
+	    return new Pair<ParameterConfiguration, ParameterConfiguration>(c1, c2);
 	}
 	
 	public boolean validateParameterConfiguration(ParameterConfiguration config) {

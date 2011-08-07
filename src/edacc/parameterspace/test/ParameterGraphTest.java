@@ -23,6 +23,7 @@ import edacc.parameterspace.graph.Node;
 import edacc.parameterspace.graph.OrNode;
 import edacc.parameterspace.graph.ParameterGraph;
 import edacc.util.MersenneTwister;
+import edacc.util.Pair;
 
 public class ParameterGraphTest {
 	private ParameterGraph g = null;
@@ -158,6 +159,35 @@ public class ParameterGraphTest {
 			Object p_val = cross.getParameterValue(p);
 			assertTrue(config1.getParameterValue(p).equals(p_val) || config2.getParameterValue(p).equals(p_val));
 		}
+	}
+	
+	@Test
+	public void testCrossover2Point() throws Exception {
+        Random rng = new MersenneTwister();
+        API api = new APIImpl();
+        ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/sparrow_parameterspace.xml");
+        ParameterConfiguration config1 = new ParameterConfiguration(pspace.getParameterSet());
+        config1.setParameterValue("ps", 0.1);
+        config1.setParameterValue("c1", 1);
+        config1.setParameterValue("c2", 1);
+        config1.setParameterValue("c3", 11);
+        
+        ParameterConfiguration config2 = new ParameterConfiguration(pspace.getParameterSet());
+        config2.setParameterValue("ps", 0.2);
+        config2.setParameterValue("c1", 2);
+        config2.setParameterValue("c2", 2);
+        config2.setParameterValue("c3", 22);
+        
+        Pair<ParameterConfiguration, ParameterConfiguration> cross = pspace.crossover2Point(config1, config2, rng);
+        ParameterConfiguration c1 = cross.getFirst();
+        ParameterConfiguration c2 = cross.getSecond();
+        
+        for (Parameter p: pspace.parameters) {
+            Object p_val1 = c1.getParameterValue(p);
+            Object p_val2 = c2.getParameterValue(p);
+            assertTrue(config1.getParameterValue(p).equals(p_val1) || config2.getParameterValue(p).equals(p_val1));
+            assertTrue(config1.getParameterValue(p).equals(p_val2) || config2.getParameterValue(p).equals(p_val2));
+        }
 	}
 
 }
