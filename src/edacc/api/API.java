@@ -38,7 +38,15 @@ public interface API {
         PAR1 {
             @Override
             public String toString() { return "par1"; }
-        }
+        },
+        PAR7 {
+            @Override
+            public String toString() { return "par7"; }
+        },
+        MEDIAN {
+            @Override
+            public String toString() { return "median"; }
+        },
     }
     
     /**
