@@ -469,7 +469,7 @@ public class ParameterGraph {
 	 * @param rng
 	 * @return
 	 */
-	public ParameterConfiguration crossover(ParameterConfiguration config1, ParameterConfiguration config2, Random rng) {
+	public Pair<ParameterConfiguration, ParameterConfiguration> crossover(ParameterConfiguration config1, ParameterConfiguration config2, Random rng) {
 		Map<Node, Integer> colors = new HashMap<Node, Integer>();
 		int currentColor = 1;
 		for (Node node: adjacentNodes(startNode)) {
@@ -477,26 +477,30 @@ public class ParameterGraph {
 			if (c == currentColor) currentColor++;
 		}
 
-		ParameterConfiguration result = new ParameterConfiguration(parameters);
+		ParameterConfiguration c1 = new ParameterConfiguration(parameters);
+		ParameterConfiguration c2 = new ParameterConfiguration(parameters);
 		
 		for (int col = 1; col < currentColor; col++) {
 			if (rng.nextFloat() < 0.5) {
 				for (Node n: colors.keySet()) {
 					if (colors.get(n) == col) {
-						result.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+						c1.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+						c2.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
 					}
 				}
 			} else {
 				for (Node n: colors.keySet()) {
 					if (colors.get(n) == col) {
-						result.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
+						c1.setParameterValue(n.getParameter(), config1.getParameterValue(n.getParameter()));
+                        c2.setParameterValue(n.getParameter(), config2.getParameterValue(n.getParameter()));
 					}
 				}
 			}
 		}
 		
-		result.updateChecksum();
-		return result;
+		c1.updateChecksum();
+		c2.updateChecksum();
+		return new Pair<ParameterConfiguration, ParameterConfiguration>(c1, c2);
 	}
 	
 	/**
@@ -536,6 +540,8 @@ public class ParameterGraph {
             }
         }
         
+        c1.updateChecksum();
+        c2.updateChecksum();
 	    return new Pair<ParameterConfiguration, ParameterConfiguration>(c1, c2);
 	}
 	

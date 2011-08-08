@@ -153,11 +153,13 @@ public class ParameterGraphTest {
 		config2.setParameterValue("c2", 2);
 		config2.setParameterValue("c3", 22);
 		
-		ParameterConfiguration cross = pspace.crossover(config1, config2, rng);
+		Pair<ParameterConfiguration, ParameterConfiguration> cross = pspace.crossover(config1, config2, rng);
 		
 		for (Parameter p: pspace.parameters) {
-			Object p_val = cross.getParameterValue(p);
-			assertTrue(config1.getParameterValue(p).equals(p_val) || config2.getParameterValue(p).equals(p_val));
+			Object p_val1 = cross.getFirst().getParameterValue(p);
+			Object p_val2 = cross.getSecond().getParameterValue(p);
+			assertTrue(config1.getParameterValue(p).equals(p_val1) || config2.getParameterValue(p).equals(p_val1));
+			assertTrue(config1.getParameterValue(p).equals(p_val2) || config2.getParameterValue(p).equals(p_val2));
 		}
 	}
 	
