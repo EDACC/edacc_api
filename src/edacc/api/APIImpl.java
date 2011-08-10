@@ -225,9 +225,20 @@ public class APIImpl implements API {
 	    if (courseLength == course.getLength()) {
 	        // TODO: extend course
 	    }
-	    InstanceSeed is = course.get(courseLength + 1);
+	    InstanceSeed is = course.get(courseLength);
 	    return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit);
 	}
+	
+    /**
+     * returns the length of the instance-seed course of the configuration experiment
+     * @return
+     * @throws Exception
+     */
+    public int getCourseLength(int idExperiment) throws Exception {
+        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        if (cs == null) return 0;
+        return cs.getCourse().getLength();
+    }
 	
 	/**
 	 * Creates numberRuns new jobs for the given solver configuration

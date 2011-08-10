@@ -212,6 +212,13 @@ public interface API {
     public ArrayList<ExperimentResult> getRuns(int idSolverConfig) throws Exception;
     
     /**
+     * returns the length of the instance-seed course of the configuration experiment
+     * @return
+     * @throws Exception
+     */
+    public int getCourseLength(int idExperiment) throws Exception;
+    
+    /**
      * Returns a map with all jobs from the database with IDs specified in the ids argument.
      * @param ids
      * @return map with (job_id -> ExperimentResult) mapping
