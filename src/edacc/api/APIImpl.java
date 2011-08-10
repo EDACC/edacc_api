@@ -210,12 +210,23 @@ public class APIImpl implements API {
 	 * in the instance-seed parcour of the given experiment.
 	 */
 	public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit) throws Exception {
-		// TODO: implement
-		// find next Instance-Seed pair in the parcour, create job.
-		// Count jobs of the solver configuration -> n jobs, find the (n+1)th parcour
-		// item. if that doesn't exist extend the parcour, otherwise create new job with
-		// that instance/seed pair
-		return 0;
+	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+	    if (cs == null) return 0;
+	    List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+	    Course course = cs.getCourse();
+	    int courseLength = 0;
+	    for (ExperimentResult er: jobs) {
+	        for (int cix = 0; cix < course.getLength(); cix++) {
+	            if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
+	                courseLength += 1;
+	            }
+	        }
+	    }
+	    if (courseLength == course.getLength()) {
+	        // TODO: extend course
+	    }
+	    InstanceSeed is = course.get(courseLength + 1);
+	    return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit);
 	}
 	
 	/**
