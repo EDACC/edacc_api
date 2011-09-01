@@ -473,10 +473,9 @@ public class APIImpl implements API {
         ExperimentResult er = ExperimentResultDAO.getById(idJob);
         if (er == null) return;
         er.setCPUTimeLimit(CPUTimeLimit);
-        er.setModified();
         ArrayList<ExperimentResult> jobs = new ArrayList<ExperimentResult>();
         jobs.add(er);
-        ExperimentResultDAO.batchSave(jobs);
+        ExperimentResultDAO.batchUpdateCPUTimeLimit(jobs);
         ExperimentResultDAO.batchUpdateStatus(jobs, StatusCode.NOT_STARTED);
     }
 
