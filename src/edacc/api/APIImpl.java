@@ -495,11 +495,23 @@ public class APIImpl implements API {
 	
 	/**
 	 * Returns all jobs of the solver configuration specified by the idSolverConfig argument.
+	 * @param idExperiment
 	 * @param idSolverConfig
 	 * @return
 	 */
-	public synchronized ArrayList<ExperimentResult> getRuns(int idSolverConfig) throws Exception {
-		return ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+	public synchronized ArrayList<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception {
+		ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+		ArrayList<ExperimentResult> orderedResults = new ArrayList<ExperimentResult>();
+		List<ExperimentResult> results = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+		for (InstanceSeed isp: cs.getCourse().getInstanceSeedList()) {
+			for (ExperimentResult res: results) {
+				if (res.getInstanceId() == isp.instance.getId() && res.getSeed() == isp.seed) {
+					orderedResults.add(res);
+					break;
+				}
+			}
+		}
+		return orderedResults;
 	}
 	
 	/**
