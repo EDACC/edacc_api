@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import edacc.model.ExperimentResult;
 import edacc.model.Instance;
@@ -106,7 +107,7 @@ public interface API {
      * Creates a new job for the given solver configuration
      * in the instance-seed parcour of the given experiment.
      */
-    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit) throws Exception;
+    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception;
     
     /**
      * Creates numberRuns new jobs for the given solver configuration
@@ -118,7 +119,7 @@ public interface API {
      * @return
      * @throws Exception
      */
-    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns) throws Exception;
+    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception;
     
     /**
      * Returns the parameter configuration corresponding to the given solver configuration in the DB.

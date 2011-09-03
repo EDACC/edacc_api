@@ -209,7 +209,7 @@ public class APIImpl implements API {
 	 * Creates a new job for the given solver configuration
 	 * in the instance-seed parcour of the given experiment.
 	 */
-	public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit) throws Exception {
+	public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception {
 	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
 	    if (cs == null) return 0;
 	    List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
@@ -223,7 +223,16 @@ public class APIImpl implements API {
 	        }
 	    }
 	    if (courseLength == course.getLength()) {
-	        // TODO: extend course
+	    	// the instances that are part of the initial course are reused in extension
+	    	Instance instance = course.get(courseLength % course.getInitialLength()).instance;
+	    	int seed = rng.nextInt();
+	    	PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
+	    	st.setInt(1, cs.getId());
+	    	st.setInt(2, instance.getId());
+	    	st.setInt(3, seed);
+	    	st.setInt(4, courseLength);
+	    	st.executeUpdate();
+	    	course.add(new InstanceSeed(instance, seed));
 	    }
 	    InstanceSeed is = course.get(courseLength);
 	    return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit);
@@ -250,10 +259,10 @@ public class APIImpl implements API {
 	 * @return
 	 * @throws Exception
 	 */
-	public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns) throws Exception {
+	public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception {
 	    List<Integer> ids = new ArrayList<Integer>();
 	    for (int i = 0; i < numberRuns; i++) {
-	        ids.add(launchJob(idExperiment, idSolverConfig, cpuTimeLimit[i]));
+	        ids.add(launchJob(idExperiment, idSolverConfig, cpuTimeLimit[i], rng));
 	    }
 	    return ids;
 	}
