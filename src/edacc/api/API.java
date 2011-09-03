@@ -70,9 +70,10 @@ public interface API {
      * Returns a canonical name of the given parameter configuration in the context
      * of the configuration experiment.
      * This means only values that are to be configured are actually appearing in the name.
-     * @param idExperiment
-     * @param config
-     * @return
+     * Example: "-c 2 -p1 0.4 -p2 0.8" 
+     * @param idExperiment ID of the configuration experiment
+     * @param config parameter configuration to be named
+     * @return name
      * @throws Exception
      */
     public String getCanonicalName(int idExperiment, ParameterConfiguration config) throws Exception;
