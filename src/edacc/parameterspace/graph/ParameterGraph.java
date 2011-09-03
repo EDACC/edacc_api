@@ -24,9 +24,10 @@ public class ParameterGraph {
 	public List<Edge> edges;
 	
 	private Map<Node, List<Edge>> adjacent_edges; // internal adjacency list
+	private Set<Parameter> fixedParameters;
 	
 	private ParameterGraph() {
-		
+	    this.fixedParameters = new HashSet<Parameter>();
 	}
 
 	public ParameterGraph(Set<Node> nodes, List<Edge> edges, Set<Parameter> parameters, AndNode startNode) {
@@ -35,6 +36,17 @@ public class ParameterGraph {
 		this.edges = edges;
 		this.parameters = parameters;
 		buildAdjacencyList();
+		this.fixedParameters = new HashSet<Parameter>();
+	}
+	
+	/**
+	 * Set a subset of parameters to be fixed, i.e. they don't have to be considered
+	 * in neighbourhood calculation. Their values will be set to null in the resulting configurations.
+	 * @param parameters
+	 */
+	public void setFixedParameters(Set<Parameter> parameters) {
+	    if (parameters == null) throw new IllegalArgumentException("fixedParameters can't be set to null");
+	    fixedParameters = parameters;
 	}
 	
 	public Map<String, Parameter> getParameterMap() {
@@ -246,6 +258,7 @@ public class ParameterGraph {
 		
 		List<ParameterConfiguration> nbh = new LinkedList<ParameterConfiguration>();
 		for (AndNode node: assigned_and_nodes) {
+		    if (fixedParameters.contains(node.getParameter())) continue;
 			for (Object value: preceedingNode(node).getParameter().getDomain().getDiscreteValues()) {
 				if (node.getDomain().contains(value)) { // same subdomain, different value
 					if (valuesEqual(value, config.getParameterValue(node.getParameter()))) continue;
@@ -281,6 +294,7 @@ public class ParameterGraph {
 		
 		List<ParameterConfiguration> nbh = new LinkedList<ParameterConfiguration>();
 		for (Parameter p: config.getParameter_instances().keySet()) {
+		    if (fixedParameters.contains(p)) continue;
 			for (Object v: p.getDomain().getDiscreteValues()) {
 				if (old_assigned_and_nodes.get(p) == null) continue; // this parameter wasn't actually set
 				if (old_assigned_and_nodes.get(p).getDomain().contains(v)) { // same AND node
@@ -401,7 +415,9 @@ public class ParameterGraph {
 	public ParameterConfiguration getRandomNeighbour(ParameterConfiguration config, Random rng) {
 		Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
 		Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
-		for (Parameter p: config.getParameter_instances().keySet()) {
+		Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
+		params.removeAll(fixedParameters);
+		for (Parameter p: params) {
     		for (AndNode n: getAndNodes()) {
     			if (n == startNode) continue;
     			if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {

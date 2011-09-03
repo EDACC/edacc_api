@@ -11,9 +11,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -593,6 +595,7 @@ public class APIImpl implements API {
 	 * @return parameter graph object providing parameter space methods.
 	 */
 	public synchronized ParameterGraph loadParameterGraphFromDB(int idExperiment) throws Exception {
+	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
         Statement st = db.getConn().createStatement();
 
         ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ConfigurationScenario JOIN SolverBinaries ON SolverBinaries_idSolverBinary=idSolverBinary JOIN ParameterGraph ON SolverBinaries.idSolver=ParameterGraph.Solver_idSolver WHERE Experiment_idExperiment = " + idExperiment);
@@ -600,6 +603,29 @@ public class APIImpl implements API {
             if (rs.next()) {
                 ParameterGraph pg = unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
                 pg.buildAdjacencyList();
+
+                Set<edacc.parameterspace.Parameter> fixedParams = new HashSet<edacc.parameterspace.Parameter>();
+                List<ConfigurationScenarioParameter> params = cs.getParameters();
+                Collections.sort(params);
+                for (ConfigurationScenarioParameter param: params) {
+                    if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) continue;
+                    if (!param.isConfigurable()) {
+                        // fixed parameter
+                        edacc.parameterspace.Parameter config_param = null;
+                        for (edacc.parameterspace.Parameter p: pg.getParameterSet()) {
+                            if (p.getName().equals(param.getParameter().getName())) {
+                                config_param = p;
+                                break;
+                            }
+                        }
+                        if (config_param == null) {
+                            continue;
+                        }
+
+                        fixedParams.add(config_param);
+                    }
+                }
+                pg.setFixedParameters(fixedParams);
                 rs.close();
                 st.close();
                 return pg;
