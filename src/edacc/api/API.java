@@ -245,6 +245,14 @@ public interface API {
     public String getSolverConfigName(int idSolverConfig) throws Exception;
     
     /**
+     * Updates the name of the solver configuration with the given ID.
+     * @param idSolverConfig
+     * @param name
+     * @throws Exception
+     */
+    public void updateSolverConfigurationName(int idSolverConfig, String name) throws Exception;
+    
+    /**
      * Returns the ID of the best configuration with cost function @func of the given experiment.
      * Returns 0 if there's no configuration with the given cost function 
      * @param idExperiment
