@@ -1,7 +1,13 @@
 package edacc.parameterspace.test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import edacc.api.API;
+import edacc.api.API.COST_FUNCTIONS;
 import edacc.api.APIImpl;
+import edacc.api.CostFunction;
+import edacc.model.ExperimentResult;
 
 /**
  * random tests
