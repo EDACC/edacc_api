@@ -3,6 +3,7 @@ package edacc.api;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -20,36 +21,6 @@ import edacc.parameterspace.graph.ParameterGraph;
  * 
  */
 public interface API {
-    public enum COST_FUNCTIONS {
-        // Enumeration of cost functions.
-        // This enumeration (i.e. the values of the toString methods)
-        // should match the enumeration specified in the database schema
-        AVERAGE {
-            @Override
-            public String toString() { return "average"; }
-        },
-        MIN {
-            @Override
-            public String toString() { return "min"; }
-        },
-        PAR10 {
-            @Override
-            public String toString() { return "par10"; }
-        },
-        PAR1 {
-            @Override
-            public String toString() { return "par1"; }
-        },
-        PAR7 {
-            @Override
-            public String toString() { return "par7"; }
-        },
-        MEDIAN {
-            @Override
-            public String toString() { return "median"; }
-        },
-    }
-    
     /**
      * Establishes the database connection.
      * @param hostname
@@ -278,4 +249,112 @@ public interface API {
      * @throws FileNotFoundException
      */
     public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws Exception;
+    
+    /**
+     * Cost functions enumeration. Each cost function also implements a method to calculate
+     * its value given a list of experiment results.
+     */
+    public enum COST_FUNCTIONS implements CostFunction {
+        // Enumeration of cost functions.
+        // This enumeration (i.e. the values of the toString methods)
+        // should match the enumeration specified in the database schema
+        AVERAGE {
+            @Override
+            public String toString() { return "average"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                float sum = 0.0f;
+                if (results.size() == 0) return 0;
+                for (ExperimentResult res: results) sum += res.getResultTime();
+                return sum / results.size();
+            }
+        },
+        MIN {
+            @Override
+            public String toString() { return "min"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                if (results.size() == 0) return 0;
+                float min = Float.MAX_VALUE;
+                for (ExperimentResult res: results) {
+                    min = Math.min(min, res.getResultTime());
+                }
+                return min;
+            }
+        },
+        PAR10 {
+            @Override
+            public String toString() { return "par10"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                float sum = 0.0f;
+                if (results.size() == 0) return 0;
+                for (ExperimentResult res: results) {
+                    if (res.getStatus().getStatusCode() == 1 &&
+                        String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
+                        sum += res.getResultTime();
+                    } else {
+                        sum += res.getCPUTimeLimit() * 10.0f;
+                    }
+                }
+                return sum / results.size();
+            }
+        },
+        PAR1 {
+            @Override
+            public String toString() { return "par1"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                float sum = 0.0f;
+                if (results.size() == 0) return 0;
+                for (ExperimentResult res: results) {
+                    if (res.getStatus().getStatusCode() == 1 &&
+                        String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
+                        sum += res.getResultTime();
+                    } else {
+                        sum += res.getCPUTimeLimit();
+                    }
+                }
+                return sum / results.size();
+            }
+        },
+        PAR7 {
+            @Override
+            public String toString() { return "par7"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                float sum = 0.0f;
+                if (results.size() == 0) return 0;
+                for (ExperimentResult res: results) {
+                    if (res.getStatus().getStatusCode() == 1 &&
+                        String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
+                        sum += res.getResultTime();
+                    } else {
+                        sum += res.getCPUTimeLimit() * 7.0f;
+                    }
+                }
+                return sum / results.size();
+            }
+        },
+        MEDIAN {
+            @Override
+            public String toString() { return "median"; }
+
+            @Override
+            public float calculateCost(List<ExperimentResult> results) {
+                if (results.size() == 0) return 0;
+                List<Float> vals = new ArrayList<Float>();
+                for (ExperimentResult res: results) {
+                    vals.add(res.getResultTime());
+                }
+                Collections.sort(vals);
+                return vals.get(vals.size() / 2);
+            }
+        },
+    }
 }
