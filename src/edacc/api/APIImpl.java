@@ -716,7 +716,6 @@ public class APIImpl implements API {
 	    return String.format("%0" + (bytes.length << 1) + "X", bi);
 	}
 
-	@Override
 	public CostFunction costFunctionByName(
 			String databaseRepresentation) {
 		if ("average".equals(databaseRepresentation)) {
@@ -732,5 +731,12 @@ public class APIImpl implements API {
 			}
 		}
 		return null;
+	}
+	
+	public void updateSolverConfigurationName(int idSolverConfig, String name) throws Exception {
+		PreparedStatement ps = db.getConn().prepareStatement("UPDATE SolverConfig SET name = ? WHERE idSolverConfig = ?");
+		ps.setString(1, name);
+		ps.setInt(2, idSolverConfig);
+		ps.executeUpdate();
 	}
 }
