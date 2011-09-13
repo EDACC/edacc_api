@@ -259,6 +259,13 @@ public interface API {
     public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws Exception;
     
     /**
+     * Returns the <code>COST_FUNCTION</code> with the specified name.
+     * @param name the name of the <code>COST_FUNCTION</code>
+     * @return the <code>COST_FUNCTION</code>
+     */
+    public COST_FUNCTIONS getCostFunctionByName(String name);
+    
+    /**
      * Cost functions enumeration. Each cost function also implements a method to calculate
      * its value given a list of experiment results.
      */

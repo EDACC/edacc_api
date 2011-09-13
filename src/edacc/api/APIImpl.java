@@ -725,4 +725,14 @@ public class APIImpl implements API {
 		ps.executeUpdate();
 	}
 
+	@Override
+	public COST_FUNCTIONS getCostFunctionByName(String name) {
+		for (COST_FUNCTIONS func : COST_FUNCTIONS.values()) {
+			if (func.toString().equals(name)) {
+				return func;
+			}
+		}
+		return null;
+	}
+
 }
