@@ -64,6 +64,10 @@ public interface API {
      */
     public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception;
     
+    /**
+     * Removes the solver configuration with the specified id.
+     */
+    public void removeSolverConfig(int idSolverConfig) throws Exception;
 
     /**
      * Creates a new job with the given parameters and marks it as ready for computation.
