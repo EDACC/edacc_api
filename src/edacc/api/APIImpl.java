@@ -723,6 +723,7 @@ public class APIImpl implements API {
 		ps.setString(1, name);
 		ps.setInt(2, idSolverConfig);
 		ps.executeUpdate();
+		ps.close();
 	}
 
 	@Override
@@ -733,6 +734,13 @@ public class APIImpl implements API {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void removeSolverConfig(int idSolverConfig) throws Exception {
+		Statement st = db.getConn().createStatement();
+		st.executeUpdate("DELETE FROM SolverConfig WHERE idSolverConfig = " + idSolverConfig);
+		st.close();
 	}
 
 }
