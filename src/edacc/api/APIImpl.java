@@ -237,6 +237,7 @@ public class APIImpl implements API {
 	    	st.setInt(3, seed);
 	    	st.setInt(4, courseLength);
 	    	st.executeUpdate();
+	    	st.close();
 	    	course.add(new InstanceSeed(instance, seed));
 	    }
 	    InstanceSeed is = course.get(courseLength);
@@ -704,9 +705,17 @@ public class APIImpl implements API {
 		ps.setInt(2, idInstance);
 		ResultSet rs = ps.executeQuery();
 		if (rs.next()) {
-			if (rs.getObject(1) == null) return -1;
+			if (rs.getObject(1) == null) {
+				rs.close();
+				ps.close();
+				return -1;
+			}
+			rs.close();
+			ps.close();
 			return rs.getInt(1);
 		}
+		rs.close();
+		ps.close();
 		return -1;
 	}
 
