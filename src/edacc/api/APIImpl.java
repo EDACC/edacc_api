@@ -21,7 +21,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import edacc.api.API.COST_FUNCTIONS;
+import edacc.api.costfunctions.Average;
+import edacc.api.costfunctions.CostFunction;
+import edacc.api.costfunctions.Median;
+import edacc.api.costfunctions.PARX;
 import edacc.model.*;
 import edacc.parameterspace.domain.*;
 import edacc.parameterspace.graph.ParameterGraph;
@@ -390,10 +393,10 @@ public class APIImpl implements API {
 	 * @param cost
 	 * @param func
 	 */
-	public synchronized void updateSolverConfigurationCost(int idSolverConfig, float cost, COST_FUNCTIONS func) throws Exception {
+	public synchronized void updateSolverConfigurationCost(int idSolverConfig, float cost, CostFunction func) throws Exception {
 		PreparedStatement st = db.getConn().prepareStatement("UPDATE SolverConfig SET cost=?, cost_function=? WHERE idSolverConfig=?");
 		st.setFloat(1, cost);
-		st.setString(2, func.toString());
+		st.setString(2, func.databaseRepresentation());
 		st.setInt(3, idSolverConfig);
 		st.executeUpdate();
 		st.close();
@@ -404,19 +407,15 @@ public class APIImpl implements API {
 	 * @param idSolverConfig
 	 * @return
 	 */
-	public synchronized COST_FUNCTIONS getCostFunction(int idSolverConfig) throws Exception {
+	public synchronized CostFunction getCostFunction(int idSolverConfig) throws Exception {
 		PreparedStatement st = db.getConn().prepareStatement("SELECT cost_function FROM SolverConfig WHERE idSolverConfig=?");
 		st.setInt(1, idSolverConfig);
 		ResultSet rs = st.executeQuery();
 		if (rs.next()) {
 			String func = rs.getString("cost_function");
-			for (COST_FUNCTIONS f: COST_FUNCTIONS.values()) {
-				if (f.equals(func)) {
-					rs.close();
-					st.close();
-					return f;
-				}
-			}
+			rs.close();
+			st.close();
+			return costFunctionByName(func);
 		}
 		rs.close();
 		st.close();
@@ -568,10 +567,10 @@ public class APIImpl implements API {
 	 * @param func
 	 * @return
 	 */
-	public synchronized int getBestConfiguration(int idExperiment, COST_FUNCTIONS func) throws Exception {
+	public synchronized int getBestConfiguration(int idExperiment, CostFunction func) throws Exception {
         PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE Experiment_idExperiment=? AND cost_function=? AND cost IS NOT NULL ORDER BY cost LIMIT 1");
         st.setInt(1, idExperiment);
-        st.setString(2, func.toString());
+        st.setString(2, func.databaseRepresentation());
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
             int id = rs.getInt("idSolverConfig");
@@ -592,10 +591,10 @@ public class APIImpl implements API {
      * @return
      */
     public List<Integer> getBestConfigurations(int idExperiment,
-            COST_FUNCTIONS func, int no) throws Exception {
+    		CostFunction func, int no) throws Exception {
         PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE Experiment_idExperiment=? AND cost_function=? AND cost IS NOT NULL ORDER BY cost LIMIT ?");
         st.setInt(1, idExperiment);
-        st.setString(2, func.toString());
+        st.setString(2, func.databaseRepresentation());
         st.setInt(3, no);
         ResultSet rs = st.executeQuery();
         List<Integer> best = new ArrayList<Integer>(); 
@@ -717,4 +716,21 @@ public class APIImpl implements API {
 	    return String.format("%0" + (bytes.length << 1) + "X", bi);
 	}
 
+	@Override
+	public CostFunction costFunctionByName(
+			String databaseRepresentation) {
+		if ("average".equals(databaseRepresentation)) {
+			return new Average();
+		} else if ("median".equals(databaseRepresentation)) {
+			return new Median();
+		} else if (databaseRepresentation != null && databaseRepresentation.startsWith("par")) {
+			try {
+				int penaltyFactor = Integer.valueOf(databaseRepresentation.substring(3));
+				return new PARX(penaltyFactor);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		return null;
+	}
 }

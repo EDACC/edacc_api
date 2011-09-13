@@ -3,10 +3,12 @@ package edacc.api;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import edacc.api.costfunctions.CostFunction;
 import edacc.model.ExperimentResult;
 import edacc.model.Instance;
 import edacc.parameterspace.ParameterConfiguration;
@@ -20,36 +22,6 @@ import edacc.parameterspace.graph.ParameterGraph;
  * 
  */
 public interface API {
-    public enum COST_FUNCTIONS {
-        // Enumeration of cost functions.
-        // This enumeration (i.e. the values of the toString methods)
-        // should match the enumeration specified in the database schema
-        AVERAGE {
-            @Override
-            public String toString() { return "average"; }
-        },
-        MIN {
-            @Override
-            public String toString() { return "min"; }
-        },
-        PAR10 {
-            @Override
-            public String toString() { return "par10"; }
-        },
-        PAR1 {
-            @Override
-            public String toString() { return "par1"; }
-        },
-        PAR7 {
-            @Override
-            public String toString() { return "par7"; }
-        },
-        MEDIAN {
-            @Override
-            public String toString() { return "median"; }
-        },
-    }
-    
     /**
      * Establishes the database connection.
      * @param hostname
@@ -153,14 +125,14 @@ public interface API {
      * @param cost
      * @param func
      */
-    public void updateSolverConfigurationCost(int idSolverConfig, float cost, COST_FUNCTIONS func) throws Exception;
+    public void updateSolverConfigurationCost(int idSolverConfig, float cost, CostFunction func) throws Exception;
 
     /**
      * Returns the cost function of the given solver configuration as saved in the database
      * @param idSolverConfig
      * @return
      */
-    public COST_FUNCTIONS getCostFunction(int idSolverConfig) throws Exception;
+    public CostFunction getCostFunction(int idSolverConfig) throws Exception;
     
     /**
      * Returns the current cost value of the solver configuration as saved in the database.
@@ -251,7 +223,7 @@ public interface API {
      * @param func
      * @return
      */
-    public int getBestConfiguration(int idExperiment, COST_FUNCTIONS func) throws Exception;
+    public int getBestConfiguration(int idExperiment, CostFunction func) throws Exception;
     
     /**
      * Returns the IDs of the #no best configuration with cost function @func of the given experiment.
@@ -260,7 +232,7 @@ public interface API {
      * @param no how many
      * @return
      */
-    public List<Integer> getBestConfigurations(int idExperiment, COST_FUNCTIONS func, int no) throws Exception;
+    public List<Integer> getBestConfigurations(int idExperiment, CostFunction func, int no) throws Exception;
     
     /**
      * Loads the parameter graph object of the solver binary selected in the configuration experiment
@@ -278,4 +250,12 @@ public interface API {
      * @throws FileNotFoundException
      */
     public ParameterGraph loadParameterGraphFromFile(String xmlFileName) throws Exception;
+   
+    /**
+     * Returns an instance of a cost function from the given database representation,
+     * or null, if no such cost function exists.
+     * @param databaseRepresentation
+     * @return
+     */
+    public CostFunction costFunctionByName(String databaseRepresentation);
 }
