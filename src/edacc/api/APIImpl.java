@@ -710,9 +710,10 @@ public class APIImpl implements API {
 				ps.close();
 				return -1;
 			}
+			int res = rs.getInt(1);
 			rs.close();
 			ps.close();
-			return rs.getInt(1);
+			return res;
 		}
 		rs.close();
 		ps.close();
