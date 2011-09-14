@@ -230,7 +230,7 @@ public class APIImpl implements API {
 	    if (courseLength == course.getLength()) {
 	    	// the instances that are part of the initial course are reused in extension
 	    	Instance instance = course.get(courseLength % course.getInitialLength()).instance;
-	    	int seed = rng.nextInt();
+	    	int seed = rng.nextInt(Integer.MAX_VALUE);
 	    	PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
 	    	st.setInt(1, cs.getId());
 	    	st.setInt(2, instance.getId());
