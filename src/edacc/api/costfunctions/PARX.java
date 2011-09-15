@@ -7,10 +7,17 @@ import edacc.model.ExperimentResult;
 public class PARX implements CostFunction {
 	private int penaltyFactor;
 	
+	/**
+	 * Default constructor initialising the PARX cost function to PAR10.
+	 */
 	public PARX() {
 		this(10);
 	}
 	
+	/**
+	 * Initialises the cost function to PARX with X = <code>penaltyFactor</code>
+	 * @param penaltyFactor
+	 */
 	public PARX(int penaltyFactor) {
 		if (penaltyFactor <= 0) throw new IllegalArgumentException("penalty factor should be greater than 0");
 		this.penaltyFactor = penaltyFactor;
