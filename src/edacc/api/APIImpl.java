@@ -50,7 +50,7 @@ public class APIImpl implements API {
 	 * @return
 	 */
 	public synchronized boolean connect(String hostname, int port, String database, String username, String password) throws Exception {
-		db.connect(hostname, port, username, database, password, false, false, 8, false);
+		db.connect(hostname, port, username, database, password, false, false, 8, false, false);
 		return db.isConnected();
 	}
 	
@@ -266,10 +266,48 @@ public class APIImpl implements API {
 	 * @throws Exception
 	 */
 	public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception {
-	    List<Integer> ids = new ArrayList<Integer>();
-	    for (int i = 0; i < numberRuns; i++) {
-	        ids.add(launchJob(idExperiment, idSolverConfig, cpuTimeLimit[i], rng));
+	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+	    List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+	    Course course = cs.getCourse();
+	    int courseLength = 0;
+	    for (ExperimentResult er: jobs) {
+	        for (int cix = 0; cix < course.getLength(); cix++) {
+	            if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
+	                courseLength += 1;
+	            }
+	        }
 	    }
+	    int oldLength = course.getLength();
+	    if (courseLength + numberRuns > oldLength) {
+	    	// extend course to fit all new runs
+	    	PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
+	    	for (int i = 0; i < courseLength + numberRuns - oldLength; i++) {
+		    	Instance instance = course.get((courseLength + i) % course.getInitialLength()).instance;
+		    	int seed = rng.nextInt(Integer.MAX_VALUE);
+		    	st.setInt(1, cs.getId());
+		    	st.setInt(2, instance.getId());
+		    	st.setInt(3, seed);
+		    	st.setInt(4, oldLength + i);
+		    	st.addBatch();
+		    	course.add(new InstanceSeed(instance, seed));
+	    	}
+	    	st.executeBatch();
+	    	st.close();
+	    }
+		
+	    Map<Integer, Integer> maxRun = new HashMap<Integer, Integer>();
+		ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
+	    for (int i = 0; i < numberRuns; i++) {
+	    	int idInstance = course.get(courseLength + i).instance.getId();
+	    	int seed = course.get(courseLength + i).seed;
+	    	if (!maxRun.containsKey(idInstance)) maxRun.put(idInstance, getCurrentMaxRun(idSolverConfig, idInstance));
+	    	else maxRun.put(idInstance, maxRun.get(idInstance) + 1);
+	    	l.add(ExperimentResultDAO.createExperimentResult(maxRun.get(idInstance) + 1, 0, 0, StatusCode.NOT_STARTED, seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1, -1, -1));
+	    }
+	    ExperimentResultDAO.batchSave(l);
+	
+	    List<Integer> ids = new ArrayList<Integer>();
+	    for (ExperimentResult er: l) ids.add(er.getId());
 	    return ids;
 	}
 	
