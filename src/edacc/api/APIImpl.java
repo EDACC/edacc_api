@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -755,6 +756,47 @@ public class APIImpl implements API {
 	public void removeSolverConfig(int idSolverConfig) throws Exception {
 		Statement st = db.getConn().createStatement();
 		st.executeUpdate("DELETE FROM SolverConfig WHERE idSolverConfig = " + idSolverConfig);
+		st.close();
+	}
+
+	@Override
+	public int getComputationCoreCount(int idExperiment) throws Exception {
+		Statement st = db.getConn().createStatement();
+		ResultSet rs = st.executeQuery("SELECT IFNULL(SUM(Client.numCores), 0) FROM Client JOIN gridQueue ON (idgridQueue = Client.gridQueue_idgridQueue) JOIN Experiment_has_gridQueue ON (idgridQueue = Experiment_has_gridQueue.gridQueue_idgridQueue) WHERE Experiment_idExperiment = " + idExperiment);
+		if (rs.next()) {
+			try {
+				return rs.getInt(1);
+			} finally {
+				rs.close();
+				st.close();
+			}
+		}
+		rs.close();
+		st.close();
+		return 0;
+	}
+
+	@Override
+	public int getComputationJobCount(int idExperiment) throws Exception {
+		Statement st = db.getConn().createStatement();
+		ResultSet rs = st.executeQuery("SELECT COUNT(idJob) FROM ExperimentResults WHERE (status = 0 OR status = -1) AND Experiment_idExperiment = " + idExperiment);
+		if (rs.next()) {
+			try {
+				return rs.getInt(1);
+			} finally {
+				rs.close();
+				st.close();
+			}
+		}
+		rs.close();
+		st.close();
+		return 0;
+	}
+
+	@Override
+	public void setJobPriority(int idJob, int priority) throws Exception {
+		Statement st = db.getConn().createStatement();
+		st.executeUpdate("UPDATE ExperimentResults SET priority = " + priority + " WHERE idJob = " + idJob);
 		st.close();
 	}
 }
