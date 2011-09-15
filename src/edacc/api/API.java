@@ -270,4 +270,31 @@ public interface API {
      * @return
      */
     public CostFunction costFunctionByName(String databaseRepresentation);
+    
+    /**
+     * Returns the number of cores that can be used for the computation for the experiment
+     * specified by <code>idExperiment</code>.
+     * @param idExperiment
+     * @return number of computation cores
+     * @throws Exception
+     */
+    public int getComputationCoreCount(int idExperiment) throws Exception;
+    
+    /**
+     * Returns the number of jobs that have to be computed to finish all jobs in the experiment
+     * specified by <code>idExperiment</code>.<br>
+     * i.e. the number of jobs with status code <code>RUNNING</code> or <code>NOT_STARTED</code>.
+     * @param idExperiment
+     * @return
+     * @throws Exception
+     */
+    public int getComputationJobCount(int idExperiment) throws Exception;
+    
+    /**
+     * Sets the priority of the job specified by <code>idJob</code> to the priority given by <code>priority</code>.
+     * @param idJob
+     * @param priority
+     * @throws Exception
+     */
+    public void setJobPriority(int idJob, int priority) throws Exception;
 }
