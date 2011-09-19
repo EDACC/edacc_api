@@ -18,6 +18,14 @@ public class Median implements CostFunction {
 		Collections.sort(vals);
 		return vals.get(vals.size() / 2);
 	}
+	
+	@Override
+	public float calculateCumulatedCost(List<ExperimentResult> results) {
+		float sum = 0.0f;
+		if (results.size() == 0) return 0;
+		for (ExperimentResult res: results) sum += res.getResultTime();
+		return sum ;
+	}
 
 	@Override
 	public String databaseRepresentation() {

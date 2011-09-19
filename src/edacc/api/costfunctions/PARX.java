@@ -37,6 +37,21 @@ public class PARX implements CostFunction {
 		}
 		return sum / results.size();
 	}
+	
+	@Override
+	public float calculateCumulatedCost(List<ExperimentResult> results) {
+		float sum = 0.0f;
+		if (results.size() == 0) return 0;
+		for (ExperimentResult res: results) {
+			if (res.getStatus().getStatusCode() == 1 &&
+				String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
+				sum += res.getResultTime();
+			} else {
+				sum += res.getCPUTimeLimit() * (float)penaltyFactor;
+			}
+		}
+		return sum;
+	}
 
 	@Override
 	public String databaseRepresentation() {
