@@ -147,7 +147,7 @@ public class APIImpl implements API {
             }
         }
         
-        SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, null, null, toHex(md.digest()));
+        SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, "", null, null, toHex(md.digest()));
 		
 		for (ConfigurationScenarioParameter param: cs.getParameters()) {
 			if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
