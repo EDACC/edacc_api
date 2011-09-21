@@ -3,7 +3,6 @@ package edacc.api;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -69,6 +68,14 @@ public interface API {
      */
     public void removeSolverConfig(int idSolverConfig) throws Exception;
 
+    /**
+     * Returns the solver config ids with the specified hint.
+     * @param idSolverConfig
+     * @return
+     * @throws Exception
+     */
+    public List<Integer> getSolverConfigurations(String hint) throws Exception;
+    
     /**
      * Creates a new job with the given parameters and marks it as ready for computation.
      * @param idExperiment ID of the experiment that should contain the job.
@@ -188,7 +195,7 @@ public interface API {
      * @param idSolverConfig
      * @return
      */
-    public ArrayList<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception;
+    public List<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception;
     
     /**
      * returns the length of the instance-seed course of the configuration experiment
@@ -245,6 +252,14 @@ public interface API {
      * @return
      */
     public List<Integer> getBestConfigurations(int idExperiment, CostFunction func, int no) throws Exception;
+    
+    /**
+     * Returns the IDs of all solver configurations for this experiment.
+     * @param idExperiment
+     * @return
+     * @throws Exception
+     */
+    public List<Integer> getSolverConfigurations(int idExperiment) throws Exception;
     
     /**
      * Loads the parameter graph object of the solver binary selected in the configuration experiment

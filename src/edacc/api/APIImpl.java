@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -836,5 +835,32 @@ public class APIImpl implements API {
 		Statement st = db.getConn().createStatement();
 		st.executeUpdate("UPDATE ExperimentResults SET priority = " + priority + " WHERE idJob = " + idJob);
 		st.close();
+	}
+
+	@Override
+	public List<Integer> getSolverConfigurations(int idExperiment) throws Exception {
+		Statement st = db.getConn().createStatement();
+		ResultSet rs = st.executeQuery("SELECT idSolverConfig FROM SolverConfig WHERE Experiment_idExperiment = " + idExperiment);
+		List<Integer> res = new ArrayList<Integer>();
+		while (rs.next()) {
+			res.add(rs.getInt(1));
+		}
+		rs.close();
+		st.close();
+		return res;
+	}
+
+	@Override
+	public List<Integer> getSolverConfigurations(String hint) throws Exception {
+		PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE hint LIKE ?");
+		st.setString(1, hint);
+		ResultSet rs = st.executeQuery();
+		List<Integer> res = new ArrayList<Integer>();
+		while (rs.next()) {
+			res.add(rs.getInt(1));
+		}
+		rs.close();
+		st.close();
+		return res;
 	}
 }
