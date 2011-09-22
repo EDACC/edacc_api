@@ -70,11 +70,12 @@ public interface API {
 
     /**
      * Returns the solver config ids with the specified hint.
+     * @param idExperiment
      * @param idSolverConfig
      * @return
      * @throws Exception
      */
-    public List<Integer> getSolverConfigurations(String hint) throws Exception;
+    public List<Integer> getSolverConfigurations(int idExperiment, String hint) throws Exception;
     
     /**
      * Creates a new job with the given parameters and marks it as ready for computation.

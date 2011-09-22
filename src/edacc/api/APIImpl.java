@@ -851,9 +851,10 @@ public class APIImpl implements API {
 	}
 
 	@Override
-	public List<Integer> getSolverConfigurations(String hint) throws Exception {
-		PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE hint LIKE ?");
+	public List<Integer> getSolverConfigurations(int idExperiment, String hint) throws Exception {
+		PreparedStatement st = db.getConn().prepareStatement("SELECT idSolverConfig FROM SolverConfig WHERE hint LIKE ? AND Experiment_idExperiment = ?");
 		st.setString(1, hint);
+		st.setInt(2, idExperiment);
 		ResultSet rs = st.executeQuery();
 		List<Integer> res = new ArrayList<Integer>();
 		while (rs.next()) {
