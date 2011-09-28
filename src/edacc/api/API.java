@@ -89,10 +89,28 @@ public interface API {
     public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit) throws Exception;
 
     /**
+     * Creates a new job with the given parameters and marks it as ready for computation.
+     * @param idExperiment ID of the experiment that should contain the job.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param idInstance ID of the instance.
+     * @param seed integer seed that is assigned to the seed parameter of the solver configuration, if the seed parameter was activated.
+     * @param cpuTimeLimit time limit of the job in CPU seconds.
+     * @param priority Priority of the job
+     * @return unique database ID > 0 of the created job, 0 on errors.
+     */
+    public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int priority) throws Exception;
+    
+    /**
      * Creates a new job for the given solver configuration
      * in the instance-seed parcour of the given experiment.
      */
     public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception;
+    
+    /**
+     * Creates a new job for the given solver configuration
+     * in the instance-seed parcour of the given experiment.
+     */
+    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng) throws Exception;
     
     /**
      * Creates numberRuns new jobs for the given solver configuration
@@ -105,6 +123,19 @@ public interface API {
      * @throws Exception
      */
     public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception;
+
+    /**
+     * Creates numberRuns new jobs for the given solver configuration
+     * in the given experiment.
+     * @param idExperiment
+     * @param idSolverConfig
+     * @param cpuTimeLimit
+     * @param numberRuns
+     * @param priority
+     * @return
+     * @throws Exception
+     */
+    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, int[] priority, Random rng) throws Exception;
     
     /**
      * Returns the parameter configuration corresponding to the given solver configuration in the DB.
