@@ -232,6 +232,32 @@ public class APIImpl implements API {
 	    return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, 0, rng);
 	}
 	
+	/**
+	 * Doubles the instance seed course of the given configuration scenario (only to be called internally).
+	 * @param idExperiment
+	 * @param rng
+	 */
+	private synchronized void extendCourse(ConfigurationScenario cs, Random rng) throws Exception {
+	    List<Instance> instances = new ArrayList<Instance>();
+	    for (int i = 0; i < cs.getCourse().getInitialLength(); i++) {
+	        instances.add(cs.getCourse().get(i).instance);
+	    }
+	    Collections.shuffle(instances, rng);
+	    int oldLength = cs.getCourse().getLength();
+	    PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
+	    for (int i = 0; i < cs.getCourse().getInitialLength(); i++) {
+	        int seed = rng.nextInt(Integer.MAX_VALUE);
+            st.setInt(1, cs.getId());
+            st.setInt(2, instances.get(i).getId());
+            st.setInt(3, seed);
+            st.setInt(4, oldLength + i);
+            st.addBatch();
+            cs.getCourse().add(new InstanceSeed(instances.get(i), seed));
+	    }
+	    st.executeUpdate();
+	    st.close();
+	}
+	
     /**
      * Creates a new job for the given solver configuration
      * in the instance-seed parcour of the given experiment.
@@ -250,17 +276,7 @@ public class APIImpl implements API {
             }
         }
         if (courseLength == course.getLength()) {
-            // the instances that are part of the initial course are reused in extension
-            Instance instance = course.get(courseLength % course.getInitialLength()).instance;
-            int seed = rng.nextInt(Integer.MAX_VALUE);
-            PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
-            st.setInt(1, cs.getId());
-            st.setInt(2, instance.getId());
-            st.setInt(3, seed);
-            st.setInt(4, courseLength);
-            st.executeUpdate();
-            st.close();
-            course.add(new InstanceSeed(instance, seed));
+            extendCourse(cs, rng);
         }
         InstanceSeed is = course.get(courseLength);
         return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit, priority);
@@ -315,23 +331,7 @@ public class APIImpl implements API {
                 }
             }
         }
-        int oldLength = course.getLength();
-        if (courseLength + numberRuns > oldLength) {
-            // extend course to fit all new runs
-            PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
-            for (int i = 0; i < courseLength + numberRuns - oldLength; i++) {
-                Instance instance = course.get((courseLength + i) % course.getInitialLength()).instance;
-                int seed = rng.nextInt(Integer.MAX_VALUE);
-                st.setInt(1, cs.getId());
-                st.setInt(2, instance.getId());
-                st.setInt(3, seed);
-                st.setInt(4, oldLength + i);
-                st.addBatch();
-                course.add(new InstanceSeed(instance, seed));
-            }
-            st.executeBatch();
-            st.close();
-        }
+        while (course.getLength() < courseLength + numberRuns) extendCourse(cs, rng);
         
         Map<Integer, Integer> maxRun = new HashMap<Integer, Integer>();
         ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
