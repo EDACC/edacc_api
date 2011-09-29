@@ -79,4 +79,14 @@ public class RealDomain extends Domain {
     public String getName() {
         return name;
     }
+
+    @Override
+    public List<Object> getGaussianDiscreteValues(Random rng, Object value,
+            float stdDevFactor, int numberSamples) {
+        List<Object> vals = new LinkedList<Object>();
+        for (int i = 0; i < numberSamples; i++) {
+            vals.add(mutatedValue(rng, value, stdDevFactor));
+        }
+        return vals;
+    }
 }

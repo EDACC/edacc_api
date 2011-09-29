@@ -75,4 +75,22 @@ public class IntegerDomain extends Domain {
     public String getName() {
         return name;
     }
+
+    @Override
+    public List<Object> getGaussianDiscreteValues(Random rng, Object value, float stdDevFactor,
+            int numberSamples) {
+        if (numberSamples >= (high - low + 1)) {
+            return getDiscreteValues();
+        }
+        List<Object> vals = new LinkedList<Object>();
+        for (int i = 0; i < numberSamples; i++) {
+            if (vals.size() == high - low + 1) break; // sampled all possible values
+            Object val = null;
+            while (val == null || vals.contains(val)) {
+                val = mutatedValue(rng, value, stdDevFactor);
+            }
+            vals.add(mutatedValue(rng, value, stdDevFactor));
+        }
+        return vals;
+    }
 }

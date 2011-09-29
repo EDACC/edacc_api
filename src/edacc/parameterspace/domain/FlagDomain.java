@@ -89,4 +89,10 @@ public class FlagDomain extends Domain {
 		return values;
 	}
 
+    @Override
+    public List<Object> getGaussianDiscreteValues(Random rng, Object value, float stdDevFactor,
+            int numberSamples) {
+        return getDiscreteValues();
+    }
+
 }
