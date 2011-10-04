@@ -95,13 +95,7 @@ public class ParameterConfiguration {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime
-				* result
-				+ ((parameter_instances == null) ? 0 : parameter_instances
-						.hashCode());
-		return result;
+		return java.util.Arrays.hashCode(checksum);
 	}
 
 	@Override

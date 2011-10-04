@@ -403,12 +403,6 @@ public class APIImpl implements API {
 				}
 			}
 		}
-		Random rng = new Random();
-		// set parameters that are not part of the configuration scenario to some
-		// random values since they should not matter (will be replaced by fixed values or not appear at all)
-		for (edacc.parameterspace.Parameter p: pgraph_map.values()) {
-		    if (config.getParameterValue(p) == null) config.setParameterValue(p, p.getDomain().randomValue(rng));
-		}
 		config.updateChecksum();
 		return config;
 	}
