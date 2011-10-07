@@ -864,4 +864,14 @@ public class APIImpl implements API {
 		st.close();
 		return res;
 	}
+
+	@Override
+	public void setSolverConfigurationHint(int idExperiment, int idSolverConfig, String hint) throws Exception {
+		PreparedStatement st = db.getConn().prepareStatement("UPDATE SolverConfig SET hint = ? WHERE Experiment_idExperiment = ? AND idSolverConfig = ?");
+		st.setString(1, hint);
+		st.setInt(2, idExperiment);
+		st.setInt(3, idSolverConfig);
+		st.executeUpdate();
+		st.close();
+	}
 }

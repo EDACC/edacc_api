@@ -78,6 +78,15 @@ public interface API {
     public List<Integer> getSolverConfigurations(int idExperiment, String hint) throws Exception;
     
     /**
+     * Updates the <code>hint</code> of the solver configuration specified by <code>idSolverConfig</code>.
+     * @param idExperiment
+     * @param idSolverConfig
+     * @param hint
+     * @throws Exception
+     */
+    public void setSolverConfigurationHint(int idExperiment, int idSolverConfig, String hint) throws Exception;
+    
+    /**
      * Creates a new job with the given parameters and marks it as ready for computation.
      * @param idExperiment ID of the experiment that should contain the job.
      * @param idSolverConfig ID of the solver configuration.
