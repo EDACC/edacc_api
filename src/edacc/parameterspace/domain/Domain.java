@@ -22,6 +22,8 @@ public abstract class Domain implements Serializable {
 	public abstract Object mutatedValue(Random rng, Object value, float stdDevFactor);
 	
 	public abstract List<Object> getDiscreteValues();
+	
+	public abstract List<Object> getGaussianDiscreteValues(Random rng, Object value, float stdDevFactor, int numberSamples);
         
     public abstract String getName();
 }

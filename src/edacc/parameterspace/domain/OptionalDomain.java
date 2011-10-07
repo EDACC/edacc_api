@@ -56,4 +56,10 @@ public class OptionalDomain extends Domain {
 		values.add(OPTIONS.NOT_SPECIFIED);
 		return values;
 	}
+
+    @Override
+    public List<Object> getGaussianDiscreteValues(Random rng, Object value,
+            float stdDevFactor, int numberSamples) {
+        return getDiscreteValues();
+    }
 }

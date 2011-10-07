@@ -72,4 +72,10 @@ public class MixedDomain extends Domain {
     public String getName() {
         return name;
     }
+
+    @Override
+    public List<Object> getGaussianDiscreteValues(Random rng, Object value,
+            float stdDevFactor, int numberSamples) {
+        return getDiscreteValues();
+    }
 }

@@ -203,46 +203,84 @@ public class APIImpl implements API {
 	 * @return unique database ID > 0 of the created job, 0 on errors.
 	 */
 	public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit) throws Exception {
-		ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(idSolverConfig, idInstance) + 1, 0, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit, -1, -1, -1, -1, -1);
-		ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
-		l.add(job);
-		ExperimentResultDAO.batchSave(l);
-		return job.getId();
+		return launchJob(idExperiment, idSolverConfig, idInstance, seed, cpuTimeLimit, 0);
 	}
+	
+    /**
+     * Creates a new job with the given parameters and marks it as ready for computation.
+     * @param idExperiment ID of the experiment that should contain the job.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param idInstance ID of the instance.
+     * @param seed integer seed that is assigned to the seed parameter of the solver configuration, if the seed parameter was activated.
+     * @param cpuTimeLimit time limit of the job in CPU seconds.
+     * @param priority Priority of the job
+     * @return unique database ID > 0 of the created job, 0 on errors.
+     */
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int priority) throws Exception {
+        ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(idSolverConfig, idInstance) + 1, priority, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit, -1, -1, -1, -1, -1);
+        ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
+        l.add(job);
+        ExperimentResultDAO.batchSave(l);
+        return job.getId();
+    }
 	
 	/**
 	 * Creates a new job for the given solver configuration
 	 * in the instance-seed parcour of the given experiment.
 	 */
 	public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception {
-	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
-	    if (cs == null) return 0;
-	    List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
-	    Course course = cs.getCourse();
-	    int courseLength = 0;
-	    for (ExperimentResult er: jobs) {
-	        for (int cix = 0; cix < course.getLength(); cix++) {
-	            if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
-	                courseLength += 1;
-	            }
-	        }
-	    }
-	    if (courseLength == course.getLength()) {
-	    	// the instances that are part of the initial course are reused in extension
-	    	Instance instance = course.get(courseLength % course.getInitialLength()).instance;
-	    	int seed = rng.nextInt(Integer.MAX_VALUE);
-	    	PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
-	    	st.setInt(1, cs.getId());
-	    	st.setInt(2, instance.getId());
-	    	st.setInt(3, seed);
-	    	st.setInt(4, courseLength);
-	    	st.executeUpdate();
-	    	st.close();
-	    	course.add(new InstanceSeed(instance, seed));
-	    }
-	    InstanceSeed is = course.get(courseLength);
-	    return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit);
+	    return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, 0, rng);
 	}
+	
+	/**
+	 * Doubles the instance seed course of the given configuration scenario (only to be called internally).
+	 * @param idExperiment
+	 * @param rng
+	 */
+	private synchronized void extendCourse(ConfigurationScenario cs, Random rng) throws Exception {
+	    List<Instance> instances = new ArrayList<Instance>();
+	    for (int i = 0; i < cs.getCourse().getInitialLength(); i++) {
+	        instances.add(cs.getCourse().get(i).instance);
+	    }
+	    Collections.shuffle(instances, rng);
+	    int oldLength = cs.getCourse().getLength();
+	    PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
+	    for (int i = 0; i < cs.getCourse().getInitialLength(); i++) {
+	        int seed = rng.nextInt(Integer.MAX_VALUE);
+            st.setInt(1, cs.getId());
+            st.setInt(2, instances.get(i).getId());
+            st.setInt(3, seed);
+            st.setInt(4, oldLength + i);
+            st.addBatch();
+            cs.getCourse().add(new InstanceSeed(instances.get(i), seed));
+	    }
+	    st.executeUpdate();
+	    st.close();
+	}
+	
+    /**
+     * Creates a new job for the given solver configuration
+     * in the instance-seed parcour of the given experiment.
+     */
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng) throws Exception {
+        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        if (cs == null) return 0;
+        List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+        Course course = cs.getCourse();
+        int courseLength = 0;
+        for (ExperimentResult er: jobs) {
+            for (int cix = 0; cix < course.getLength(); cix++) {
+                if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
+                    courseLength += 1;
+                }
+            }
+        }
+        if (courseLength == course.getLength()) {
+            extendCourse(cs, rng);
+        }
+        InstanceSeed is = course.get(courseLength);
+        return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit, priority);
+    }
 	
     /**
      * returns the length of the instance-seed course of the configuration experiment
@@ -266,50 +304,50 @@ public class APIImpl implements API {
 	 * @throws Exception
 	 */
 	public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception {
-	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
-	    List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
-	    Course course = cs.getCourse();
-	    int courseLength = 0;
-	    for (ExperimentResult er: jobs) {
-	        for (int cix = 0; cix < course.getLength(); cix++) {
-	            if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
-	                courseLength += 1;
-	            }
-	        }
-	    }
-	    int oldLength = course.getLength();
-	    if (courseLength + numberRuns > oldLength) {
-	    	// extend course to fit all new runs
-	    	PreparedStatement st = DatabaseConnector.getInstance().getConn().prepareStatement("INSERT INTO Course (ConfigurationScenario_idConfigurationScenario, Instances_idInstance, seed, `order`) VALUES (?, ?, ?, ?)");
-	    	for (int i = 0; i < courseLength + numberRuns - oldLength; i++) {
-		    	Instance instance = course.get((courseLength + i) % course.getInitialLength()).instance;
-		    	int seed = rng.nextInt(Integer.MAX_VALUE);
-		    	st.setInt(1, cs.getId());
-		    	st.setInt(2, instance.getId());
-		    	st.setInt(3, seed);
-		    	st.setInt(4, oldLength + i);
-		    	st.addBatch();
-		    	course.add(new InstanceSeed(instance, seed));
-	    	}
-	    	st.executeBatch();
-	    	st.close();
-	    }
-		
-	    Map<Integer, Integer> maxRun = new HashMap<Integer, Integer>();
-		ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
-	    for (int i = 0; i < numberRuns; i++) {
-	    	int idInstance = course.get(courseLength + i).instance.getId();
-	    	int seed = course.get(courseLength + i).seed;
-	    	if (!maxRun.containsKey(idInstance)) maxRun.put(idInstance, getCurrentMaxRun(idSolverConfig, idInstance));
-	    	else maxRun.put(idInstance, maxRun.get(idInstance) + 1);
-	    	l.add(ExperimentResultDAO.createExperimentResult(maxRun.get(idInstance) + 1, 0, 0, StatusCode.NOT_STARTED, seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1, -1, -1));
-	    }
-	    ExperimentResultDAO.batchSave(l);
-	
-	    List<Integer> ids = new ArrayList<Integer>();
-	    for (ExperimentResult er: l) ids.add(er.getId());
-	    return ids;
+	    int[] priority = new int[numberRuns];
+	    for (int i = 0; i < numberRuns; i++) priority[i] = 0;
+	    return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, numberRuns, priority, rng);
 	}
+	
+    /**
+     * Creates numberRuns new jobs for the given solver configuration
+     * in the given experiment.
+     * @param idExperiment
+     * @param idSolverConfig
+     * @param cpuTimeLimit
+     * @param numberRuns
+     * @return
+     * @throws Exception
+     */
+    public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, int[] priority, Random rng) throws Exception {
+        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
+        Course course = cs.getCourse();
+        int courseLength = 0;
+        for (ExperimentResult er: jobs) {
+            for (int cix = 0; cix < course.getLength(); cix++) {
+                if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
+                    courseLength += 1;
+                }
+            }
+        }
+        while (course.getLength() < courseLength + numberRuns) extendCourse(cs, rng);
+        
+        Map<Integer, Integer> maxRun = new HashMap<Integer, Integer>();
+        ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
+        for (int i = 0; i < numberRuns; i++) {
+            int idInstance = course.get(courseLength + i).instance.getId();
+            int seed = course.get(courseLength + i).seed;
+            if (!maxRun.containsKey(idInstance)) maxRun.put(idInstance, getCurrentMaxRun(idSolverConfig, idInstance));
+            else maxRun.put(idInstance, maxRun.get(idInstance) + 1);
+            l.add(ExperimentResultDAO.createExperimentResult(maxRun.get(idInstance) + 1, priority[i], 0, StatusCode.NOT_STARTED, seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1, -1, -1));
+        }
+        ExperimentResultDAO.batchSave(l);
+    
+        List<Integer> ids = new ArrayList<Integer>();
+        for (ExperimentResult er: l) ids.add(er.getId());
+        return ids;
+    }
 	
 	/**
 	 * Returns the parameter configuration corresponding to the given solver configuration in the DB.
@@ -364,12 +402,6 @@ public class APIImpl implements API {
 					}
 				}
 			}
-		}
-		Random rng = new Random();
-		// set parameters that are not part of the configuration scenario to some
-		// random values since they should not matter (will be replaced by fixed values or not appear at all)
-		for (edacc.parameterspace.Parameter p: pgraph_map.values()) {
-		    if (config.getParameterValue(p) == null) config.setParameterValue(p, p.getDomain().randomValue(rng));
 		}
 		config.updateChecksum();
 		return config;
