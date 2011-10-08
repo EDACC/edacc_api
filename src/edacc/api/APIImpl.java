@@ -254,7 +254,7 @@ public class APIImpl implements API {
             st.addBatch();
             cs.getCourse().add(new InstanceSeed(instances.get(i), seed));
 	    }
-	    st.executeUpdate();
+	    st.executeBatch();
 	    st.close();
 	}
 	
