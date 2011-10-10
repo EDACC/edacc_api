@@ -147,20 +147,30 @@ public class APIImpl implements API {
         }
         
         SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, "", null, null, toHex(md.digest()));
+		List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
 		
 		for (ConfigurationScenarioParameter param: cs.getParameters()) {
 			if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
-				ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
-				ParameterInstanceDAO.save(pi);
+				ParameterInstance pi = new ParameterInstance();
+				pi.setSolverConfiguration(solver_config);
+				pi.setValue("");
+				pi.setParameter_id(param.getParameter().getId());
+				parameter_instances.add(pi);
 			}
 			else if (!param.isConfigurable()) {
 				if (param.getParameter().getHasValue()) {
-					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, param.getFixedValue());
-					ParameterInstanceDAO.save(pi);
+					ParameterInstance pi = new ParameterInstance();
+					pi.setSolverConfiguration(solver_config);
+					pi.setValue(param.getFixedValue());
+					pi.setParameter_id(param.getParameter().getId());
+					parameter_instances.add(pi);
 				}
 				else { // flag
-					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, "");
-					ParameterInstanceDAO.save(pi);
+					ParameterInstance pi = new ParameterInstance();
+					pi.setSolverConfiguration(solver_config);
+					pi.setValue("");
+					pi.setParameter_id(param.getParameter().getId());
+					parameter_instances.add(pi);
 				}
 			}
 			else if (param.isConfigurable()) {
@@ -184,11 +194,16 @@ public class APIImpl implements API {
 				if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param))) continue;
 				else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param))) continue;
 				else {
-					ParameterInstance pi = ParameterInstanceDAO.createParameterInstance(param.getParameter().getId(), solver_config, config.getParameterValue(config_param).toString());
-					ParameterInstanceDAO.save(pi);
+					ParameterInstance pi = new ParameterInstance();
+					pi.setSolverConfiguration(solver_config);
+					pi.setValue(config.getParameterValue(config_param).toString());
+					pi.setParameter_id(param.getParameter().getId());
+					parameter_instances.add(pi);
 				}
 			}
 		}
+		
+		ParameterInstanceDAO.saveBatch(parameter_instances);
 		
 		return solver_config.getId();
 	}
