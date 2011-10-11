@@ -39,6 +39,9 @@ import edacc.parameterspace.ParameterConfiguration;
  */
 public class APIImpl implements API {
 	private static DatabaseConnector db = DatabaseConnector.getInstance();
+	private Map<Integer, ConfigurationScenario> csCache = new HashMap<Integer, ConfigurationScenario>();
+	private Map<Integer, ParameterGraph> pgCache = new HashMap<Integer, ParameterGraph>();
+	private Map<Integer, SolverBinaries> sbCache = new HashMap<Integer, SolverBinaries>();
 
 	/**
 	 * Establishes the database connection.
@@ -58,6 +61,9 @@ public class APIImpl implements API {
 	 * Closes the database connection.
 	 */
 	public synchronized void disconnect() {
+		csCache.clear();
+		pgCache.clear();
+		sbCache.clear();
 		db.disconnect();
 	}
 	
@@ -71,7 +77,7 @@ public class APIImpl implements API {
 	 * @throws Exception
 	 */
 	public synchronized String getCanonicalName(int idExperiment, ParameterConfiguration config) throws Exception {
-	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+	    ConfigurationScenario cs = getConfigScenario(idExperiment);
 	    StringBuilder name = new StringBuilder();
 	    List<ConfigurationScenarioParameter> params = cs.getParameters();
 	    Collections.sort(params);
@@ -118,8 +124,8 @@ public class APIImpl implements API {
 	 * @return unique database ID > 0 of the created solver configuration, 0 on errors.
 	 */
 	public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
-		ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
-		SolverBinaries solver_binary = SolverBinariesDAO.getById(cs.getIdSolverBinary());
+		ConfigurationScenario cs = getConfigScenario(idExperiment);
+		SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
 		MessageDigest md = MessageDigest.getInstance("SHA");
 		
         List<ConfigurationScenarioParameter> params = cs.getParameters();
@@ -147,6 +153,8 @@ public class APIImpl implements API {
         }
         
         SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0, name, "", null, null, toHex(md.digest()));
+        SolverConfigurationDAO.clearCache(); // should probably not cache in the first place ...
+        
 		List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
 		
 		for (ConfigurationScenarioParameter param: cs.getParameters()) {
@@ -278,7 +286,7 @@ public class APIImpl implements API {
      * in the instance-seed parcour of the given experiment.
      */
     public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng) throws Exception {
-        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
         if (cs == null) return 0;
         List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
         Course course = cs.getCourse();
@@ -303,7 +311,7 @@ public class APIImpl implements API {
      * @throws Exception
      */
     public int getCourseLength(int idExperiment) throws Exception {
-        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
         if (cs == null) return 0;
         return cs.getCourse().getLength();
     }
@@ -335,7 +343,7 @@ public class APIImpl implements API {
      * @throws Exception
      */
     public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, int[] priority, Random rng) throws Exception {
-        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
         List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
         Course course = cs.getCourse();
         int courseLength = 0;
@@ -370,9 +378,9 @@ public class APIImpl implements API {
 	 * @param idSolverConfig
 	 */
 	public synchronized ParameterConfiguration getParameterConfiguration(int idExperiment, int idSolverConfig) throws Exception {
-		ParameterGraph graph = loadParameterGraphFromDB(idExperiment);
+		ParameterGraph graph = getParamGraph(idExperiment);
 		ParameterConfiguration config = new ParameterConfiguration(graph.getParameterSet());
-		ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+		ConfigurationScenario cs = getConfigScenario(idExperiment);
 		SolverConfiguration solver_config = SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig);
 		if (solver_config == null) return null;
 		
@@ -432,7 +440,7 @@ public class APIImpl implements API {
 	 */
 	public synchronized int exists(int idExperiment, ParameterConfiguration config) throws Exception {
 	    MessageDigest md = MessageDigest.getInstance("SHA");
-        ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
         List<ConfigurationScenarioParameter> params = cs.getParameters();
         Collections.sort(params);
         for (ConfigurationScenarioParameter param: params) {
@@ -596,7 +604,7 @@ public class APIImpl implements API {
 	 * @return
 	 */
 	public synchronized ArrayList<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception {
-		ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+		ConfigurationScenario cs = getConfigScenario(idExperiment);
 		ArrayList<ExperimentResult> orderedResults = new ArrayList<ExperimentResult>();
 		List<ExperimentResult> results = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO.getSolverConfigurationById(idSolverConfig));
 		for (InstanceSeed isp: cs.getCourse().getInstanceSeedList()) {
@@ -700,7 +708,7 @@ public class APIImpl implements API {
 	 * @return parameter graph object providing parameter space methods.
 	 */
 	public synchronized ParameterGraph loadParameterGraphFromDB(int idExperiment) throws Exception {
-	    ConfigurationScenario cs = ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment);
+	    ConfigurationScenario cs = getConfigScenario(idExperiment);
         Statement st = db.getConn().createStatement();
 
         ResultSet rs = st.executeQuery("SELECT serializedGraph FROM ConfigurationScenario JOIN SolverBinaries ON SolverBinaries_idSolverBinary=idSolverBinary JOIN ParameterGraph ON SolverBinaries.idSolver=ParameterGraph.Solver_idSolver WHERE Experiment_idExperiment = " + idExperiment);
@@ -920,5 +928,23 @@ public class APIImpl implements API {
 		st.setInt(3, idSolverConfig);
 		st.executeUpdate();
 		st.close();
+	}
+	
+	private synchronized ConfigurationScenario getConfigScenario(int idExperiment) throws Exception {
+		if (csCache.containsKey(idExperiment)) return csCache.get(idExperiment);
+		csCache.put(idExperiment, ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment));
+		return csCache.get(idExperiment);
+	}
+	
+	private synchronized ParameterGraph getParamGraph(int idExperiment) throws Exception {
+		if (pgCache.containsKey(idExperiment)) return pgCache.get(idExperiment);
+		pgCache.put(idExperiment, loadParameterGraphFromDB(idExperiment));
+		return pgCache.get(idExperiment);
+	}
+	
+	private synchronized SolverBinaries getSolverBinary(int idSolverBinary) throws Exception {
+		if (sbCache.containsKey(idSolverBinary)) return sbCache.get(idSolverBinary);
+		sbCache.put(idSolverBinary, SolverBinariesDAO.getById(idSolverBinary));
+		return sbCache.get(idSolverBinary);
 	}
 }
