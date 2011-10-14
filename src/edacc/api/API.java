@@ -2,7 +2,6 @@ package edacc.api;
 
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -35,14 +34,16 @@ public interface API {
     public boolean connect(String hostname, int port, String database, String username, String password) throws Exception;
 
     /**
-     * Closes the database connection.
+     * Closes the database connection and clears internal caches.
      */
     public void disconnect();
 
     /**
      * Returns a canonical name of the given parameter configuration in the
      * context of the configuration experiment. This means only values that are
-     * to be configured are actually appearing in the name. Example:
+     * to be configured are actually appearing in the name. The name will consist
+     * of parameter prefix - value pairs in ascending order of the parameter names.
+     * Example:
      * "-c 2 -p1 0.4 -p2 0.8"
      * 
      * @param idExperiment
@@ -56,13 +57,13 @@ public interface API {
 
     /**
      * Creates a new solver configuration in the database for the experiment
-     * specified by the idExperiment argument. The solver binary of the
+     * specified by the <code>idExperiment</code> argument. The solver binary of the
      * configuration is determined by the configuration scenario that the user
-     * created in the GUI. The parameters values are assigned by looping over
+     * created in the GUI. The parameter values are assigned by iterating over
      * the parameters that were chosen in the GUI for the configuration
      * scenario. Non-configurable parameters take on the value that the user
-     * specified as "fixed value" while configurable parameters take on the
-     * values that are specified in the ParameterConfiguration config that is
+     * specified as "fixed value" in the GUI, while configurable parameters take on the
+     * values that are specified in the ParameterConfiguration <code>config</code> that is
      * passed to this function.
      * 
      * @param idExperiment
@@ -73,13 +74,14 @@ public interface API {
      *            parameters.
      * @param name
      *            name for the new solver configuration (used to display)
-     * @return unique database ID > 0 of the created solver configuration, 0 on
+     * @return database unique ID > 0 of the created solver configuration, 0 on
      *         errors.
      */
     public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception;
 
     /**
-     * Removes the solver configuration with the specified id.
+     * Removes the solver configuration with the specified ID.
+     * Also removes all jobs and parameters of the solver configuration.
      */
     public void removeSolverConfig(int idSolverConfig) throws Exception;
 
@@ -96,6 +98,10 @@ public interface API {
     /**
      * Updates the <code>hint</code> of the solver configuration specified by
      * <code>idSolverConfig</code>.
+     * Hints can be used by configuration tools to store some
+     * information about the solver configuration in the database. This
+     * hint will also be shown in the GUI.
+     * There's a length limit on the database hint column (currently 1024).
      * 
      * @param idExperiment
      * @param idSolverConfig
@@ -107,6 +113,9 @@ public interface API {
     /**
      * Creates a new job with the given parameters and marks it as ready for
      * computation.
+     * 
+     * It should be ensured by the API user that the instance is actually part
+     * of the experiment, i.e. selected in the GUI.
      * 
      * @param idExperiment
      *            ID of the experiment that should contain the job.
@@ -139,7 +148,8 @@ public interface API {
      * @param cpuTimeLimit
      *            time limit of the job in CPU seconds.
      * @param priority
-     *            Priority of the job
+     *            Priority of the job, only jobs with priority >= 0 will be considered for
+     *            computation.
      * @return unique database ID > 0 of the created job, 0 on errors.
      */
     public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int priority)
@@ -147,39 +157,60 @@ public interface API {
 
     /**
      * Creates a new job for the given solver configuration in the instance-seed
-     * parcour of the given experiment.
+     * course of the given experiment. That means, the job will be created
+     * for the given solver configuration on the next instance and seed slot
+     * of the course.
+     * 
+     * @param idExperiment ID of the experiment that should contain the job.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param cpuTimeLimit time limit of the job in CPU seconds.
+     * @param rng Random number generator instance that should be used to create seeds if the course has to be extended.
+     * @return unique database ID > 0 of the created job, 0 on errors.
+     * @throws Exception
      */
     public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception;
 
     /**
      * Creates a new job for the given solver configuration in the instance-seed
-     * parcour of the given experiment.
+     * course of the given experiment. That means, the job will be created
+     * for the given solver configuration on the next instance and seed slot
+     * of the course.
+     * 
+     * @param idExperiment ID of the experiment that should contain the job.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param cpuTimeLimit time limit of the job in CPU seconds.
+     * @param rng Random number generator instance that should be used to create seeds if the course has to be extended.
+     * @param priority Priority of the job, only jobs with priority >= 0 will be considered for computation.
+     * @return unique database ID > 0 of the created job, 0 on errors.
+     * @throws Exception
      */
     public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng) throws Exception;
 
     /**
      * Creates numberRuns new jobs for the given solver configuration in the
-     * given experiment.
+     * instance-seed course of the experiment.
      * 
-     * @param idExperiment
-     * @param idSolverConfig
-     * @param cpuTimeLimit
-     * @param numberRuns
-     * @return
+     * @param idExperiment ID of the experiment that should contain the jobs.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param cpuTimeLimit time limits of the jobs in CPU seconds.
+     * @param rng Random number generator instance that should be used to create seeds if the course has to be extended.
+     * @param numberRuns how many jobs to generate
+     * @return List of unique database IDs
      * @throws Exception
      */
     public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception;
 
     /**
      * Creates numberRuns new jobs for the given solver configuration in the
-     * given experiment.
+     * instance-seed course of the experiment.
      * 
-     * @param idExperiment
-     * @param idSolverConfig
-     * @param cpuTimeLimit
-     * @param numberRuns
-     * @param priority
-     * @return
+     * @param idExperiment ID of the experiment that should contain the jobs.
+     * @param idSolverConfig ID of the solver configuration.
+     * @param cpuTimeLimit time limits of the jobs in CPU seconds.
+     * @param priority priorities of the jobs.
+     * @param numberRuns how many jobs to generate
+     * @param rng Random number generator instance that should be used to create seeds if the course has to be extended.
+     * @return List of unique database IDs
      * @throws Exception
      */
     public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, int[] priority, Random rng)
@@ -218,6 +249,8 @@ public interface API {
      * Updates the cost of the given solver configuration. The cost function is
      * also saved in the table.
      * 
+     * The API user is responsible for keeping this value updated.
+     * 
      * @param idSolverConfig
      * @param cost
      * @param func
@@ -228,6 +261,8 @@ public interface API {
      * Returns the cost function of the given solver configuration as saved in
      * the database
      * 
+     * The API user is responsible for keeping this value updated.
+     * 
      * @param idSolverConfig
      * @return
      */
@@ -236,6 +271,8 @@ public interface API {
     /**
      * Returns the current cost value of the solver configuration as saved in
      * the database. Can return null if the DB value is NULL.
+     * 
+     * The API user is responsible for keeping this value updated.
      * 
      * @param idSolverConfig
      * @return
@@ -267,7 +304,12 @@ public interface API {
     public ExperimentResult killJob(int idJob) throws Exception;
 
     /**
-     * Deletes a job no matter its computation status.
+     * Immediately deletes a job no matter its computation status.
+     * If the job is currently being computed by some client
+     * a message will be sent to the client to stop the computation.
+     * 
+     * This method does not block to wait until the job is killed. There are no
+     * guarantees about the time it takes to kill a running job.
      * 
      * @param idJob
      *            ID of the job to delete.
@@ -276,7 +318,7 @@ public interface API {
     public boolean deleteResult(int idJob) throws Exception;
 
     /**
-     * reset the job with the given ID to "not started".
+     * Reset the job with the given ID to "not started".
      * 
      * @param idJob
      * @throws Exception
