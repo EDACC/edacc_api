@@ -165,7 +165,7 @@ public class ParameterGraph {
 	private boolean valuesEqual(Object v1, Object v2) {
 		if (v1 instanceof Double || v1 instanceof Float) {
 			if (!(v2 instanceof Number)) return false;
-			double cur_val = (Double)v2;
+			double cur_val = ((Number)v2).doubleValue();
 			double val = (Double)v1;
 			if (cur_val - 0.00000001 < val && val < cur_val + 0.00000001) return true;
 		}
