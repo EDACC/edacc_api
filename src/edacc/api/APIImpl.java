@@ -357,7 +357,22 @@ public class APIImpl implements API {
                     }
                 }
             } else {
-                config.setParameterValue(parameter_name, param.getFixedValue());
+                if (pgraph_map.get(param.getParameter().getName()).getDomain().contains(param.getFixedValue())) {
+                    // string should be fine for this domain
+                    config.setParameterValue(parameter_name, param.getFixedValue());
+                } else {
+                    try {
+                        int i = Integer.valueOf(param.getFixedValue());
+                        config.setParameterValue(parameter_name, i);
+                    } catch (NumberFormatException e) {
+                        try {
+                            double f = Double.valueOf(param.getFixedValue());
+                            config.setParameterValue(parameter_name, f);
+                        } catch (NumberFormatException e2) {
+                            config.setParameterValue(parameter_name, param.getFixedValue());
+                        }
+                    }
+                }
             }
         }
         config.updateChecksum();
