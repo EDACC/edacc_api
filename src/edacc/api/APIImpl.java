@@ -449,7 +449,8 @@ public class APIImpl implements API {
         st.setInt(1, idSolverConfig);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
-            float cost = rs.getFloat("cost");
+            Float cost = rs.getFloat("cost");
+            if (rs.wasNull()) cost = null;
             rs.close();
             st.close();
             return cost;
