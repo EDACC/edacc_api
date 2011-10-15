@@ -330,6 +330,7 @@ public class APIImpl implements API {
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
             if ("instance".equals(param.getParameter().getName())
                     || "seed".equals(param.getParameter().getName())) continue;
+            if (!pgraph_map.containsKey(param.getParameter().getName())) continue;
             
             String parameter_name = param.getParameter().getName();
             if (param.isConfigurable()) {
