@@ -328,9 +328,11 @@ public class APIImpl implements API {
         Map<String, edacc.parameterspace.Parameter> pgraph_map = graph.getParameterMap();
 
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
-            if (param.isConfigurable() && !"instance".equals(param.getParameter().getName())
-                    && !"seed".equals(param.getParameter().getName())) {
-                String parameter_name = param.getParameter().getName();
+            if ("instance".equals(param.getParameter().getName())
+                    || "seed".equals(param.getParameter().getName())) continue;
+            
+            String parameter_name = param.getParameter().getName();
+            if (param.isConfigurable()) {
                 if (!param.getParameter().getHasValue()) { // this is a flag
                                                            // which is ON in
                                                            // this solver config
@@ -354,6 +356,8 @@ public class APIImpl implements API {
                         }
                     }
                 }
+            } else {
+                config.setParameterValue(parameter_name, param.getFixedValue());
             }
         }
         config.updateChecksum();
@@ -559,7 +563,7 @@ public class APIImpl implements API {
                 ParameterGraph pg = unmarshal(ParameterGraph.class, rs.getBlob("serializedGraph").getBinaryStream());
                 pg.buildAdjacencyList();
 
-                Set<edacc.parameterspace.Parameter> fixedParams = new HashSet<edacc.parameterspace.Parameter>();
+                Map<edacc.parameterspace.Parameter, Object> fixedParams = new HashMap<edacc.parameterspace.Parameter, Object>();
                 List<ConfigurationScenarioParameter> params = cs.getParameters();
                 Collections.sort(params);
                 for (ConfigurationScenarioParameter param : params) {
@@ -578,7 +582,7 @@ public class APIImpl implements API {
                             continue;
                         }
 
-                        fixedParams.add(config_param);
+                        fixedParams.put(config_param, param.getFixedValue());
                     }
                 }
                 pg.setFixedParameters(fixedParams);
