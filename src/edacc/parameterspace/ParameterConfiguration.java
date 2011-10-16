@@ -126,7 +126,7 @@ public class ParameterConfiguration {
 				
 				if (parameter_instances.get(p) instanceof Double || parameter_instances.get(p) instanceof Float) {
 					double this_val = (Double)parameter_instances.get(p);
-					double other_val = (Double)other.getParameterValue(p);
+					double other_val = ((Number)other.getParameterValue(p)).doubleValue();
 					if (!(other_val - 0.00000001 < this_val && this_val < other_val + 0.00000001)) return false;
 				}
 				else if (!parameter_instances.get(p).equals(other.getParameterValue(p))) return false;
