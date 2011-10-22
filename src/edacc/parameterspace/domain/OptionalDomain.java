@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("serial")
 public class OptionalDomain extends Domain {
     public static final String name = "Optional";
     @Override

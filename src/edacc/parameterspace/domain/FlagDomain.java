@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+@SuppressWarnings("serial")
 public class FlagDomain extends Domain {
 	protected Set<FLAGS> values;
 
@@ -28,7 +29,8 @@ public class FlagDomain extends Domain {
 		}
 	}
 	
-	private FlagDomain() {
+	@SuppressWarnings("unused")
+    private FlagDomain() {
 		
 	}
 	

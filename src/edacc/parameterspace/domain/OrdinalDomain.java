@@ -4,10 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("serial")
 public class OrdinalDomain extends Domain {
 	protected List<String> ordered_list;
 	public static final String name = "Ordinal";
-	private OrdinalDomain() {
+	
+	@SuppressWarnings("unused")
+    private OrdinalDomain() {
 		
 	}
 	

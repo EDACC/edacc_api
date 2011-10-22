@@ -27,7 +27,8 @@ public class ParameterGraph {
 	private Map<Node, List<Edge>> adjacent_edges; // internal adjacency list
 	private Map<Parameter, Object> fixedParameters;
 	
-	private ParameterGraph() {
+	@SuppressWarnings("unused")
+    private ParameterGraph() {
 	    this.fixedParameters = new HashMap<Parameter, Object>();
 	}
 
@@ -82,7 +83,7 @@ public class ParameterGraph {
 		return nodes;
 	}
 	
-	private Set<Node> preceedingNodes(OrNode node) {
+	/*private Set<Node> preceedingNodes(OrNode node) {
 		Set<Node> nodes = new HashSet<Node>();
 		for (Node n: this.nodes) {
 			if (!(n instanceof OrNode)) continue;
@@ -91,7 +92,7 @@ public class ParameterGraph {
 			}
 		}
 		return nodes;
-	}
+	}*/
 	
 	private OrNode preceedingNode(AndNode node) {
 		for (OrNode n: getOrNodes()) {

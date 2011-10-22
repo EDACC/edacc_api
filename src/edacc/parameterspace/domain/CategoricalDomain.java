@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+@SuppressWarnings("serial")
 public class CategoricalDomain extends Domain {
 	protected Set<String> categories;
 	public static final String name = "Categorical";
         
-	private CategoricalDomain() {
+	@SuppressWarnings("unused")
+    private CategoricalDomain() {
 		
 	}
 

@@ -4,10 +4,12 @@ import edacc.parameterspace.Parameter;
 import edacc.parameterspace.domain.Domain;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class AndNode extends Node implements Serializable {
 	protected Domain domain;
 	
-	private AndNode() {
+	@SuppressWarnings("unused")
+    private AndNode() {
 		
 	}
 	

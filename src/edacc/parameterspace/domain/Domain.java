@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+@SuppressWarnings("serial")
 @XmlSeeAlso({ CategoricalDomain.class, FlagDomain.class, IntegerDomain.class,
 		MixedDomain.class, OptionalDomain.class, RealDomain.class,
                 OrdinalDomain.class})

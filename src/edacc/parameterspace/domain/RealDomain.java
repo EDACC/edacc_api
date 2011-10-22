@@ -4,10 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("serial")
 public class RealDomain extends Domain {
 	protected Double low, high;
 	public static final String name = "Real";
-	private RealDomain() {
+	
+	@SuppressWarnings("unused")
+    private RealDomain() {
 		
 	}
 	

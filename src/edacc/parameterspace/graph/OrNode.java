@@ -3,9 +3,11 @@ package edacc.parameterspace.graph;
 import edacc.parameterspace.Parameter;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class OrNode extends Node implements Serializable {
 	
-	private OrNode() {
+	@SuppressWarnings("unused")
+    private OrNode() {
 		
 	}
 	

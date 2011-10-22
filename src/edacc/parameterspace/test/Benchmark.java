@@ -10,7 +10,8 @@ import edacc.parameterspace.graph.ParameterGraph;
 import edacc.util.Pair;
 
 public class Benchmark {
-	public static void main(String... args) throws Exception {
+	@SuppressWarnings("unused")
+    public static void main(String... args) throws Exception {
 		API api = new APIImpl();
 		Random rng = new edacc.util.MersenneTwister(123456789);
 		ParameterGraph graph = api

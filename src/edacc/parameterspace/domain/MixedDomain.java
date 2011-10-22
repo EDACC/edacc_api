@@ -4,10 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("serial")
 public class MixedDomain extends Domain {
 	protected List<Domain> domains;
 	public static final String name = "Mixed";
-	private MixedDomain() {
+	
+	@SuppressWarnings("unused")
+    private MixedDomain() {
 		
 	}
 	

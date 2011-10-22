@@ -473,4 +473,14 @@ public interface API {
      * @throws Exception
      */
     public void setJobPriority(int idJob, int priority) throws Exception;
+    
+    /**
+     * Returns the total amount of CPU time used by the finished jobs of the
+     * given experiment.
+     * 
+     * @param idExperiment
+     * @return
+     * @throws Exception
+     */
+    public float getTotalCPUTime(int idExperiment) throws Exception;
 }

@@ -1,7 +1,6 @@
 package edacc.api;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -11,11 +10,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -31,17 +28,15 @@ import edacc.parameterspace.graph.ParameterGraph;
 import edacc.parameterspace.ParameterConfiguration;
 
 /**
- * EDACC Configurator database API.
- * 
- * This API provides methods to create and retrieve solver configurations and
- * jobs for "configuration experiments" that were created using the EDACC GUI
- * application.
- * 
+ * API implementation
  */
 public class APIImpl implements API {
     private static DatabaseConnector db = DatabaseConnector.getInstance();
+    // internal configuration scenario cache
     private Map<Integer, ConfigurationScenario> csCache = new HashMap<Integer, ConfigurationScenario>();
+    // internal parameter graph cache
     private Map<Integer, ParameterGraph> pgCache = new HashMap<Integer, ParameterGraph>();
+    // internal solver binaries cache
     private Map<Integer, SolverBinaries> sbCache = new HashMap<Integer, SolverBinaries>();
 
     public synchronized boolean connect(String hostname, int port, String database, String username, String password)
@@ -61,6 +56,7 @@ public class APIImpl implements API {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         StringBuilder name = new StringBuilder();
         List<ConfigurationScenarioParameter> params = cs.getParameters();
+        // sort parameters in ascending order of their name
         Collections.sort(params);
         for (ConfigurationScenarioParameter param : params) {
             if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
@@ -102,6 +98,8 @@ public class APIImpl implements API {
         SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
         MessageDigest md = MessageDigest.getInstance("SHA");
 
+        // calculate the checksum of the parameter configuration in the context of the experiment's
+        // configuration scenario, i.e. consider only configurable parameter values.
         List<ConfigurationScenarioParameter> params = cs.getParameters();
         Collections.sort(params);
         for (ConfigurationScenarioParameter param : params) {
@@ -133,7 +131,6 @@ public class APIImpl implements API {
                                              // first place ...
 
         List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
-
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
             ParameterInstance pi = new ParameterInstance();
             if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
@@ -799,5 +796,23 @@ public class APIImpl implements API {
             return sbCache.get(idSolverBinary);
         sbCache.put(idSolverBinary, SolverBinariesDAO.getById(idSolverBinary));
         return sbCache.get(idSolverBinary);
+    }
+
+    public float getTotalCPUTime(int idExperiment) throws Exception {
+        PreparedStatement st = db.getConn().prepareStatement(
+                "SELECT SUM(resultTime) FROM ExperimentResults WHERE Experiment_idExperiment = ? AND status != -1 AND status != 0");
+        st.setInt(1, idExperiment);
+        ResultSet rs = st.executeQuery();  
+        if (rs.next()) {
+            try {
+                return rs.getFloat(1);
+            } finally {
+                rs.close();
+                st.close();
+            }
+        }
+        rs.close();
+        st.close();
+        return 0;
     }
 }

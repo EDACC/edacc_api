@@ -7,7 +7,8 @@ public class Edge {
 	protected Node target;
 	protected int group;
 	
-	private Edge() {
+	@SuppressWarnings("unused")
+    private Edge() {
 		
 	}
 	

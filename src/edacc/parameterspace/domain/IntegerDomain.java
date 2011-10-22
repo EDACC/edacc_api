@@ -4,10 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("serial")
 public class IntegerDomain extends Domain {
 	protected Integer low, high;
 	public static final String name = "Integer";
-	private IntegerDomain() {
+	
+	@SuppressWarnings("unused")
+    private IntegerDomain() {
 		
 	}
 	
