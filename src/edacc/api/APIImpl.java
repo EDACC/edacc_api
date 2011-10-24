@@ -578,6 +578,7 @@ public class APIImpl implements API {
                 pg.buildAdjacencyList();
 
                 Map<edacc.parameterspace.Parameter, Object> fixedParams = new HashMap<edacc.parameterspace.Parameter, Object>();
+                Map<String, edacc.parameterspace.Parameter> pgraph_map = pg.getParameterMap();
                 List<ConfigurationScenarioParameter> params = cs.getParameters();
                 Collections.sort(params);
                 for (ConfigurationScenarioParameter param : params) {
@@ -595,8 +596,24 @@ public class APIImpl implements API {
                         if (config_param == null) {
                             continue;
                         }
-
-                        fixedParams.put(config_param, param.getFixedValue());
+                        
+                        // guess the right type
+                        if (pgraph_map.get(param.getParameter().getName()).getDomain().contains(param.getFixedValue())) {
+                            // string should be fine for this domain
+                            fixedParams.put(config_param, param.getFixedValue());
+                        } else {
+                            try {
+                                int i = Integer.valueOf(param.getFixedValue());
+                                fixedParams.put(config_param, i);
+                            } catch (NumberFormatException e) {
+                                try {
+                                    double f = Double.valueOf(param.getFixedValue());
+                                    fixedParams.put(config_param, f);
+                                } catch (NumberFormatException e2) {
+                                    fixedParams.put(config_param, param.getFixedValue());
+                                }
+                            }
+                        }
                     }
                 }
                 pg.setFixedParameters(fixedParams);
