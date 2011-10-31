@@ -40,7 +40,7 @@ public class ParameterConfiguration {
 				if (parameter_instances.get(p) != null && 
 					!(parameter_instances.get(p) instanceof OptionalDomain.OPTIONS) &&
 					!(parameter_instances.get(p).equals(FlagDomain.FLAGS.OFF))) {
-					md.update(parameter_instances.get(p).toString().getBytes());
+					md.update(getValueRepresentation(parameter_instances.get(p)).getBytes());
 				}
 			}
 			this.checksum = md.digest();
@@ -146,7 +146,7 @@ public class ParameterConfiguration {
 		for (Parameter p: params) {
 			sb.append(p.getName());
 			sb.append(": ");
-			sb.append(parameter_instances.get(p));
+			sb.append(getValueRepresentation(parameter_instances.get(p)));
 			sb.append(" ");
 		}
 		return sb.toString();
@@ -160,5 +160,15 @@ public class ParameterConfiguration {
 		for (Parameter p: other.parameter_instances.keySet()) {
 			parameter_instances.put(p, other.getParameterValue(p));
 		}
+	}
+	
+	public String getValueRepresentation(Object value) {
+	    // return the textual representation of a parameter value
+	    if (value instanceof Float || value instanceof Double) {
+	        String r = String.valueOf(value);
+	        if (!r.contains(".")) r += ".0";
+	        return r;
+	    }
+	    else return value.toString();
 	}
 }

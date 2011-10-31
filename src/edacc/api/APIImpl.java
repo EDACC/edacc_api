@@ -83,7 +83,7 @@ public class APIImpl implements API {
                     name.append(param.getParameter().getPrefix());
                     if (param.getParameter().getSpace())
                         name.append(" ");
-                    name.append(config.getParameterValue(config_param).toString());
+                    name.append(config.getValueRepresentation(config.getParameterValue(config_param)));
                     if (param != params.get(params.size() - 1))
                         name.append(" ");
                 }
@@ -120,7 +120,8 @@ public class APIImpl implements API {
                 if (config.getParameterValue(config_param) != null
                         && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
                         && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
-                    md.update(config.getParameterValue(config_param).toString().getBytes());
+                    md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
+                    
                 }
             }
         }
@@ -163,7 +164,7 @@ public class APIImpl implements API {
                 if (config.getParameterValue(config_param) != null
                         && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
                         && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
-                    md.update(config.getParameterValue(config_param).toString().getBytes());
+                    md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
                 }
 
                 if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
@@ -172,7 +173,7 @@ public class APIImpl implements API {
                     continue;
                 else {
                     pi.setSolverConfiguration(solver_config);
-                    pi.setValue(config.getParameterValue(config_param).toString());
+                    pi.setValue(config.getValueRepresentation(config.getParameterValue(config_param)));
                     pi.setParameter_id(param.getParameter().getId());
                 }
             }
@@ -400,7 +401,7 @@ public class APIImpl implements API {
                 if (config.getParameterValue(config_param) != null
                         && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
                         && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
-                    md.update(config.getParameterValue(config_param).toString().getBytes());
+                    md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
                 }
             }
 
