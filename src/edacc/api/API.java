@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import edacc.api.costfunctions.CostFunction;
+import edacc.model.Course;
 import edacc.model.ExperimentResult;
 import edacc.model.Instance;
 import edacc.parameterspace.ParameterConfiguration;
@@ -483,4 +484,13 @@ public interface API {
      * @throws Exception
      */
     public float getTotalCPUTime(int idExperiment) throws Exception;
+    
+    /**
+     * Returns the Instance-Seed course of the configuration scenario of
+     * the given experiment. Do NOT modify the returned course.
+     * @param idExperiment
+     * @return
+     * @throws Exception
+     */
+    public Course getCourse(int idExperiment) throws Exception;
 }

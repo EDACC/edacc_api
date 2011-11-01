@@ -833,4 +833,9 @@ public class APIImpl implements API {
         st.close();
         return 0;
     }
+
+    @Override
+    public Course getCourse(int idExperiment) throws Exception {
+        return getConfigScenario(idExperiment).getCourse();
+    }
 }
