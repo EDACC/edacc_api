@@ -11,6 +11,7 @@ import java.util.Set;
 
 import edacc.parameterspace.domain.FlagDomain;
 import edacc.parameterspace.domain.OptionalDomain;
+import edacc.parameterspace.domain.RealDomain;
 
 public class ParameterConfiguration {
 	private Map<Parameter, Object> parameter_instances;
@@ -62,6 +63,9 @@ public class ParameterConfiguration {
 		if (!p.getDomain().contains(v)) {
 			throw new IllegalArgumentException("Domain of parameter " + p.getName() + " does not contain the given value " + v + " Domain: " + p.getDomain());
 		}
+        if (p.getDomain() instanceof RealDomain) {
+            if (v instanceof Integer) v = ((Integer)v).floatValue();
+        }
 		parameter_instances.put(p, v);
 	}
 	
@@ -74,6 +78,9 @@ public class ParameterConfiguration {
 		
 		if (!param.getDomain().contains(v)) {
 			throw new IllegalArgumentException("Domain of parameter " + param.getName() + " does not contain the given value " + v + " Domain: " + param.getDomain());
+		}
+		if (param.getDomain() instanceof RealDomain) {
+		    if (v instanceof Integer) v = ((Integer)v).floatValue();
 		}
 		parameter_instances.put(param, v);
 	}
