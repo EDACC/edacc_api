@@ -236,12 +236,13 @@ public class APIImpl implements API {
                 .getSolverConfigurationById(idSolverConfig));
         Course course = cs.getCourse();
         int courseLength = 0;
-        for (ExperimentResult er : jobs) {
-            for (int cix = 0; cix < course.getLength(); cix++) {
-                if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
-                    courseLength += 1;
-                }
+        for (int cix = 0; cix < course.getLength(); cix++) {
+            boolean matchingJob = false;
+            for (ExperimentResult er : jobs) {
+                matchingJob |= er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed;
             }
+            if (!matchingJob) break;
+            courseLength++;
         }
         if (courseLength == course.getLength()) {
             extendCourse(cs, rng);
@@ -272,12 +273,13 @@ public class APIImpl implements API {
                 .getSolverConfigurationById(idSolverConfig));
         Course course = cs.getCourse();
         int courseLength = 0;
-        for (ExperimentResult er : jobs) {
-            for (int cix = 0; cix < course.getLength(); cix++) {
-                if (er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed) {
-                    courseLength += 1;
-                }
+        for (int cix = 0; cix < course.getLength(); cix++) {
+            boolean matchingJob = false;
+            for (ExperimentResult er : jobs) {
+                matchingJob |= er.getInstanceId() == course.get(cix).instance.getId() && er.getSeed() == course.get(cix).seed;
             }
+            if (!matchingJob) break;
+            courseLength++;
         }
         while (course.getLength() < courseLength + numberRuns)
             extendCourse(cs, rng);
