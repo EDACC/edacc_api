@@ -180,7 +180,7 @@ public class APIImpl implements API {
             parameter_instances.add(pi);
         }
 
-        ParameterInstanceDAO.saveBatch(parameter_instances);
+        ParameterInstanceDAO.saveBulk(parameter_instances);
 
         return solver_config.getId();
     }
