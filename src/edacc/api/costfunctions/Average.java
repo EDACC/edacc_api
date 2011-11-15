@@ -6,6 +6,11 @@ import edacc.model.ExperimentResult;
 
 public class Average implements CostFunction {
 	@Override
+	public float singleCost(edacc.model.ExperimentResult job){
+		return job.getResultTime();
+	}
+	
+	@Override
 	public float calculateCost(List<ExperimentResult> results) {
 		float sum = 0.0f;
 		if (results.size() == 0) return 0;
