@@ -79,6 +79,8 @@ public interface API {
      *         errors.
      */
     public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception;
+    
+    public List<Integer> createSolverConfigs(int idExperiment, List<ParameterConfiguration> configs, List<String> names) throws Exception;
 
     /**
      * Removes the solver configuration with the specified ID.

@@ -96,8 +96,8 @@ public class APIImpl implements API {
     public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
+        
         MessageDigest md = MessageDigest.getInstance("SHA");
-
         // calculate the checksum of the parameter configuration in the context of the experiment's
         // configuration scenario, i.e. consider only configurable parameter values.
         List<ConfigurationScenarioParameter> params = cs.getParameters();
@@ -161,12 +161,6 @@ public class APIImpl implements API {
                     continue;
                 }
 
-                if (config.getParameterValue(config_param) != null
-                        && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
-                        && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
-                    md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
-                }
-
                 if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
                     continue;
                 else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param)))
@@ -183,6 +177,128 @@ public class APIImpl implements API {
         ParameterInstanceDAO.saveBulk(parameter_instances);
 
         return solver_config.getId();
+    }
+    
+    public synchronized List<Integer> createSolverConfigs(int idExperiment, List<ParameterConfiguration> configs, List<String> names) throws Exception {
+        if (configs.size() != names.size()) {
+            throw new IllegalArgumentException("Number of configs and names has to be the same");
+        }
+        List<Integer> solverConfigIds = new ArrayList<Integer>();
+        if (configs.isEmpty()) {
+            return solverConfigIds;
+        }
+        try {
+            db.getConn().setAutoCommit(false);
+            ConfigurationScenario cs = getConfigScenario(idExperiment);
+            SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
+            
+            List<SolverConfiguration> solverConfigurations = new ArrayList<SolverConfiguration>();
+            int name_i = 0;
+            for (ParameterConfiguration config: configs) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                // calculate the checksum of the parameter configuration in the context of the experiment's
+                // configuration scenario, i.e. consider only configurable parameter values.
+                List<ConfigurationScenarioParameter> params = cs.getParameters();
+                Collections.sort(params);
+                for (ConfigurationScenarioParameter param : params) {
+                    if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+                        continue;
+                    if (param.isConfigurable()) {
+                        edacc.parameterspace.Parameter config_param = null;
+                        for (edacc.parameterspace.Parameter p : config.getParameter_instances().keySet()) {
+                            if (p.getName().equals(param.getParameter().getName())) {
+                                config_param = p;
+                                break;
+                            }
+                        }
+                        if (config_param == null) {
+                            continue;
+                        }
+    
+                        if (config.getParameterValue(config_param) != null
+                                && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
+                                && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
+                            md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
+                            
+                        }
+                    }
+                }
+                SolverConfiguration solver_config = new SolverConfiguration();
+                solver_config.setHint("");
+                solver_config.setSolverBinary(solver_binary);
+                solver_config.setExperiment_id(idExperiment);
+                solver_config.setSeed_group(0);
+                solver_config.setName(names.get(name_i++));
+                solver_config.setParameter_hash(toHex(md.digest()));
+                solver_config.setCost(null);
+                solver_config.setCost_function(null);
+                solverConfigurations.add(solver_config);
+                
+            }
+            
+            SolverConfigurationDAO.saveAll(solverConfigurations);
+            for (SolverConfiguration sc: solverConfigurations) {
+                solverConfigIds.add(sc.getId());
+            }
+            
+            SolverConfigurationDAO.clearCache();
+            
+            List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
+            int configIx = 0;
+            for (SolverConfiguration solver_config: solverConfigurations) {
+                ParameterConfiguration config = configs.get(configIx++);
+                for (ConfigurationScenarioParameter param : cs.getParameters()) {
+                    ParameterInstance pi = new ParameterInstance();
+                    if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
+                        pi.setSolverConfiguration(solver_config);
+                        pi.setValue("");
+                        pi.setParameter_id(param.getParameter().getId());
+                        
+                    } else if (!param.isConfigurable()) {
+                        if (param.getParameter().getHasValue()) {
+                            pi.setSolverConfiguration(solver_config);
+                            pi.setValue(param.getFixedValue());
+                            pi.setParameter_id(param.getParameter().getId());
+                        } else { // flag
+                            pi.setSolverConfiguration(solver_config);
+                            pi.setValue("");
+                            pi.setParameter_id(param.getParameter().getId());
+                        }
+                    } else if (param.isConfigurable()) {
+                        edacc.parameterspace.Parameter config_param = null;
+                        for (edacc.parameterspace.Parameter p : config.getParameter_instances().keySet()) {
+                            if (p.getName().equals(param.getParameter().getName())) {
+                                config_param = p;
+                                break;
+                            }
+                        }
+                        if (config_param == null) {
+                            continue;
+                        }
+    
+                        if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
+                            continue;
+                        else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param)))
+                            continue;
+                        else {
+                            pi.setSolverConfiguration(solver_config);
+                            pi.setValue(config.getValueRepresentation(config.getParameterValue(config_param)));
+                            pi.setParameter_id(param.getParameter().getId());
+                        }
+                    }
+                    parameter_instances.add(pi);
+                }
+            }
+            
+            ParameterInstanceDAO.saveBulk(parameter_instances);
+        } catch (Exception e) {
+            db.getConn().rollback();
+            throw e;
+        } finally {
+            db.getConn().setAutoCommit(true);
+        }
+        
+        return solverConfigIds;
     }
 
     public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit)
