@@ -194,7 +194,7 @@ public class APIImpl implements API {
             int priority) throws Exception {
         ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(idSolverConfig, idInstance) + 1,
                 priority, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment,
-                idInstance, null, cpuTimeLimit, -1, -1, -1, -1, -1);
+                idInstance, null, cpuTimeLimit, -1, -1, -1);
         ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
         l.add(job);
         ExperimentResultDAO.batchSave(l);
@@ -294,8 +294,7 @@ public class APIImpl implements API {
             else
                 maxRun.put(idInstance, maxRun.get(idInstance) + 1);
             l.add(ExperimentResultDAO.createExperimentResult(maxRun.get(idInstance) + 1, priority[i], 0, StatusCode.NOT_STARTED,
-                    seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1, -1,
-                    -1));
+                    seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1));
         }
         ExperimentResultDAO.batchSave(l);
 
