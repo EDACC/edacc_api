@@ -96,8 +96,76 @@ public class APIImpl implements API {
     public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
-        MessageDigest md = MessageDigest.getInstance("SHA");
 
+        SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0,
+                name, "", null, null, calculateParameterConfigHash(idExperiment, config));
+        SolverConfigurationDAO.clearCache(); // should probably not cache in the
+                                             // first place ...
+
+        List<ParameterInstance> parameter_instances = createParameterInstancesList(idExperiment, solver_config, config);
+
+        ParameterInstanceDAO.saveBulk(parameter_instances);
+
+        return solver_config.getId();
+    }
+    
+    public synchronized List<Integer> createSolverConfigs(int idExperiment, List<ParameterConfiguration> configs, List<String> names) throws Exception {
+        if (configs.size() != names.size()) {
+            throw new IllegalArgumentException("Number of configs and names has to be the same");
+        }
+        List<Integer> solverConfigIds = new ArrayList<Integer>();
+        if (configs.isEmpty()) {
+            return solverConfigIds;
+        }
+        try {
+            db.getConn().setAutoCommit(false);
+            ConfigurationScenario cs = getConfigScenario(idExperiment);
+            SolverBinaries solver_binary = getSolverBinary(cs.getIdSolverBinary());
+            
+            List<SolverConfiguration> solverConfigurations = new ArrayList<SolverConfiguration>();
+            int name_i = 0;
+            for (ParameterConfiguration config: configs) {
+                SolverConfiguration solver_config = new SolverConfiguration();
+                solver_config.setHint("");
+                solver_config.setSolverBinary(solver_binary);
+                solver_config.setExperiment_id(idExperiment);
+                solver_config.setSeed_group(0);
+                solver_config.setName(names.get(name_i++));
+                solver_config.setParameter_hash(calculateParameterConfigHash(idExperiment, config));
+                solver_config.setCost(null);
+                solver_config.setCost_function(null);
+                solverConfigurations.add(solver_config);
+                
+            }
+            
+            SolverConfigurationDAO.saveAll(solverConfigurations);
+            for (SolverConfiguration sc: solverConfigurations) {
+                solverConfigIds.add(sc.getId());
+            }
+            
+            SolverConfigurationDAO.clearCache();
+            
+            List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
+            int configIx = 0;
+            for (SolverConfiguration solver_config: solverConfigurations) {
+                ParameterConfiguration config = configs.get(configIx++);
+                parameter_instances.addAll(createParameterInstancesList(idExperiment, solver_config, config));
+            }
+            
+            ParameterInstanceDAO.saveBulk(parameter_instances);
+        } catch (Exception e) {
+            db.getConn().rollback();
+            throw e;
+        } finally {
+            db.getConn().setAutoCommit(true);
+        }
+        
+        return solverConfigIds;
+    }
+    
+    private synchronized String calculateParameterConfigHash(int idExperiment, ParameterConfiguration config) throws Exception {
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
+        MessageDigest md = MessageDigest.getInstance("SHA");
         // calculate the checksum of the parameter configuration in the context of the experiment's
         // configuration scenario, i.e. consider only configurable parameter values.
         List<ConfigurationScenarioParameter> params = cs.getParameters();
@@ -125,12 +193,12 @@ public class APIImpl implements API {
                 }
             }
         }
-
-        SolverConfiguration solver_config = SolverConfigurationDAO.createSolverConfiguration(solver_binary, idExperiment, 0,
-                name, "", null, null, toHex(md.digest()));
-        SolverConfigurationDAO.clearCache(); // should probably not cache in the
-                                             // first place ...
-
+        
+        return toHex(md.digest());
+    }
+    
+    private synchronized List<ParameterInstance> createParameterInstancesList(int idExperiment, SolverConfiguration solver_config, ParameterConfiguration config) throws Exception {
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
         List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
             ParameterInstance pi = new ParameterInstance();
@@ -161,12 +229,6 @@ public class APIImpl implements API {
                     continue;
                 }
 
-                if (config.getParameterValue(config_param) != null
-                        && !(config.getParameterValue(config_param) instanceof OptionalDomain.OPTIONS)
-                        && !(config.getParameterValue(config_param).equals(FlagDomain.FLAGS.OFF))) {
-                    md.update(config.getValueRepresentation(config.getParameterValue(config_param)).getBytes());
-                }
-
                 if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
                     continue;
                 else if (FlagDomain.FLAGS.OFF.equals(config.getParameterValue(config_param)))
@@ -179,10 +241,7 @@ public class APIImpl implements API {
             }
             parameter_instances.add(pi);
         }
-
-        ParameterInstanceDAO.saveBulk(parameter_instances);
-
-        return solver_config.getId();
+        return parameter_instances;
     }
 
     public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit)

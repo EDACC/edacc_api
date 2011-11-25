@@ -7,7 +7,12 @@ import java.util.List;
 import edacc.model.ExperimentResult;
 
 public class Median implements CostFunction {
-
+	
+	@Override
+	public float singleCost(edacc.model.ExperimentResult job){
+		return job.getResultTime();
+	}
+	
 	@Override
 	public float calculateCost(List<ExperimentResult> results) {
 		if (results.size() == 0)

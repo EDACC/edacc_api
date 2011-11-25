@@ -24,7 +24,16 @@ public class PARX implements CostFunction {
 			throw new IllegalArgumentException("penalty factor should be greater than 0");
 		this.penaltyFactor = penaltyFactor;
 	}
-
+	
+	@Override
+	public float singleCost(edacc.model.ExperimentResult job){
+		if (String.valueOf(job.getResultCode().getResultCode()).startsWith("1")) {
+			return  job.getResultTime();
+		} else {
+			return job.getCPUTimeLimit() * (float) penaltyFactor;
+		}
+	}
+	
 	/**
 	 * Calculates the cost according to a PARX function. Only finished jobs are taken into consideration. 
 	 * Running, not started or crashed jobs are not used for the computation!
