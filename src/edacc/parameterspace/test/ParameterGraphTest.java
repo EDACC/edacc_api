@@ -98,7 +98,7 @@ public class ParameterGraphTest {
 		config.setParameterValue("flag", FlagDomain.FLAGS.ON);
 		config.setParameterValue("method", "hybrid");
 		config.setParameterValue("cat", "1");
-		assertTrue("c1: 5 cat: 1 method: hybrid flag: ON ps: 0.1 prob: null ".equals(config.toString()));
+		assertTrue("c1: 5 cat: 1 method: hybrid flag: ON ps: 0.1 ".equals(config.toString()));
 		
 		List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
 		

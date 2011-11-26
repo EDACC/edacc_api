@@ -19,7 +19,7 @@ public class ParameterConfigurationTest {
 		config.setParameterValue("c1", 5);
 		config.setParameterValue("ps", 0.1);
 		config.setParameterValue("flag", FlagDomain.FLAGS.OFF);
-		assertTrue("c1: 5 cat: null method: null flag: OFF ps: 0.1 prob: null ".equals(config.toString()));
+		assertTrue("c1: 5 flag: OFF ps: 0.1 ".equals(config.toString()));
 		
 		ParameterConfiguration config2 = new ParameterConfiguration(pspace.getParameterSet());
 		config2.setParameterValue("c1", 5);
