@@ -38,10 +38,14 @@ public class APIImpl implements API {
     private Map<Integer, ParameterGraph> pgCache = new HashMap<Integer, ParameterGraph>();
     // internal solver binaries cache
     private Map<Integer, SolverBinaries> sbCache = new HashMap<Integer, SolverBinaries>();
-
     public synchronized boolean connect(String hostname, int port, String database, String username, String password)
             throws Exception {
-        db.connect(hostname, port, username, database, password, false, false, 8, false, false);
+    	return connect(hostname, port, username, database, password, false);
+    }
+    
+    public synchronized boolean connect(String hostname, int port, String database, String username, String password, boolean compress)
+            throws Exception {
+        db.connect(hostname, port, username, database, password, false, compress, 8, false, false);
         return db.isConnected();
     }
 

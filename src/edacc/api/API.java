@@ -33,6 +33,7 @@ public interface API {
      * @return
      */
     public boolean connect(String hostname, int port, String database, String username, String password) throws Exception;
+    public boolean connect(String hostname, int port, String database, String username, String passwd, boolean compress) throws Exception;
 
     /**
      * Closes the database connection and clears internal caches.
