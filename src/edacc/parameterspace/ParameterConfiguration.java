@@ -151,6 +151,7 @@ public class ParameterConfiguration {
 		List<Parameter> params = new ArrayList<Parameter>();
 		params.addAll(parameter_instances.keySet());
 		for (Parameter p: params) {
+		    if (parameter_instances.get(p)== null) continue;
 			sb.append(p.getName());
 			sb.append(": ");
 			sb.append(getValueRepresentation(parameter_instances.get(p)));
