@@ -40,7 +40,7 @@ public class APIImpl implements API {
     private Map<Integer, SolverBinaries> sbCache = new HashMap<Integer, SolverBinaries>();
     public synchronized boolean connect(String hostname, int port, String database, String username, String password)
             throws Exception {
-    	return connect(hostname, port, username, database, password, false);
+    	return connect(hostname, port, database, username, password, false);
     }
     
     public synchronized boolean connect(String hostname, int port, String database, String username, String password, boolean compress)
