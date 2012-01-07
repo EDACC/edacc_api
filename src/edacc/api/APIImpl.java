@@ -403,6 +403,8 @@ public class APIImpl implements API {
                                                            // this solver config
                     config.setParameterValue(parameter_name, FlagDomain.FLAGS.ON);
                 } else { // standard parameter with a value
+                    if (solver_config_param_map.get(param.getParameter().getName()) == null) continue;
+                    
                     String value = solver_config_param_map.get(param.getParameter().getName()).getValue();
                     if (pgraph_map.get(param.getParameter().getName()).getDomain().contains(value)) {
                         // string should be fine for this domain
