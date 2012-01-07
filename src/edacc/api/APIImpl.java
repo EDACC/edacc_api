@@ -232,6 +232,7 @@ public class APIImpl implements API {
                 if (config_param == null) {
                     continue;
                 }
+                if (config.getParameterValue(config_param) == null) continue;
 
                 if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
                     continue;
