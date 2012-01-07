@@ -60,6 +60,11 @@ public class ParameterConfiguration {
 	public void setParameterValue(Parameter p, Object v) {
 		if (!parameter_instances.containsKey(p))
 			throw new IllegalArgumentException("The parameter has to be part of a solver configuration");
+		if (v == null) {
+		    parameter_instances.put(p, null);
+		    return;
+		}
+		
 		if (!p.getDomain().contains(v)) {
 			throw new IllegalArgumentException("Domain of parameter " + p.getName() + " does not contain the given value " + v + " Domain: " + p.getDomain());
 		}
@@ -75,6 +80,10 @@ public class ParameterConfiguration {
 			if (p.getName().equals(parameter_name)) param = p;
 		}
 		if (param == null) return;
+		if (v == null) {
+		    parameter_instances.put(param, null);
+		    return;
+		}
 		
 		if (!param.getDomain().contains(v)) {
 			throw new IllegalArgumentException("Domain of parameter " + param.getName() + " does not contain the given value " + v + " Domain: " + param.getDomain());
