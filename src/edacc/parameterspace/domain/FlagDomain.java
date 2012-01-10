@@ -97,4 +97,9 @@ public class FlagDomain extends Domain {
         return getDiscreteValues();
     }
 
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		return getDiscreteValues();
+	}
+
 }

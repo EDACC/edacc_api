@@ -92,4 +92,16 @@ public class RealDomain extends Domain {
         }
         return vals;
     }
+
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		List<Object> vals = new LinkedList<Object>();
+		double dist = (high - low) / (double) numberSamples;
+		double cur = low;
+		for (int i = 0; i < numberSamples; i++) {
+			vals.add(cur);
+			cur += dist;
+		}
+		return vals;
+	}
 }
