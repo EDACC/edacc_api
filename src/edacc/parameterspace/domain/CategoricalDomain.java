@@ -86,4 +86,9 @@ public class CategoricalDomain extends Domain {
             int numberSamples) {
         return getDiscreteValues();
     }
+
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		return getDiscreteValues();
+	}
 }

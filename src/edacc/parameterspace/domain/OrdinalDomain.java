@@ -92,4 +92,20 @@ public class OrdinalDomain extends Domain {
         }
         return vals;
     }
+
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		if (numberSamples >= ordered_list.size()) {
+			return getDiscreteValues();
+		}
+		double dist = (ordered_list.size() -1) / (double) numberSamples;
+		double cur = 0;
+		List<Object> vals = new LinkedList<Object>();
+		for (int i = 0; i < numberSamples; i++) {
+			if (vals.size() == ordered_list.size()) break;
+			vals.add(ordered_list.get((int) Math.round(cur)));
+			cur += dist;
+		}
+		return vals;
+	}
 }

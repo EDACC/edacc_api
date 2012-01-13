@@ -81,4 +81,9 @@ public class MixedDomain extends Domain {
             float stdDevFactor, int numberSamples) {
         return getDiscreteValues();
     }
+
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		return getDiscreteValues();
+	}
 }

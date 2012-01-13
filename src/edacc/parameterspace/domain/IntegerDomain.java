@@ -96,4 +96,20 @@ public class IntegerDomain extends Domain {
         }
         return vals;
     }
+
+	@Override
+	public List<Object> getUniformDistributedValues(int numberSamples) {
+		if (numberSamples >= (high - low + 1)) {
+			return getDiscreteValues();
+		}
+		List<Object> vals = new LinkedList<Object>();
+		double dist = (high - low + 1) / (double) numberSamples;
+		double cur = low;
+		for (int i = 0; i < numberSamples; i++) {
+			if (vals.size() == high - low + 1) break;
+			vals.add(Math.round(cur));
+			cur += dist;
+		}
+		return vals;
+	}
 }
