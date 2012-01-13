@@ -97,6 +97,26 @@ public class APIImpl implements API {
         }
         return name.toString();
     }
+    
+    public synchronized List<edacc.parameterspace.Parameter> getConfigurableParameters(int idExperiment) throws Exception {
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
+        List<edacc.parameterspace.Parameter> configurableParameters = new ArrayList<edacc.parameterspace.Parameter>();
+        for (ConfigurationScenarioParameter param : cs.getParameters()) {
+            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+                continue;
+            if (param.isConfigurable()) {
+                edacc.parameterspace.Parameter config_param = null;
+                for (edacc.parameterspace.Parameter p : getParamGraph(idExperiment).getParameterSet()) {
+                    if (p.getName().equals(param.getParameter().getName())) {
+                        config_param = p;
+                        break;
+                    }
+                }
+                if (config_param != null) configurableParameters.add(config_param);
+            }
+        }
+        return configurableParameters;
+    }
 
     public synchronized int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);

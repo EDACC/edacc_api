@@ -81,6 +81,14 @@ public interface API {
      */
     public int createSolverConfig(int idExperiment, ParameterConfiguration config, String name) throws Exception;
     
+    /**
+     * Returns a list of all configurable parameters for the parameter graph of the given experiment.
+     * @param idExperiment
+     * @return
+     * @throws Exception
+     */
+    public List<edacc.parameterspace.Parameter> getConfigurableParameters(int idExperiment) throws Exception;
+    
     public List<Integer> createSolverConfigs(int idExperiment, List<ParameterConfiguration> configs, List<String> names) throws Exception;
 
     /**
