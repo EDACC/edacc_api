@@ -108,4 +108,24 @@ public class OrdinalDomain extends Domain {
 		}
 		return vals;
 	}
+
+	@Override
+	public Object getMidValueOrNull(Object o1, Object o2) {
+		int i1 = -1, i2 = -1;
+		for (int i = 0; i < ordered_list.size(); i++) {
+			if (ordered_list.get(i).equals(o1)) {
+				i1 = i;
+			}
+			if (ordered_list.get(i).equals(o2)) {
+				i2 = i;
+			}
+		}
+		if (i1 == i2 || i1 == -1 || i2 == -1)
+			return null;
+		int i = (i1 + i2) / 2;
+		if (i == i1 || i == i2) {
+			return null;
+		}
+		return ordered_list.get(i);
+	}
 }

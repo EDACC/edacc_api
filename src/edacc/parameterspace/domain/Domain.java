@@ -28,5 +28,7 @@ public abstract class Domain implements Serializable {
         
 	public abstract List<Object> getUniformDistributedValues(int numberSamples);
 	
+	public abstract Object getMidValueOrNull(Object o1, Object o2);
+	
     public abstract String getName();
 }

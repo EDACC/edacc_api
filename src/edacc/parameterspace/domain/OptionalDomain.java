@@ -68,4 +68,9 @@ public class OptionalDomain extends Domain {
 	public List<Object> getUniformDistributedValues(int numberSamples) {
 		return getDiscreteValues();
 	}
+
+	@Override
+	public Object getMidValueOrNull(Object o1, Object o2) {
+		return null;
+	}
 }

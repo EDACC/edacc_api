@@ -112,4 +112,18 @@ public class IntegerDomain extends Domain {
 		}
 		return vals;
 	}
+
+	@Override
+	public Object getMidValueOrNull(Object o1, Object o2) {
+		if (!(o1 instanceof Integer) || !(o2 instanceof Integer)) {
+			return null;
+		}
+		Integer i1 = (Integer)o1;
+		Integer i2 = (Integer)o2;
+		Integer mid = (i1 + i2) / 2;
+		if (i1.equals(mid) || i2.equals(mid)) {
+			return null;
+		}
+		return mid;
+	}
 }

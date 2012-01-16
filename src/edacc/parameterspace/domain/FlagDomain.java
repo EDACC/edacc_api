@@ -102,4 +102,9 @@ public class FlagDomain extends Domain {
 		return getDiscreteValues();
 	}
 
+	@Override
+	public Object getMidValueOrNull(Object o1, Object o2) {
+		return null;
+	}
+
 }

@@ -104,4 +104,16 @@ public class RealDomain extends Domain {
 		}
 		return vals;
 	}
+
+	@Override
+	public Object getMidValueOrNull(Object o1, Object o2) {
+		if (!(o1 instanceof Double) || !(o2 instanceof Double))
+			return null;
+		Double d1 = (Double) o1;
+		Double d2 = (Double) o2;
+		if (d1.equals(d2)) {
+			return null;
+		}
+		return (d1+d2) / 2;
+	}
 }
