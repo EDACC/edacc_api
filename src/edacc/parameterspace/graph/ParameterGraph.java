@@ -416,16 +416,16 @@ public class ParameterGraph {
      * In contrast to the other neighbourhood method, real, integer and optionally ordinal parameters
      * are sampled <code>numSamples</code> times according to a gaussian distribution around their
      * current value. The standard deviation of the gaussian is the size of the domain multiplied by 
-     * <code>stdDevFactor</code>.
+     * the standardDeviation factor of each parameter given in the <code>standardDeviation</code> map.
      * @param config The configuration of which the neighbourhood should be generated.
      * @param rng
-     * @param stdDevFactor
+     * @param standardDeviation
      * @param numSamples how many samples should be taken for real, integer and ordinal parameters
      * @param gaussianOrdinal whether to sample ordinal domains according to a gaussian distribution or not
      * @return list of all neighbouring configurations
      */
     public List<ParameterConfiguration> getGaussianNeighbourhood(ParameterConfiguration config,
-            Random rng, float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
+            Random rng, Map<Parameter, Float> standardDeviation, int numSamples, boolean gaussianOrdinal) {
         //Map<Parameter, OrNode> assigned_or_nodes = new HashMap<Parameter, OrNode>();
         Map<Parameter, AndNode> old_assigned_and_nodes = new HashMap<Parameter, AndNode>();
         for (Parameter p: config.getParameter_instances().keySet()) {
@@ -446,7 +446,8 @@ public class ParameterGraph {
                 domain_vals = p.getDomain().getDiscreteValues();
             }
             else {
-                domain_vals = p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDevFactor, numSamples);
+                float stdDev = standardDeviation.get(p);
+                domain_vals = p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDev, numSamples);
             }
              
             for (Object v: domain_vals) {
@@ -559,6 +560,28 @@ public class ParameterGraph {
         return nbh;
     }
 	
+    /**
+     * Returns all parameter configurations that are considered neighbours of the given configuration.
+     * In contrast to the other neighbourhood method, real, integer and optionally ordinal parameters
+     * are sampled <code>numSamples</code> times according to a gaussian distribution around their
+     * current value. The standard deviation of the gaussian is the size of the domain multiplied by 
+     * <code>stdDevFactor</code>.
+     * @param config The configuration of which the neighbourhood should be generated.
+     * @param rng
+     * @param stdDevFactor
+     * @param numSamples how many samples should be taken for real, integer and ordinal parameters
+     * @param gaussianOrdinal whether to sample ordinal domains according to a gaussian distribution or not
+     * @return list of all neighbouring configurations
+     */
+    public List<ParameterConfiguration> getGaussianNeighbourhood(ParameterConfiguration config,
+            Random rng, float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
+        Map<Parameter, Float> standardDeviation = new HashMap<Parameter, Float>();
+        for (Parameter p: config.getParameter_instances().keySet()) {
+            standardDeviation.put(p, stdDevFactor);
+        }
+        return getGaussianNeighbourhood(config, rng, standardDeviation, numSamples, gaussianOrdinal);
+    }
+	
 	/**
 	 * Generates a random neighbour
 	 * TODO: use generalized algorithm instead of the "same-AND-node" constrained neighbourhood. 
@@ -607,7 +630,7 @@ public class ParameterGraph {
      * @return random neighbour of the passed configuration
      */
     public ParameterConfiguration getGaussianRandomNeighbour(ParameterConfiguration config, Random rng,
-            float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
+            Map<Parameter, Float> standardDeviation, int numSamples, boolean gaussianOrdinal) {
         Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
         Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
         Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
@@ -627,7 +650,7 @@ public class ParameterGraph {
         if (!gaussianOrdinal && node.getDomain() instanceof OrdinalDomain) {
             vals = node.getDomain().getDiscreteValues();
         } else {
-            vals = node.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(node.getParameter()), stdDevFactor, numSamples);
+            vals = node.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(node.getParameter()), standardDeviation.get(node.getParameter()), numSamples);
         }
         ParameterConfiguration n = new ParameterConfiguration(config);
         
@@ -642,6 +665,25 @@ public class ParameterGraph {
         }
         n.updateChecksum();
         return n;
+    }
+    
+    /**
+     * Generates a random neighbour where real, integer and ordinal parameters are sampled according
+     * to a gaussian distribution around their old value (see getGaussianNeighbourhood)
+     * TODO: use generalized algorithm instead of the "same-AND-node" constrained neighbourhood. 
+     * @param config The configuration of which a random neighbour should be returned
+     * @param rng Random number generator instance
+     * @return random neighbour of the passed configuration
+     */
+    public ParameterConfiguration getGaussianRandomNeighbour(ParameterConfiguration config, Random rng,
+            float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
+        Map<Parameter, Float> standardDeviation = new HashMap<Parameter, Float>();
+        Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
+        params.removeAll(fixedParameters.keySet());
+        for (Parameter p: params) {
+            standardDeviation.put(p, stdDevFactor);
+        }
+        return getGaussianRandomNeighbour(config, rng, standardDeviation, numSamples, gaussianOrdinal);
     }
 	
 	/**
