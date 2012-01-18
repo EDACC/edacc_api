@@ -99,6 +99,8 @@ public class RealDomain extends Domain {
 		double dist = (high - low) / (double) (numberSamples-1);
 		double cur = low;
 		for (int i = 0; i < numberSamples; i++) {
+			if (i == numberSamples -1)
+				cur = high;
 			vals.add(cur);
 			cur += dist;
 		}
