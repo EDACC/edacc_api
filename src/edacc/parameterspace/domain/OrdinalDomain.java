@@ -61,7 +61,7 @@ public class OrdinalDomain extends Domain {
         double r = rng.nextGaussian() * (ordered_list.size() * stdDevFactor);
         if (-1 < r && r < 0) r = -1; // always mutate at least by one
         else if (0 < r && r < 1) r = 1; 
-        int n = Math.min((int)Math.max(Math.round(ix + r), ordered_list.size()), 0);
+        int n = Math.max((int)Math.min(Math.round(ix + r), ordered_list.size() - 1), 0);
         return ordered_list.get(n);
     }
 	
