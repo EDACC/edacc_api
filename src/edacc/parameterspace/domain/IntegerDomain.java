@@ -103,11 +103,11 @@ public class IntegerDomain extends Domain {
 			return getDiscreteValues();
 		}
 		List<Object> vals = new LinkedList<Object>();
-		double dist = (high - low + 1) / (double) numberSamples;
+		double dist = (high - low) / (double) (numberSamples-1);
 		double cur = low;
 		for (int i = 0; i < numberSamples; i++) {
 			if (vals.size() == high - low + 1) break;
-			vals.add(Math.round(cur));
+			vals.add(new Integer((int) Math.round(cur)));
 			cur += dist;
 		}
 		return vals;
