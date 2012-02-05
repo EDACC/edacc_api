@@ -821,7 +821,7 @@ public class APIImpl implements API {
     public int getComputationJobCount(int idExperiment) throws Exception {
         Statement st = db.getConn().createStatement();
         ResultSet rs = st
-                .executeQuery("SELECT COUNT(idJob) FROM ExperimentResults WHERE (status = 0 OR status = -1) AND Experiment_idExperiment = "
+                .executeQuery("SELECT COUNT(idJob) FROM ExperimentResults WHERE (status = 0 OR status = -1) AND priority >= 0 AND Experiment_idExperiment = "
                         + idExperiment);
         if (rs.next()) {
             try {

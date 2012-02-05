@@ -62,4 +62,12 @@ public class IntegerDomainTest {
 		assertNull(d2.getMidValueOrNull(new Integer(5), new Integer(5)));
 		assertTrue(new Integer(3).equals(d3.getMidValueOrNull(new Integer(2), new Integer(4))));
 	}
+	
+	@Test
+	public void testGetGaussianDiscreteValues() {
+	    Random rng = new MersenneTwister();
+        IntegerDomain d1 = new IntegerDomain(0,1);
+        
+        assertTrue(d1.getGaussianDiscreteValues(rng, 0.5f, 0.1f, 7).size() == 2);
+	}
 }
