@@ -38,6 +38,9 @@ public class APIImpl implements API {
     private Map<Integer, ParameterGraph> pgCache = new HashMap<Integer, ParameterGraph>();
     // internal solver binaries cache
     private Map<Integer, SolverBinaries> sbCache = new HashMap<Integer, SolverBinaries>();
+    // internal experiment cache
+    private Map<Integer, Experiment> expCache = new HashMap<Integer, Experiment>();
+    
     public synchronized boolean connect(String hostname, int port, String database, String username, String password)
             throws Exception {
     	return connect(hostname, port, database, username, password, false);
@@ -270,16 +273,16 @@ public class APIImpl implements API {
         return parameter_instances;
     }
 
-    public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit)
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int wallClockTimeLimit)
             throws Exception {
-        return launchJob(idExperiment, idSolverConfig, idInstance, seed, cpuTimeLimit, 0);
+        return launchJob(idExperiment, idSolverConfig, idInstance, seed, cpuTimeLimit, wallClockTimeLimit, 0);
     }
     
-    public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit,
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int wallClockTimeLimit,
             int priority) throws Exception {
         ExperimentResult job = ExperimentResultDAO.createExperimentResult(getCurrentMaxRun(idSolverConfig, idInstance) + 1,
-                priority, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment,
-                idInstance, null, cpuTimeLimit, -1, -1, -1);
+                priority, 0, StatusCode.NOT_STARTED, seed.intValue(), ResultCode.UNKNOWN, 0, 0, 0, idSolverConfig, idExperiment,
+                idInstance, null, cpuTimeLimit, -1, wallClockTimeLimit, -1);
         ArrayList<ExperimentResult> l = new ArrayList<ExperimentResult>();
         l.add(job);
         ExperimentResultDAO.batchSave(l);
@@ -308,11 +311,11 @@ public class APIImpl implements API {
         st.close();
     }
 
-    public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception {
-        return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, 0, rng);
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int wallClockTimeLimit, Random rng) throws Exception {
+        return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, wallClockTimeLimit, 0, rng);
     }
 
-    public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng)
+    public synchronized int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int wallClockTimeLimit, int priority, Random rng)
             throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         if (cs == null)
@@ -333,7 +336,7 @@ public class APIImpl implements API {
             extendCourse(cs, rng);
         }
         InstanceSeed is = course.get(courseLength);
-        return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit, priority);
+        return launchJob(idExperiment, idSolverConfig, is.instance.getId(), BigInteger.valueOf(is.seed), cpuTimeLimit, wallClockTimeLimit, priority);
     }
 
     public int getCourseLength(int idExperiment) throws Exception {
@@ -343,15 +346,15 @@ public class APIImpl implements API {
         return cs.getCourse().getLength();
     }
 
-    public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns,
+    public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int[] wallClockTimeLimit, int numberRuns,
             Random rng) throws Exception {
         int[] priority = new int[numberRuns];
         for (int i = 0; i < numberRuns; i++)
             priority[i] = 0;
-        return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, numberRuns, priority, rng);
+        return launchJob(idExperiment, idSolverConfig, cpuTimeLimit, wallClockTimeLimit, numberRuns, priority, rng);
     }
 
-    public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns,
+    public synchronized List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int[] wallClockTimeLimit, int numberRuns,
             int[] priority, Random rng) throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         List<ExperimentResult> jobs = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO
@@ -379,7 +382,7 @@ public class APIImpl implements API {
             else
                 maxRun.put(idInstance, maxRun.get(idInstance) + 1);
             l.add(ExperimentResultDAO.createExperimentResult(maxRun.get(idInstance) + 1, priority[i], 0, StatusCode.NOT_STARTED,
-                    seed, ResultCode.UNKNOWN, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, -1, -1));
+                    seed, ResultCode.UNKNOWN, 0, 0, 0, idSolverConfig, idExperiment, idInstance, null, cpuTimeLimit[i], -1, wallClockTimeLimit[i], -1));
         }
         ExperimentResultDAO.batchSave(l);
 
@@ -516,14 +519,15 @@ public class APIImpl implements API {
     }
 
     public synchronized CostFunction getCostFunction(int idSolverConfig) throws Exception {
-        PreparedStatement st = db.getConn().prepareStatement("SELECT cost_function FROM SolverConfig WHERE idSolverConfig=?");
+        PreparedStatement st = db.getConn().prepareStatement("SELECT cost_function, Experiment_idExperiment FROM SolverConfig WHERE idSolverConfig=?");
         st.setInt(1, idSolverConfig);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
             String func = rs.getString("cost_function");
+            int idExperiment = rs.getInt("Experiment_idExperiment");
             rs.close();
             st.close();
-            return costFunctionByName(func);
+            return costFunctionByExperiment(idExperiment, func);
         }
         rs.close();
         st.close();
@@ -767,7 +771,7 @@ public class APIImpl implements API {
         return String.format("%0" + (bytes.length << 1) + "X", bi);
     }
 
-    public CostFunction costFunctionByName(String databaseRepresentation) {
+    /*public CostFunction costFunctionByName(String databaseRepresentation) {
         if ("average".equals(databaseRepresentation)) {
             return new Average();
         } else if ("median".equals(databaseRepresentation)) {
@@ -776,6 +780,24 @@ public class APIImpl implements API {
             try {
                 int penaltyFactor = Integer.valueOf(databaseRepresentation.substring(3));
                 return new PARX(penaltyFactor);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }*/
+    
+    public CostFunction costFunctionByExperiment(int idExperiment, String databaseRepresentation) throws Exception {
+        Experiment exp = getExperiment(idExperiment);
+        Experiment.Cost cost = exp.getDefaultCost();
+        if ("average".equals(databaseRepresentation)) {
+            return new Average(cost, exp.getMinimize());
+        } else if ("median".equals(databaseRepresentation)) {
+            return new Median(cost, exp.getMinimize());
+        } else if (databaseRepresentation != null && databaseRepresentation.startsWith("par")) {
+            try {
+                int penaltyFactor = Integer.valueOf(databaseRepresentation.substring(3));
+                return new PARX(cost, exp.getMinimize(), exp.getCostPenalty(), penaltyFactor);
             } catch (Exception e) {
                 return null;
             }
@@ -888,6 +910,13 @@ public class APIImpl implements API {
             return csCache.get(idExperiment);
         csCache.put(idExperiment, ConfigurationScenarioDAO.getConfigurationScenarioByExperimentId(idExperiment));
         return csCache.get(idExperiment);
+    }
+    
+    private synchronized Experiment getExperiment(int idExperiment) throws Exception {
+        if (expCache.containsKey(idExperiment))
+            return expCache.get(idExperiment);
+        expCache.put(idExperiment, ExperimentDAO.getById(idExperiment));
+        return expCache.get(idExperiment);
     }
 
     private synchronized ParameterGraph getParamGraph(int idExperiment) throws Exception {

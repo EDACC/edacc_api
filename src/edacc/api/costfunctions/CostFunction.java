@@ -33,4 +33,6 @@ public interface CostFunction {
 	 * @return representation string
 	 */
 	public String databaseRepresentation();
+	
+	public boolean getMinimize();
 }

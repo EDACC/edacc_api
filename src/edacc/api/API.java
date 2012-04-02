@@ -142,7 +142,7 @@ public interface API {
      *            time limit of the job in CPU seconds.
      * @return unique database ID > 0 of the created job, 0 on errors.
      */
-    public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit) throws Exception;
+    public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int wallClockTimeLimit) throws Exception;
 
     /**
      * Creates a new job with the given parameters and marks it as ready for
@@ -164,7 +164,7 @@ public interface API {
      *            computation.
      * @return unique database ID > 0 of the created job, 0 on errors.
      */
-    public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int priority)
+    public int launchJob(int idExperiment, int idSolverConfig, int idInstance, BigInteger seed, int cpuTimeLimit, int wallClockTimeLimit, int priority)
             throws Exception;
 
     /**
@@ -180,7 +180,7 @@ public interface API {
      * @return unique database ID > 0 of the created job, 0 on errors.
      * @throws Exception
      */
-    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, Random rng) throws Exception;
+    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int wallClockTimeLimit, Random rng) throws Exception;
 
     /**
      * Creates a new job for the given solver configuration in the instance-seed
@@ -196,7 +196,7 @@ public interface API {
      * @return unique database ID > 0 of the created job, 0 on errors.
      * @throws Exception
      */
-    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int priority, Random rng) throws Exception;
+    public int launchJob(int idExperiment, int idSolverConfig, int cpuTimeLimit, int wallClockTimeLimit, int priority, Random rng) throws Exception;
 
     /**
      * Creates numberRuns new jobs for the given solver configuration in the
@@ -210,7 +210,7 @@ public interface API {
      * @return List of unique database IDs
      * @throws Exception
      */
-    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, Random rng) throws Exception;
+    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int[] wallClockTimeLimit, int numberRuns, Random rng) throws Exception;
 
     /**
      * Creates numberRuns new jobs for the given solver configuration in the
@@ -225,7 +225,7 @@ public interface API {
      * @return List of unique database IDs
      * @throws Exception
      */
-    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int numberRuns, int[] priority, Random rng)
+    public List<Integer> launchJob(int idExperiment, int idSolverConfig, int[] cpuTimeLimit, int[] wallClockTimeLimit, int numberRuns, int[] priority, Random rng)
             throws Exception;
 
     /**
@@ -452,7 +452,16 @@ public interface API {
      * @param databaseRepresentation
      * @return
      */
-    public CostFunction costFunctionByName(String databaseRepresentation);
+    //public CostFunction costFunctionByName(String databaseRepresentation);
+    
+    /**
+     * Returns an instance of a cost function from the given database
+     * representation, or null, if no such cost function exists.
+     * 
+     * @param idExperiment experiment id
+     * @return
+     */
+    public CostFunction costFunctionByExperiment(int idExperiment, String databaseRepresentation) throws Exception;
 
     /**
      * Returns the number of cores that can be used for the computation for the

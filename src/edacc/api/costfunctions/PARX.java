@@ -2,24 +2,35 @@ package edacc.api.costfunctions;
 
 import java.util.List;
 
+import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
 public class PARX implements CostFunction {
 	private int penaltyFactor;
-
-	/**
-	 * Default constructor initialising the PARX cost function to PAR10.
-	 */
-	public PARX() {
-		this(10);
-	}
+    private boolean minimize;
+    private Experiment.Cost costType;
+    private float costPenaltyValue;
+    
+    /**
+     * Default constructor initialising the PARX cost function to PAR10.
+     */
+    public PARX(Experiment.Cost costType, boolean minimize, float costPenaltyValue) {
+        this.minimize = minimize;
+        this.costType = costType;
+        this.costPenaltyValue = costPenaltyValue;
+        penaltyFactor = 10;
+        
+    }
 
 	/**
 	 * Initialises the cost function to PARX with X = <code>penaltyFactor</code>
 	 * 
 	 * @param penaltyFactor
 	 */
-	public PARX(int penaltyFactor) {
+	public PARX(Experiment.Cost costType, boolean minimize, float costPenaltyValue, int penaltyFactor) {
+        this.minimize = minimize;
+        this.costType = costType;
+        this.costPenaltyValue = costPenaltyValue;
 		if (penaltyFactor <= 0)
 			throw new IllegalArgumentException("penalty factor should be greater than 0");
 		this.penaltyFactor = penaltyFactor;
@@ -28,9 +39,19 @@ public class PARX implements CostFunction {
 	@Override
 	public float singleCost(edacc.model.ExperimentResult job){
 		if (String.valueOf(job.getResultCode().getResultCode()).startsWith("1")) {
-			return  job.getResultTime();
+		    if (costType.equals(Experiment.Cost.resultTime))
+		        return job.getResultTime();
+		    else if (costType.equals(Experiment.Cost.wallTime)) 
+		        return job.getWallTime();
+		    else
+		        return job.getCost();
 		} else {
-			return job.getCPUTimeLimit() * (float) penaltyFactor;
+		    if (costType.equals(Experiment.Cost.resultTime))
+		        return job.getCPUTimeLimit() * (float) penaltyFactor;
+		    else if (costType.equals(Experiment.Cost.wallTime)) 
+		        return job.getWallClockTimeLimit() * (float) penaltyFactor;
+		    else
+		        return costPenaltyValue * penaltyFactor;
 		}
 	}
 	
@@ -44,11 +65,9 @@ public class PARX implements CostFunction {
 		if (results.size() == 0)
 			return 0;
 		for (ExperimentResult res : results) {
-			if (String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
-				sum += res.getResultTime();
-			} else {
-				sum += res.getCPUTimeLimit() * (float) penaltyFactor;
-			}
+		    if (res.getStatus().getStatusCode() > 0) {
+		        sum += singleCost(res);
+		    }
 		}
 		return sum / results.size();
 	}
@@ -65,11 +84,7 @@ public class PARX implements CostFunction {
 			return 0;
 		for (ExperimentResult res : results) {
 			if (res.getStatus().getStatusCode() > 0) {
-				if (String.valueOf(res.getResultCode().getResultCode()).startsWith("1")) {
-					sum += res.getResultTime();
-				} else {
-					sum += res.getCPUTimeLimit() * (float) penaltyFactor;
-				}
+			    sum += singleCost(res);
 			}
 		}
 		return sum;
@@ -79,4 +94,9 @@ public class PARX implements CostFunction {
 	public String databaseRepresentation() {
 		return "par" + String.valueOf(penaltyFactor);
 	}
+
+    @Override
+    public boolean getMinimize() {
+        return minimize;
+    }
 }

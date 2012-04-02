@@ -2,12 +2,26 @@ package edacc.api.costfunctions;
 
 import java.util.List;
 
+import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
 public class Average implements CostFunction {
+    private boolean minimize;
+    private Experiment.Cost costType;
+    
+    public Average(Experiment.Cost costType, boolean minimize) {
+        this.minimize = minimize;
+        this.costType = costType;
+    }
+    
 	@Override
 	public float singleCost(edacc.model.ExperimentResult job){
-		return job.getResultTime();
+        if (costType.equals(Experiment.Cost.resultTime)) 
+            return job.getResultTime();
+        else if (costType.equals(Experiment.Cost.wallTime))
+            return job.getWallTime();
+        else
+            return job.getCost();
 	}
 	
 	@Override
@@ -15,7 +29,7 @@ public class Average implements CostFunction {
 		float sum = 0.0f;
 		if (results.size() == 0) return 0;
 		for (ExperimentResult res: results) 
-				sum += res.getResultTime();
+				sum += singleCost(res);
 		return sum / results.size();
 	}
 	@Override
@@ -24,7 +38,7 @@ public class Average implements CostFunction {
 		if (results.size() == 0) return 0;
 		for (ExperimentResult res: results) 
 			if (res.getStatus().getStatusCode() > 0)
-				sum += res.getResultTime();
+				sum += singleCost(res);
 		return sum ;
 	}
 	
@@ -33,4 +47,8 @@ public class Average implements CostFunction {
 		return "average";
 	}
 
+	@Override
+	public boolean getMinimize() {
+	    return minimize;
+	}
 }
