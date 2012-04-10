@@ -797,7 +797,7 @@ public class APIImpl implements API {
         } else if (databaseRepresentation != null && databaseRepresentation.startsWith("par")) {
             try {
                 int penaltyFactor = Integer.valueOf(databaseRepresentation.substring(3));
-                return new PARX(cost, exp.getMinimize(), exp.getCostPenalty(), penaltyFactor);
+                return new PARX(cost, exp.getMinimize(), exp.getCostPenalty() == null ? 0.f : exp.getCostPenalty(), penaltyFactor);
             } catch (Exception e) {
                 return null;
             }

@@ -31,7 +31,7 @@ public class PARX implements CostFunction {
         this.minimize = minimize;
         this.costType = costType;
         this.costPenaltyValue = costPenaltyValue;
-		if (Experiment.Cost.cost.equals(costType) && penaltyFactor <= 0)
+		if (penaltyFactor <= 0)
 			throw new IllegalArgumentException("penalty factor should be greater than 0");
 		this.penaltyFactor = penaltyFactor;
 	}
