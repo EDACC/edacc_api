@@ -955,4 +955,24 @@ public class APIImpl implements API {
     public Course getCourse(int idExperiment) throws Exception {
         return getConfigScenario(idExperiment).getCourse();
     }
+
+	@Override
+	public void setOutput(int idExperiment, String output) throws Exception {
+		PreparedStatement st = db.getConn().prepareStatement(
+				"UPDATE `ConfigurationScenario` SET configuratorOutput = ? WHERE Experiment_idExperiment = ?");
+		st.setString(1, output);
+		st.setInt(2, idExperiment);
+		st.executeUpdate();
+		st.close();
+	}
+
+	@Override
+	public void addOutput(int idExperiment, String text) throws Exception {
+		PreparedStatement st = db.getConn().prepareStatement(
+				"UPDATE `ConfigurationScenario` SET configuratorOutput = CONCAT(configuratorOutput, ?) WHERE Experiment_idExperiment = ?");
+		st.setString(1, text);
+		st.setInt(2, idExperiment);
+		st.executeUpdate();
+		st.close();
+	}
 }

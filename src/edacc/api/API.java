@@ -513,4 +513,20 @@ public interface API {
      * @throws Exception
      */
     public Course getCourse(int idExperiment) throws Exception;
+    
+    /**
+     * Sets the output for this configuration scenario.
+     * @param idExperiment
+     * @param output
+     * @throws Exception
+     */
+    public void setOutput(int idExperiment, String output) throws Exception;
+    
+    /**
+     * Adds some text to the output of this configuration scenario.
+     * @param idExperiment
+     * @param text
+     * @throws Exception
+     */
+    public void addOutput(int idExperiment, String text) throws Exception;
 }
