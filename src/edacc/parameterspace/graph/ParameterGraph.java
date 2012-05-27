@@ -425,7 +425,7 @@ public class ParameterGraph {
      * @return list of all neighbouring configurations
      */
     public List<ParameterConfiguration> getGaussianNeighbourhood(ParameterConfiguration config,
-            Random rng, Map<Parameter, Float> standardDeviation, int numSamples, boolean gaussianOrdinal) {
+            Random rng, Map<Parameter, Float> standardDeviation, int numSamples, Map<Parameter, Float> samplesFactor, boolean gaussianOrdinal) {
         //Map<Parameter, OrNode> assigned_or_nodes = new HashMap<Parameter, OrNode>();
         Map<Parameter, AndNode> old_assigned_and_nodes = new HashMap<Parameter, AndNode>();
         for (Parameter p: config.getParameter_instances().keySet()) {
@@ -447,7 +447,8 @@ public class ParameterGraph {
             }
             else {
                 float stdDev = standardDeviation.get(p);
-                domain_vals = p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDev, numSamples);
+                int samples = Math.round(numSamples * (samplesFactor.get(p) == null ? 1.0f : samplesFactor.get(p)));
+                domain_vals = p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDev, samples);
             }
              
             for (Object v: domain_vals) {
@@ -558,6 +559,15 @@ public class ParameterGraph {
         }
 
         return nbh;
+    }
+    
+    public List<ParameterConfiguration> getGaussianNeighbourhood(ParameterConfiguration config,
+            Random rng, Map<Parameter, Float> standardDeviation, int numSamples, boolean gaussianOrdinal) {
+        Map<Parameter, Float> samplesFactor = new HashMap<Parameter, Float>();
+        for (Parameter p: standardDeviation.keySet()) {
+            samplesFactor.put(p, 1.0f);
+        }
+        return getGaussianNeighbourhood(config, rng, standardDeviation, numSamples, samplesFactor, gaussianOrdinal);
     }
 	
     /**
