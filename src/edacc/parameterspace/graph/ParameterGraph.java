@@ -814,7 +814,33 @@ public class ParameterGraph {
 	}
 	
 	public boolean validateParameterConfiguration(ParameterConfiguration config) {
-		// TODO: implement
-		return false;
+        Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
+        Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
+        Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
+        params.removeAll(fixedParameters.keySet());
+        for (Parameter p: params) {
+            for (AndNode n: getAndNodes()) {
+                if (n == startNode) continue;
+                if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
+                    assigned_or_nodes.add(preceedingNode(n));
+                    assigned_and_nodes.add(n);
+                }
+            }
+        }
+        
+        for (Node n: adjacentNodes(startNode)) {
+            if (!assigned_or_nodes.contains(n)) return false;
+        }
+        
+        assigned_and_nodes.add(startNode);
+        
+        for (OrNode n: assigned_or_nodes) {
+            if (!incomingEdgesDone(n, assigned_and_nodes)) {
+                return false;
+            }
+            
+        }
+
+        return true;
 	}
 }

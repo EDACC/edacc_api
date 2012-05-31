@@ -118,7 +118,6 @@ public class ParameterGraphTest {
 		assertTrue(nbh.contains(nb3));
 		nb3.setParameterValue("c1", 5); // same config
 		assertFalse(nbh.contains(nb3));
-		
 	}
 	
 	@Test
@@ -190,6 +189,43 @@ public class ParameterGraphTest {
             assertTrue(config1.getParameterValue(p).equals(p_val1) || config2.getParameterValue(p).equals(p_val1));
             assertTrue(config1.getParameterValue(p).equals(p_val2) || config2.getParameterValue(p).equals(p_val2));
         }
+	}
+	
+	@Test
+	public void testValidateParameterConfiguration() throws Exception {
+        API api = new APIImpl();
+        ParameterGraph pspace = api.loadParameterGraphFromFile("src/edacc/parameterspace/test/complex.xml");
+        ParameterConfiguration config = new ParameterConfiguration(pspace.getParameterSet());
+        config.setParameterValue("c1", 5);
+        config.setParameterValue("ps", 0.1);
+        config.setParameterValue("flag", FlagDomain.FLAGS.ON);
+        config.setParameterValue("method", "hybrid");
+        config.setParameterValue("cat", "1");
+        
+        assertTrue(pspace.validateParameterConfiguration(config));
+        
+        List<ParameterConfiguration> nbh = pspace.getNeighbourhood(config);
+        
+        ParameterConfiguration nb1 = new ParameterConfiguration(config);        
+        nb1.setParameterValue("method", "atom");
+        assertTrue(nbh.contains(nb1));
+        assertTrue(pspace.validateParameterConfiguration(nb1));
+        
+        ParameterConfiguration nb2 = new ParameterConfiguration(config);
+        nb2.setParameterValue("flag", FlagDomain.FLAGS.OFF);
+        assertFalse(nbh.contains(nb2)); // flag -> off should lead to method and cat being removed
+        assertFalse(pspace.validateParameterConfiguration(nb2));
+        nb2.unsetParameter("cat");
+        nb2.unsetParameter("method");
+        assertTrue(nbh.contains(nb2));
+        assertTrue(pspace.validateParameterConfiguration(nb2));
+        
+        ParameterConfiguration nb3 = new ParameterConfiguration(config);
+        nb3.setParameterValue("c1", 6);
+        assertTrue(nbh.contains(nb3));
+        nb3.setParameterValue("c1", 5); // same config
+        assertFalse(nbh.contains(nb3));
+        assertTrue(pspace.validateParameterConfiguration(nb3));
 	}
 
 }
