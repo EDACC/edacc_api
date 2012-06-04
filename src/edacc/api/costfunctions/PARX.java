@@ -62,14 +62,15 @@ public class PARX implements CostFunction {
 	@Override
 	public float calculateCost(List<ExperimentResult> results) {
 		float sum = 0.0f;
-		if (results.size() == 0)
-			return 0;
+		int count = 0;
 		for (ExperimentResult res : results) {
 		    if (res.getStatus().getStatusCode() > 0) {
 		        sum += singleCost(res);
+		        count ++;
 		    }
 		}
-		return sum / results.size();
+		if (count == 0) return 0.0f;
+		return sum / count;
 	}
 
 	/**
@@ -80,8 +81,6 @@ public class PARX implements CostFunction {
 	public float calculateCumulatedCost(List<ExperimentResult> results) {
 		// TODO: Take into account if the cost or runtime is wanted!
 		float sum = 0.0f;
-		if (results.size() == 0)
-			return 0;
 		for (ExperimentResult res : results) {
 			if (res.getStatus().getStatusCode() > 0) {
 			    sum += singleCost(res);
