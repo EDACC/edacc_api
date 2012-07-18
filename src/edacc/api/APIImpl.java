@@ -41,6 +41,23 @@ public class APIImpl implements API {
     // internal experiment cache
     private Map<Integer, Experiment> expCache = new HashMap<Integer, Experiment>();
     
+    public static final String[] constSolverParameters = {"instance", "seed", "tempdir", "db_host", "db_port", "db_db", "db_username", "db_password"};
+    /**
+     * Checks if the given parameter name is a 'magic' solver parameter.
+     * @param parameterName
+     * @return true, iff <code>parameterName</code> is a 'magic' solver parameter name.
+     */
+    public static boolean isMagicSolverParameter(String parameterName) {
+        for (String p : constSolverParameters) {
+            if (p.equals(parameterName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    
     public synchronized boolean connect(String hostname, int port, String database, String username, String password)
             throws Exception {
     	return connect(hostname, port, database, username, password, false);
@@ -66,7 +83,7 @@ public class APIImpl implements API {
         // sort parameters in ascending order of their name
         Collections.sort(params);
         for (ConfigurationScenarioParameter param : params) {
-            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+            if (isMagicSolverParameter(param.getParameter().getName()))
                 continue;
             if (param.isConfigurable()) {
                 edacc.parameterspace.Parameter config_param = null;
@@ -105,7 +122,7 @@ public class APIImpl implements API {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         List<edacc.parameterspace.Parameter> configurableParameters = new ArrayList<edacc.parameterspace.Parameter>();
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
-            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+            if (isMagicSolverParameter(param.getParameter().getName()))
                 continue;
             if (param.isConfigurable()) {
                 edacc.parameterspace.Parameter config_param = null;
@@ -199,7 +216,7 @@ public class APIImpl implements API {
         List<ConfigurationScenarioParameter> params = cs.getParameters();
         Collections.sort(params);
         for (ConfigurationScenarioParameter param : params) {
-            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+            if (isMagicSolverParameter(param.getParameter().getName()))
                 continue;
             if (param.isConfigurable()) {
                 edacc.parameterspace.Parameter config_param = null;
@@ -230,7 +247,7 @@ public class APIImpl implements API {
         List<ParameterInstance> parameter_instances = new ArrayList<ParameterInstance>();
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
             ParameterInstance pi = new ParameterInstance();
-            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName())) {
+            if (isMagicSolverParameter(param.getParameter().getName())) {
                 pi.setSolverConfiguration(solver_config);
                 pi.setValue("");
                 pi.setParameter_id(param.getParameter().getId());
@@ -415,8 +432,7 @@ public class APIImpl implements API {
         Map<String, edacc.parameterspace.Parameter> pgraph_map = graph.getParameterMap();
 
         for (ConfigurationScenarioParameter param : cs.getParameters()) {
-            if ("instance".equals(param.getParameter().getName())
-                    || "seed".equals(param.getParameter().getName())) continue;
+            if (isMagicSolverParameter(param.getParameter().getName())) continue;
             if (!pgraph_map.containsKey(param.getParameter().getName())) continue;
             
             String parameter_name = param.getParameter().getName();
@@ -475,7 +491,7 @@ public class APIImpl implements API {
         List<ConfigurationScenarioParameter> params = cs.getParameters();
         Collections.sort(params);
         for (ConfigurationScenarioParameter param : params) {
-            if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+            if (isMagicSolverParameter(param.getParameter().getName()))
                 continue;
             if (param.isConfigurable()) {
                 edacc.parameterspace.Parameter config_param = null;
@@ -675,7 +691,7 @@ public class APIImpl implements API {
                 List<ConfigurationScenarioParameter> params = cs.getParameters();
                 Collections.sort(params);
                 for (ConfigurationScenarioParameter param : params) {
-                    if ("instance".equals(param.getParameter().getName()) || "seed".equals(param.getParameter().getName()))
+                    if (isMagicSolverParameter(param.getParameter().getName()))
                         continue;
                     if (!param.isConfigurable()) {
                         // fixed parameter
