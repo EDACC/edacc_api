@@ -64,7 +64,7 @@ public class PARX implements CostFunction {
 		float sum = 0.0f;
 		int count = 0;
 		for (ExperimentResult res : results) {
-		    if (res.getStatus().getStatusCode() > 0) {
+		    if (res.getStatus().getStatusCode() > 0 && res.getStatus().getStatusCode() != 20) {
 		        sum += singleCost(res);
 		        count ++;
 		    }
@@ -82,7 +82,7 @@ public class PARX implements CostFunction {
 		// TODO: Take into account if the cost or runtime is wanted!
 		float sum = 0.0f;
 		for (ExperimentResult res : results) {
-			if (res.getStatus().getStatusCode() > 0) {
+			if (res.getStatus().getStatusCode() > 0 && res.getStatus().getStatusCode() != 20) {
 			    sum += singleCost(res);
 			}
 		}

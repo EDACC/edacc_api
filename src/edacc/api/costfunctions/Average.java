@@ -37,7 +37,7 @@ public class Average implements CostFunction {
 		float sum = 0.0f;
 		if (results.size() == 0) return 0;
 		for (ExperimentResult res: results) 
-			if (res.getStatus().getStatusCode() > 0)
+			if (res.getStatus().getStatusCode() > 0  && res.getStatus().getStatusCode() != 20)
 				sum += singleCost(res);
 		return sum ;
 	}
