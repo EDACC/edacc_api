@@ -1,5 +1,6 @@
 package edacc.parameterspace.graph;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,6 +15,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import edacc.parameterspace.Parameter;
 import edacc.parameterspace.ParameterConfiguration;
+import edacc.parameterspace.domain.CategoricalDomain;
+import edacc.parameterspace.domain.Domain;
+import edacc.parameterspace.domain.FlagDomain;
 import edacc.parameterspace.domain.OrdinalDomain;
 import edacc.util.Pair;
 
@@ -843,4 +847,64 @@ public class ParameterGraph {
 
         return true;
 	}
+	
+	public void conditionalParentsForRF(List<Parameter> orderedParameters, int[][] condParents, int[][][] condParentVals) {
+	    // TODO: for now we assume each parameter only appears once in the graph
+	    
+	    // number parameters in the same order they are used in the RF, i.e. the order they are passed in
+	    Map<Parameter, Integer> paramIndex = new HashMap<Parameter, Integer>();
+	    for (Parameter p: orderedParameters) paramIndex.put(p, orderedParameters.indexOf(p));
+	    
+	    condParents = new int[orderedParameters.size()][];
+	    condParentVals = new int[orderedParameters.size()][][];
+	    for (OrNode orNode: getOrNodes()) {
+	        int paramIx = paramIndex.get(orNode.getParameter());
+	        if (adjacentNodes(startNode).contains(orNode)) {
+	            // this node is adjacent to the start node, i.e. unconditional
+	            condParents[paramIx] = null;
+	            condParentVals[paramIx] = null;
+	        }
+	        else {
+	            // this parameter is somewhere in the graph
+	            int numParents = incomingEdges(orNode).size();
+	            condParents[paramIx] = new int[numParents];
+	            int parentNum = 0;
+	            for (Edge e: incomingEdges(orNode)) {
+	                AndNode andNode = (AndNode)e.getSource();
+	                int parentIx = paramIndex.get(andNode.getParameter());
+	                condParents[paramIx][parentNum] = parentIx;
+	                condParentVals[paramIx][parentNum] = new int[andNode.getDomain().getDiscreteValues().size()];
+                    Domain parentDomain = andNode.getParameter().getDomain();
+                    Domain constrainedParentDomain = andNode.getDomain();
+                    
+                    if (parentDomain instanceof CategoricalDomain) {
+                        List<String> sortedValues = new LinkedList<String>(((CategoricalDomain)parentDomain).getCategories());
+                        Collections.sort(sortedValues);
+                        
+                        for (int i = 0; i < condParentVals[paramIx][parentNum].length; i++) {
+                            condParentVals[paramIx][parentNum][i] = sortedValues.indexOf(constrainedParentDomain.getDiscreteValues().get(i));
+                        }
+                    } else if (parentDomain instanceof OrdinalDomain) {
+                        for (int i = 0; i < condParentVals[paramIx][parentNum].length; i++) {
+                            condParentVals[paramIx][parentNum][i] = ((OrdinalDomain)parentDomain).getOrdered_list().indexOf(constrainedParentDomain.getDiscreteValues().get(i));
+                        }
+                    } else if (parentDomain instanceof FlagDomain) {
+                        if (constrainedParentDomain.contains(FlagDomain.FLAGS.OFF) && constrainedParentDomain.contains(FlagDomain.FLAGS.ON)) {
+                            condParentVals[paramIx][parentNum][0] = 0;
+                            condParentVals[paramIx][parentNum][1] = 1;
+                        } else if (constrainedParentDomain.contains(FlagDomain.FLAGS.OFF)) {
+                            condParentVals[paramIx][parentNum][0] = 0;
+                        } else { // only contains ON
+                            condParentVals[paramIx][parentNum][0] = 1;
+                        }
+                    } else {
+                        throw new RuntimeException("Encountered non-categorical parent parameter when building conditional parents datastructure");
+                    }
+	                parentNum++;
+	            }
+	        }
+	    }
+	    
+	}
+
 }
