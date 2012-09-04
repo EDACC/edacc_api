@@ -858,6 +858,7 @@ public class ParameterGraph {
 	    condParents = new int[orderedParameters.size()][];
 	    condParentVals = new int[orderedParameters.size()][][];
 	    for (OrNode orNode: getOrNodes()) {
+	        if (!orderedParameters.contains(orNode.getParameter())) continue;
 	        int paramIx = paramIndex.get(orNode.getParameter());
 	        if (adjacentNodes(startNode).contains(orNode)) {
 	            // this node is adjacent to the start node, i.e. unconditional
@@ -867,10 +868,22 @@ public class ParameterGraph {
 	        else {
 	            // this parameter is somewhere in the graph
 	            int numParents = incomingEdges(orNode).size();
-	            condParents[paramIx] = new int[numParents];
-	            int parentNum = 0;
+	            
 	            for (Edge e: incomingEdges(orNode)) {
 	                AndNode andNode = (AndNode)e.getSource();
+	                if (!orderedParameters.contains(andNode.getParameter())) {
+	                    numParents--;
+	                    continue;
+	                }
+	            }
+	            
+	            int parentNum = 0;
+	            condParents[paramIx] = new int[numParents];
+	            condParentVals[paramIx] = new int[numParents][];
+	            for (Edge e: incomingEdges(orNode)) {
+	                AndNode andNode = (AndNode)e.getSource();
+	                if (!orderedParameters.contains(andNode.getParameter())) continue;
+
 	                int parentIx = paramIndex.get(andNode.getParameter());
 	                condParents[paramIx][parentNum] = parentIx;
 	                condParentVals[paramIx][parentNum] = new int[andNode.getDomain().getDiscreteValues().size()];
