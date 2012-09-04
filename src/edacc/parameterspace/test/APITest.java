@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import edacc.api.API;
 import edacc.api.APIImpl;
 import edacc.parameterspace.ParameterConfiguration;
 

@@ -101,11 +101,11 @@ public class APIImpl implements API {
                 if (OptionalDomain.OPTIONS.NOT_SPECIFIED.equals(config.getParameterValue(config_param)))
                     continue;
                 else if (FlagDomain.FLAGS.ON.equals(config.getParameterValue(config_param))) {
-                    name.append(param.getParameter().getPrefix());
+                    if (param.getParameter().getPrefix() != null) name.append(param.getParameter().getPrefix());
                     if (param != params.get(params.size() - 1))
                         name.append(" ");
                 } else {
-                    name.append(param.getParameter().getPrefix());
+                    if (param.getParameter().getPrefix() != null) name.append(param.getParameter().getPrefix());
                     if (param.getParameter().getSpace())
                         name.append(" ");
                     name.append(config.getValueRepresentation(config.getParameterValue(config_param)));
