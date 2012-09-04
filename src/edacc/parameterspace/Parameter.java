@@ -1,10 +1,16 @@
 package edacc.parameterspace;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlID;
 
 import edacc.parameterspace.domain.Domain;
 
-public class Parameter implements Comparable<Parameter> {
+public class Parameter implements Comparable<Parameter>, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3125234856799L;
 	private String name;
 	private Domain domain;
 	

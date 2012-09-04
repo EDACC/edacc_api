@@ -1,5 +1,6 @@
 package edacc.parameterspace;
 
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -13,7 +14,11 @@ import edacc.parameterspace.domain.FlagDomain;
 import edacc.parameterspace.domain.OptionalDomain;
 import edacc.parameterspace.domain.RealDomain;
 
-public class ParameterConfiguration {
+public class ParameterConfiguration implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8241847198586343570L;
 	private Map<Parameter, Object> parameter_instances;
 	private byte[] checksum;
 	

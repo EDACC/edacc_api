@@ -1,7 +1,13 @@
 package edacc.util;
 
-public class Pair<A, B> {
-    private A first;
+import java.io.Serializable;
+
+public class Pair<A, B> implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3256342687748L;
+	private A first;
     private B second;
 
     public Pair(A first, B second) {
