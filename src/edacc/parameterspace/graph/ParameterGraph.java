@@ -848,15 +848,42 @@ public class ParameterGraph {
         return true;
 	}
 	
-	public void conditionalParentsForRF(List<Parameter> orderedParameters, int[][] condParents, int[][][] condParentVals) {
+	/**
+	 * Return the domain of the parameter `variableParameter` constrained by the values
+	 * of all other parameters. 
+	 * @param config
+	 * @param variableParameter
+	 * @return
+	 */
+    public Domain getConstrainedParameterDomain(ParameterConfiguration config, Parameter variableParameter) {
+        Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
+        Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
+        params.removeAll(fixedParameters.keySet());
+        for (Parameter p : params) {
+            for (AndNode n : getAndNodes()) {
+                if (n == startNode)
+                    continue;
+                if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
+                    assigned_and_nodes.add(n);
+                }
+            }
+        }
+
+        for (AndNode n: assigned_and_nodes) {
+            if (n.getParameter().equals(variableParameter)) return n.getDomain();
+        }
+        
+        return null;
+    }
+	
+	public Object[] conditionalParentsForRF(List<Parameter> orderedParameters) {
 	    // TODO: for now we assume each parameter only appears once in the graph
 	    
 	    // number parameters in the same order they are used in the RF, i.e. the order they are passed in
 	    Map<Parameter, Integer> paramIndex = new HashMap<Parameter, Integer>();
 	    for (Parameter p: orderedParameters) paramIndex.put(p, orderedParameters.indexOf(p));
-	    
-	    condParents = new int[orderedParameters.size()][];
-	    condParentVals = new int[orderedParameters.size()][][];
+	    int[][] condParents = new int[orderedParameters.size()][];
+	    int[][][]  condParentVals = new int[orderedParameters.size()][][];
 	    for (OrNode orNode: getOrNodes()) {
 	        if (!orderedParameters.contains(orNode.getParameter())) continue;
 	        int paramIx = paramIndex.get(orNode.getParameter());
@@ -895,20 +922,20 @@ public class ParameterGraph {
                         Collections.sort(sortedValues);
                         
                         for (int i = 0; i < condParentVals[paramIx][parentNum].length; i++) {
-                            condParentVals[paramIx][parentNum][i] = sortedValues.indexOf(constrainedParentDomain.getDiscreteValues().get(i));
+                            condParentVals[paramIx][parentNum][i] = sortedValues.indexOf(constrainedParentDomain.getDiscreteValues().get(i)) + 1;
                         }
                     } else if (parentDomain instanceof OrdinalDomain) {
                         for (int i = 0; i < condParentVals[paramIx][parentNum].length; i++) {
-                            condParentVals[paramIx][parentNum][i] = ((OrdinalDomain)parentDomain).getOrdered_list().indexOf(constrainedParentDomain.getDiscreteValues().get(i));
+                            condParentVals[paramIx][parentNum][i] = ((OrdinalDomain)parentDomain).getOrdered_list().indexOf(constrainedParentDomain.getDiscreteValues().get(i)) + 1;
                         }
                     } else if (parentDomain instanceof FlagDomain) {
                         if (constrainedParentDomain.contains(FlagDomain.FLAGS.OFF) && constrainedParentDomain.contains(FlagDomain.FLAGS.ON)) {
-                            condParentVals[paramIx][parentNum][0] = 0;
-                            condParentVals[paramIx][parentNum][1] = 1;
-                        } else if (constrainedParentDomain.contains(FlagDomain.FLAGS.OFF)) {
-                            condParentVals[paramIx][parentNum][0] = 0;
-                        } else { // only contains ON
                             condParentVals[paramIx][parentNum][0] = 1;
+                            condParentVals[paramIx][parentNum][1] = 2;
+                        } else if (constrainedParentDomain.contains(FlagDomain.FLAGS.OFF)) {
+                            condParentVals[paramIx][parentNum][0] = 1;
+                        } else { // only contains ON
+                            condParentVals[paramIx][parentNum][0] = 2;
                         }
                     } else {
                         throw new RuntimeException("Encountered non-categorical parent parameter when building conditional parents datastructure");
@@ -917,7 +944,7 @@ public class ParameterGraph {
 	            }
 	        }
 	    }
-	    
+	    return new Object[] {condParents, condParentVals};
 	}
 
 }
