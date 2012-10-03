@@ -29,6 +29,7 @@ public class ParameterGraph {
 	public List<Edge> edges;
 	
 	private Map<Node, List<Edge>> adjacent_edges; // internal adjacency list
+	private Map<Node, List<Edge>> incoming_edges; // internal reverse adjacency list
 	private Map<Parameter, Object> fixedParameters;
 	
 	@SuppressWarnings("unused")
@@ -69,12 +70,25 @@ public class ParameterGraph {
 	
 	public void buildAdjacencyList() {
 		this.adjacent_edges = new HashMap<Node, List<Edge>>();
-                if (edges == null) {
-                    edges = new LinkedList<Edge>();
-                }
+		this.incoming_edges = new HashMap<Node, List<Edge>>();
+        if (edges == null) {
+            edges = new LinkedList<Edge>();
+        }
 		for (Edge e: edges) {
 			if (!this.adjacent_edges.containsKey(e.getSource())) this.adjacent_edges.put(e.getSource(), new LinkedList<Edge>());
 			this.adjacent_edges.get(e.getSource()).add(e);
+		}
+		
+		for (Node node: this.nodes) {
+	        List<Edge> edges = new LinkedList<Edge>();
+	        for (Node n: this.nodes) {
+	            if (!this.adjacent_edges.containsKey(n)) continue;
+	            for (Edge e: this.adjacent_edges.get(n)) {
+	                if (e.getTarget().equals(node)) edges.add(e);
+	            }
+	        }
+	        
+	        incoming_edges.put(node, edges);
 		}
 	}
 	
@@ -108,14 +122,7 @@ public class ParameterGraph {
 	}
 	
 	private List<Edge> incomingEdges(Node node) {
-		List<Edge> edges = new LinkedList<Edge>();
-		for (Node n: this.nodes) {
-			if (!this.adjacent_edges.containsKey(n)) continue;
-			for (Edge e: this.adjacent_edges.get(n)) {
-				if (e.getTarget().equals(node)) edges.add(e);
-			}
-		}
-		return edges;
+	    return incoming_edges.get(node);
 	}
 	
 	private Set<OrNode> getOrNodes() {
@@ -209,7 +216,7 @@ public class ParameterGraph {
 		
 		Set<OrNode> L = new HashSet<OrNode>();
 		for (Node n: adjacentNodes(this.startNode)) {
-			if (n instanceof OrNode) L.add((OrNode)n);
+			L.add((OrNode)n);
 		}
 		
 		while (true) {
@@ -224,7 +231,7 @@ public class ParameterGraph {
 			
 			Set<AndNode> adjacentAndNodes = new HashSet<AndNode>();
 			for (Node n: adjacentNodes(or_node)) {
-				if (n instanceof AndNode) adjacentAndNodes.add((AndNode)n);
+			    adjacentAndNodes.add((AndNode)n);
 			}
 			AndNode and_node = randomElement(adjacentAndNodes, rng);
 			
@@ -234,7 +241,7 @@ public class ParameterGraph {
 			done_and.add(and_node);
 			
 			for (Node n: adjacentNodes(and_node)) {
-				if (n instanceof OrNode) L.add((OrNode)n);
+				L.add((OrNode)n);
 			}
 		}
 		
