@@ -524,10 +524,10 @@ public class APIImpl implements API {
         return ExperimentResultDAO.getNumJobsBySolverConfigurationId(idSolverConfig);
     }
 
-    public synchronized void updateSolverConfigurationCost(int idSolverConfig, float cost, CostFunction func) throws Exception {
+    public synchronized void updateSolverConfigurationCost(int idSolverConfig, double cost, CostFunction func) throws Exception {
         PreparedStatement st = db.getConn().prepareStatement(
                 "UPDATE SolverConfig SET cost=?, cost_function=? WHERE idSolverConfig=?");
-        st.setFloat(1, cost);
+        st.setDouble(1, cost);
         st.setString(2, func.databaseRepresentation());
         st.setInt(3, idSolverConfig);
         st.executeUpdate();
@@ -550,12 +550,12 @@ public class APIImpl implements API {
         return null;
     }
 
-    public synchronized Float getSolverConfigurationCost(int idSolverConfig) throws Exception {
+    public synchronized Double getSolverConfigurationCost(int idSolverConfig) throws Exception {
         PreparedStatement st = db.getConn().prepareStatement("SELECT cost FROM SolverConfig WHERE idSolverConfig=?");
         st.setInt(1, idSolverConfig);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
-            Float cost = rs.getFloat("cost");
+            Double cost = rs.getDouble("cost");
             if (rs.wasNull()) cost = null;
             rs.close();
             st.close();

@@ -267,7 +267,7 @@ public interface API {
      * @param cost
      * @param func
      */
-    public void updateSolverConfigurationCost(int idSolverConfig, float cost, CostFunction func) throws Exception;
+    public void updateSolverConfigurationCost(int idSolverConfig, double cost, CostFunction func) throws Exception;
 
     /**
      * Returns the cost function of the given solver configuration as saved in
@@ -289,7 +289,7 @@ public interface API {
      * @param idSolverConfig
      * @return
      */
-    public Float getSolverConfigurationCost(int idSolverConfig) throws Exception;
+    public Double getSolverConfigurationCost(int idSolverConfig) throws Exception;
 
     /**
      * Retrieves and returns a job from the database by it's unique ID
