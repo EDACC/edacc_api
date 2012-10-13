@@ -21,6 +21,7 @@ public class ParameterConfiguration implements Serializable {
 	private static final long serialVersionUID = -8241847198586343570L;
 	private Map<Parameter, Object> parameter_instances;
 	private byte[] checksum;
+	private int checksumHashCode;
 	
 	public ParameterConfiguration(Set<Parameter> parameters) {
 		this.checksum = null;
@@ -50,6 +51,7 @@ public class ParameterConfiguration implements Serializable {
 				}
 			}
 			this.checksum = md.digest();
+			this.checksumHashCode = java.util.Arrays.hashCode(checksum);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,7 +118,7 @@ public class ParameterConfiguration implements Serializable {
 	
 	@Override
 	public int hashCode() {
-		return java.util.Arrays.hashCode(checksum);
+		return checksumHashCode;
 	}
 
 	@Override

@@ -23,6 +23,8 @@ import edacc.util.Pair;
 
 @XmlRootElement( name="parameterspace" )
 public class ParameterGraph {
+    public static boolean calculateChecksums = true;
+    
 	@XmlIDREF public AndNode startNode;
 	public Set<Node> nodes;
 	public Set<Parameter> parameters;
@@ -249,7 +251,7 @@ public class ParameterGraph {
 		    config.setParameterValue(fp, fixedParameters.get(fp));
 		}
 		
-		config.updateChecksum();
+		if (calculateChecksums) config.updateChecksum();
 		return config;
 	}
 	
@@ -281,7 +283,7 @@ public class ParameterGraph {
 					if (valuesEqual(value, config.getParameterValue(node.getParameter()))) continue;
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(node.getParameter(), value);
-					neighbour.updateChecksum();
+					if (calculateChecksums) neighbour.updateChecksum();
 					nbh.add(neighbour);
 				}
 			}
@@ -318,7 +320,7 @@ public class ParameterGraph {
 					if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(p, v);
-					neighbour.updateChecksum();
+					if (calculateChecksums) neighbour.updateChecksum();
 					nbh.add(neighbour);
 				} else { // different AND node
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
@@ -413,7 +415,7 @@ public class ParameterGraph {
 						}
 					}
 
-					neighbour.updateChecksum();
+					if (calculateChecksums) neighbour.updateChecksum();
 					nbh.add(neighbour);
 				}
 			}
@@ -443,7 +445,6 @@ public class ParameterGraph {
             for (AndNode n: getAndNodes()) {
                 if (n == startNode) continue;
                 if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
-                    //assigned_or_nodes.put(p, preceedingNode(n));
                     old_assigned_and_nodes.put(p, n);
                 }
             }
@@ -468,7 +469,7 @@ public class ParameterGraph {
                     if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
                     ParameterConfiguration neighbour = new ParameterConfiguration(config);
                     neighbour.setParameterValue(p, v);
-                    neighbour.updateChecksum();
+                    if (calculateChecksums) neighbour.updateChecksum();
                     nbh.add(neighbour);
                 } else { // different AND node
                     ParameterConfiguration neighbour = new ParameterConfiguration(config);
@@ -563,7 +564,7 @@ public class ParameterGraph {
                         }
                     }
 
-                    neighbour.updateChecksum();
+                    if (calculateChecksums) neighbour.updateChecksum();
                     nbh.add(neighbour);
                 }
             }
@@ -638,7 +639,7 @@ public class ParameterGraph {
 			n.setParameterValue(node.getParameter(), val);
 			break;
 		}
-		n.updateChecksum();
+		if (calculateChecksums) n.updateChecksum();
 		return n;
 	}
 	
@@ -684,7 +685,7 @@ public class ParameterGraph {
             n.setParameterValue(node.getParameter(), val);
             break;
         }
-        n.updateChecksum();
+        if (calculateChecksums) n.updateChecksum();
         return n;
     }
     
@@ -731,7 +732,7 @@ public class ParameterGraph {
 		        config.setParameterValue(n.getParameter(), n.getDomain().mutatedValue(rng, config.getParameterValue(n.getParameter()), stdDevFactor));
 		    }
 		}
-		config.updateChecksum();
+		if (calculateChecksums) config.updateChecksum();
 	}
 	
     public void mutateParameterConfiguration(Random rng, ParameterConfiguration config) {
@@ -777,8 +778,8 @@ public class ParameterGraph {
 			}
 		}
 		
-		c1.updateChecksum();
-		c2.updateChecksum();
+		if (calculateChecksums) c1.updateChecksum();
+		if (calculateChecksums) c2.updateChecksum();
 		return new Pair<ParameterConfiguration, ParameterConfiguration>(c1, c2);
 	}
 	
@@ -819,8 +820,8 @@ public class ParameterGraph {
             }
         }
         
-        c1.updateChecksum();
-        c2.updateChecksum();
+        if (calculateChecksums) c1.updateChecksum();
+        if (calculateChecksums) c2.updateChecksum();
 	    return new Pair<ParameterConfiguration, ParameterConfiguration>(c1, c2);
 	}
 	

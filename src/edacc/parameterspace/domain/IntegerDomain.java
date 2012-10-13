@@ -89,7 +89,8 @@ public class IntegerDomain extends Domain {
         for (int i = 0; i < numberSamples; i++) {
             if (vals.size() == high - low + 1) break; // sampled all possible values
             Object val = null;
-            while (val == null || vals.contains(val)) {
+            int tries = 0;
+            while ((val == null || vals.contains(val)) && tries++ < (high - low  + 1)) {
                 val = mutatedValue(rng, value, stdDevFactor);
             }
             vals.add(mutatedValue(rng, value, stdDevFactor));
