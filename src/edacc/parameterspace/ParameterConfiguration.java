@@ -148,11 +148,16 @@ public class ParameterConfiguration implements Serializable {
 				if (parameter_instances.get(p) == null) return false;
 				
 				if (parameter_instances.get(p) instanceof Double || parameter_instances.get(p) instanceof Float) {
+				    
 					double this_val = ((Number)parameter_instances.get(p)).doubleValue();
 					double other_val = ((Number)other.getParameterValue(p)).doubleValue();
-					if (!(other_val - 0.00000001 < this_val && this_val < other_val + 0.00000001)) return false;
+					if (Math.abs(other_val - this_val) > 1e-10) {
+					    return false;
+					}
 				}
-				else if (!parameter_instances.get(p).equals(other.getParameterValue(p))) return false;
+				else if (!parameter_instances.get(p).equals(other.getParameterValue(p))) {
+				    return false;
+				}
 			}
 		}
 		return true;
