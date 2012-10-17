@@ -1,5 +1,6 @@
 package edacc.parameterspace.graph;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +19,9 @@ import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.domain.CategoricalDomain;
 import edacc.parameterspace.domain.Domain;
 import edacc.parameterspace.domain.FlagDomain;
+import edacc.parameterspace.domain.IntegerDomain;
 import edacc.parameterspace.domain.OrdinalDomain;
+import edacc.parameterspace.domain.RealDomain;
 import edacc.util.Pair;
 
 @XmlRootElement( name="parameterspace" )
@@ -181,7 +184,7 @@ public class ParameterGraph {
 			if (!(v2 instanceof Number)) return false;
 			double cur_val = ((Number)v2).doubleValue();
 			double val = (Double)v1;
-			if (cur_val - 0.00000001 < val && val < cur_val + 0.00000001) return true;
+			if (Math.abs(cur_val - val) < 1e-10) return true;
 		}
 		
 		return v1.equals(v2);
@@ -955,4 +958,26 @@ public class ParameterGraph {
 	    return new Object[] {condParents, condParentVals};
 	}
 
+	public List<ParameterConfiguration> getGaussianNeighbourhoodFast(ParameterConfiguration config,
+            Random rng, float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
+	    List<ParameterConfiguration> nbh = new ArrayList<ParameterConfiguration>();
+	    for (Parameter p: config.getParameter_instances().keySet()) {
+            for (Object v:  p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDevFactor, numSamples)) {
+                if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
+                ParameterConfiguration neighbour = new ParameterConfiguration(config);
+                neighbour.setParameterValueFast(p, v);
+                if (calculateChecksums) neighbour.updateChecksum();
+                nbh.add(neighbour);
+            }
+	    }
+	    return nbh;
+	}
+	
+	public ParameterConfiguration getRandomConfigurationFast(Random rng) {
+	    ParameterConfiguration config = new ParameterConfiguration(this.parameters);
+	    for (Parameter p: this.parameters) {
+	        config.setParameterValueFast(p, p.getDomain().randomValue(rng));
+	    }
+	    return config;
+	}
 }

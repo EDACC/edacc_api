@@ -62,7 +62,7 @@ public class IntegerDomain extends Domain {
     public Object mutatedValue(Random rng, Object value, float stdDevFactor) {
         if (!contains(value)) return value;
         double r = rng.nextGaussian() * ((high - low) * stdDevFactor);
-        return Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
+        return (int) Math.min(Math.max(this.low, Math.round(((Number)value).doubleValue() + r)), this.high);
     }
 
 	@Override
@@ -82,6 +82,11 @@ public class IntegerDomain extends Domain {
     @Override
     public List<Object> getGaussianDiscreteValues(Random rng, Object value, float stdDevFactor,
             int numberSamples) {
+        if (numberSamples == 1) {
+            List<Object> singleVals = new LinkedList<Object>();
+            singleVals.add(mutatedValue(rng, value, stdDevFactor));
+            return singleVals;
+        }
         if (numberSamples >= (high - low + 1)) {
             return getDiscreteValues();
         }

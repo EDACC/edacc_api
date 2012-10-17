@@ -81,6 +81,10 @@ public class ParameterConfiguration implements Serializable {
 		parameter_instances.put(p, v);
 	}
 	
+	   public void setParameterValueFast(Parameter p, Object v) {
+	        parameter_instances.put(p, v);
+	    }
+	
 	public void setParameterValue(String parameter_name, Object v) {
 		Parameter param = null;
 		for (Parameter p: parameter_instances.keySet()) {
