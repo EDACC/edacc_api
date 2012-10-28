@@ -22,6 +22,7 @@ import edacc.api.costfunctions.Average;
 import edacc.api.costfunctions.CostFunction;
 import edacc.api.costfunctions.Median;
 import edacc.api.costfunctions.PARX;
+import edacc.api.costfunctions.PenalizedGeometricMeanX;
 import edacc.model.*;
 import edacc.parameterspace.domain.*;
 import edacc.parameterspace.graph.ParameterGraph;
@@ -814,6 +815,15 @@ public class APIImpl implements API {
             try {
                 int penaltyFactor = Integer.valueOf(databaseRepresentation.substring(3));
                 return new PARX(cost, exp.getMinimize(), exp.getCostPenalty() == null ? 0.f : exp.getCostPenalty(), penaltyFactor);
+            } catch (Exception e) {
+                return null;
+            }
+        } else if (databaseRepresentation != null && databaseRepresentation.startsWith("PenalizedGeometricMean")) {
+            try {
+                String[] split = databaseRepresentation.split("_");
+                int penaltyFactor = Integer.valueOf(split[1]);
+                double shift = Double.valueOf(split[2]);
+                return new PenalizedGeometricMeanX(cost, exp.getMinimize(), shift, exp.getCostPenalty() == null ? 0.f : exp.getCostPenalty(), penaltyFactor);
             } catch (Exception e) {
                 return null;
             }

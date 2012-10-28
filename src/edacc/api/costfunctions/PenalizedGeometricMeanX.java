@@ -57,7 +57,7 @@ public class PenalizedGeometricMeanX implements CostFunction {
 
     @Override
     public String databaseRepresentation() {
-        return "PenalizedGeometricMean" + String.valueOf(penaltyFactor);
+        return "PenalizedGeometricMean_" + String.valueOf(penaltyFactor) + "_" + String.valueOf(shift) ;
     }
 
     @Override
