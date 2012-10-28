@@ -60,4 +60,10 @@ public class Median implements CostFunction {
         return minimize;
     }
 
+    @Override
+    public boolean isSingleCostPenalized(ExperimentResult job) {
+        // TODO
+        return false;
+    }
+
 }

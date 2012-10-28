@@ -34,5 +34,12 @@ public interface CostFunction {
 	 */
 	public String databaseRepresentation();
 	
+	/**
+	 * Returns whether the job cost is penalized or not.
+	 * @param job
+	 * @return
+	 */
+	public boolean isSingleCostPenalized(edacc.model.ExperimentResult job);
+	
 	public boolean getMinimize();
 }

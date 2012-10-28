@@ -98,4 +98,18 @@ public class PARX implements CostFunction {
     public boolean getMinimize() {
         return minimize;
     }
+
+    @Override
+    public boolean isSingleCostPenalized(ExperimentResult job) {
+        if (String.valueOf(job.getResultCode().getResultCode()).startsWith("1")) {
+            if (costType.equals(Experiment.Cost.resultTime))
+                return false;
+            else if (costType.equals(Experiment.Cost.wallTime)) 
+                return false;
+            else
+                return Math.abs(job.getCost() - costPenaltyValue) < 1e-10;
+        } else {
+            return true;
+        }
+    }
 }

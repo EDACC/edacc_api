@@ -51,4 +51,9 @@ public class Average implements CostFunction {
 	public boolean getMinimize() {
 	    return minimize;
 	}
+
+    @Override
+    public boolean isSingleCostPenalized(ExperimentResult job) {
+        return false;
+    }
 }
