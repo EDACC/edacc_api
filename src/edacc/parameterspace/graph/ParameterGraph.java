@@ -976,6 +976,7 @@ public class ParameterGraph {
 	public ParameterConfiguration getRandomConfigurationFast(Random rng) {
 	    ParameterConfiguration config = new ParameterConfiguration(this.parameters);
 	    for (Parameter p: this.parameters) {
+	        if (fixedParameters.containsKey(p)) continue; // will be set by API anyway
 	        config.setParameterValueFast(p, p.getDomain().randomValue(rng));
 	    }
 	    return config;

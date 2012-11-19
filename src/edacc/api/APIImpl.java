@@ -850,7 +850,7 @@ public class APIImpl implements API {
     public int getComputationCoreCount(int idExperiment) throws Exception {
         Statement st = db.getConn().createStatement();
         ResultSet rs = st
-                .executeQuery("SELECT IFNULL(SUM(Client.numCores), 0) FROM Client JOIN gridQueue ON (idgridQueue = Client.gridQueue_idgridQueue) JOIN Experiment_has_gridQueue ON (idgridQueue = Experiment_has_gridQueue.gridQueue_idgridQueue) WHERE Experiment_idExperiment = "
+                .executeQuery("SELECT IFNULL(SUM(ceil(gridQueue.numCPUs / gridQueue.numCPUsPerJob)), 0) FROM Client JOIN gridQueue ON (idgridQueue = Client.gridQueue_idgridQueue) JOIN Experiment_has_gridQueue ON (idgridQueue = Experiment_has_gridQueue.gridQueue_idgridQueue) WHERE Experiment_idExperiment = "
                         + idExperiment);
         if (rs.next()) {
             try {
