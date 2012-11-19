@@ -962,6 +962,7 @@ public class ParameterGraph {
             Random rng, float stdDevFactor, int numSamples, boolean gaussianOrdinal) {
 	    List<ParameterConfiguration> nbh = new ArrayList<ParameterConfiguration>();
 	    for (Parameter p: config.getParameter_instances().keySet()) {
+	        if (fixedParameters.containsKey(p)) continue;
             for (Object v:  p.getDomain().getGaussianDiscreteValues(rng, config.getParameterValue(p), stdDevFactor, numSamples)) {
                 if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
                 ParameterConfiguration neighbour = new ParameterConfiguration(config);
