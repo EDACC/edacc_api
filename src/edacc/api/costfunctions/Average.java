@@ -5,7 +5,8 @@ import java.util.List;
 import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
-public class Average implements CostFunction {
+public class Average implements CostFunction, java.io.Serializable {
+    private static final long serialVersionUID = 8984409320806421494L;
     private boolean minimize;
     private Experiment.Cost costType;
     

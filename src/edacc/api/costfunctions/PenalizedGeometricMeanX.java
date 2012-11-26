@@ -5,7 +5,7 @@ import java.util.List;
 import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
-public class PenalizedGeometricMeanX implements CostFunction {
+public class PenalizedGeometricMeanX implements CostFunction, java.io.Serializable {
     private boolean minimize;
     private Experiment.Cost costType;
     private double shift;

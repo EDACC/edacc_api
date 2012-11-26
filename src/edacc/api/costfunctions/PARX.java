@@ -5,7 +5,7 @@ import java.util.List;
 import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
-public class PARX implements CostFunction {
+public class PARX implements CostFunction, java.io.Serializable {
 	private int penaltyFactor;
     private boolean minimize;
     private Experiment.Cost costType;

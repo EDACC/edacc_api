@@ -7,7 +7,7 @@ import java.util.List;
 import edacc.model.Experiment;
 import edacc.model.ExperimentResult;
 
-public class Median implements CostFunction {
+public class Median implements CostFunction, java.io.Serializable {
     private boolean minimize;
     private Experiment.Cost costType;
     
