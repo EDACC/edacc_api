@@ -237,17 +237,27 @@ public class ParameterGraph {
 			Set<AndNode> adjacentAndNodes = new HashSet<AndNode>();
 			for (Node n: adjacentNodes(or_node)) {
 			    adjacentAndNodes.add((AndNode)n);
-			}
-			AndNode and_node = randomElement(adjacentAndNodes, rng);
-			
-			if (config.getParameterValue(and_node.getParameter()) == null) {
-				config.setParameterValue(and_node.getParameter(), and_node.getDomain().randomValue(rng));
-			}
-			done_and.add(and_node);
-			
-			for (Node n: adjacentNodes(and_node)) {
-				L.add((OrNode)n);
-			}
+            }
+            AndNode and_node = randomElement(adjacentAndNodes, rng);
+
+            if (config.getParameterValue(and_node.getParameter()) == null) {
+                config.setParameterValue(and_node.getParameter(), and_node.getDomain().randomValue(rng));
+                done_and.add(and_node);
+                for (Node n : adjacentNodes(and_node)) {
+                    if (n instanceof OrNode)
+                        L.add((OrNode) n);
+                }
+            } else {
+                for (AndNode an : adjacentAndNodes) {
+                    if (an.getDomain().contains(config.getParameterValue(an.getParameter()))) {
+                        done_and.add(an);
+                        for (Node n : adjacentNodes(an)) {
+                            if (n instanceof OrNode)
+                                L.add((OrNode) n);
+                        }
+                    }
+                }
+            }
 		}
 		
 		for (Parameter fp: fixedParameters.keySet()) {
