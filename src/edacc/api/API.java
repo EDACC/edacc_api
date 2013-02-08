@@ -10,6 +10,8 @@ import edacc.api.costfunctions.CostFunction;
 import edacc.model.Course;
 import edacc.model.ExperimentResult;
 import edacc.model.Instance;
+import edacc.model.ResultCode;
+import edacc.model.StatusCode;
 import edacc.parameterspace.ParameterConfiguration;
 import edacc.parameterspace.graph.ParameterGraph;
 
@@ -315,6 +317,19 @@ public interface API {
      */
     public ExperimentResult killJob(int idJob) throws Exception;
 
+    /**
+     * Updates the CPU time limit, the status and the result code of the given
+     * job
+     * 
+     * @param idJob ID of the job.
+     * @param cputimelimit the new CPU time limit.
+     * @param statusCode the new status code.
+     * @param resultCode the new result code.
+     * @return
+     * @throws Exception
+     */
+    public ExperimentResult updateCPUTimeLimit(int idJob, int cputimelimit, StatusCode statusCode, ResultCode resultCode) throws Exception;
+    
     /**
      * Immediately deletes a job no matter its computation status.
      * If the job is currently being computed by some client

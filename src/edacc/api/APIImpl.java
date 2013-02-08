@@ -1001,4 +1001,14 @@ public class APIImpl implements API {
 		st.executeUpdate();
 		st.close();
 	}
+
+
+
+	@Override
+	public ExperimentResult updateCPUTimeLimit(int idJob, int cputimelimit, StatusCode statusCode, ResultCode resultCode) throws Exception {
+		Statement st = DatabaseConnector.getInstance().getConn().createStatement();
+		st.executeUpdate("UPDATE ExperimentResults SET status = " + statusCode.getStatusCode() + ", resultCode = " + resultCode.getResultCode() + ", CPUTimeLimit = " + cputimelimit + " WHERE idJob = " + idJob);
+		st.close();
+		return getJob(idJob);
+	}
 }
