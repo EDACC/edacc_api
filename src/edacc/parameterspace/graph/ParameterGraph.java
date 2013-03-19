@@ -842,7 +842,7 @@ public class ParameterGraph {
         Set<OrNode> assigned_or_nodes = new HashSet<OrNode>();
         Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
         Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
-        params.removeAll(fixedParameters.keySet());
+
         for (Parameter p: params) {
             for (AndNode n: getAndNodes()) {
                 if (n == startNode) continue;
@@ -853,20 +853,25 @@ public class ParameterGraph {
             }
         }
         
+        boolean valid = true; 
         for (Node n: adjacentNodes(startNode)) {
-            if (!assigned_or_nodes.contains(n)) return false;
+            if (!assigned_or_nodes.contains(n)) {
+                System.err.println("Mandatory parameter " + n.getParameter().getName() + " has no value.");
+                valid = false;;
+            }
         }
         
         assigned_and_nodes.add(startNode);
         
         for (OrNode n: assigned_or_nodes) {
             if (!incomingEdgesDone(n, assigned_and_nodes)) {
-                return false;
+                System.err.println("Parameter " + n.getParameter().getName() + " is conditional but parent has wrong value.");
+                valid = false;
             }
             
         }
 
-        return true;
+        return valid;
 	}
 	
 	/**
