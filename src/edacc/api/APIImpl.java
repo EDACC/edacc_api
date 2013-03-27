@@ -601,7 +601,7 @@ public class APIImpl implements API {
         ExperimentResultDAO.deleteExperimentResults(l);
         return true;
     }
-
+    //returns runs only fromt the course
     public synchronized ArrayList<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception {
         ConfigurationScenario cs = getConfigScenario(idExperiment);
         ArrayList<ExperimentResult> orderedResults = new ArrayList<ExperimentResult>();
@@ -614,6 +614,22 @@ public class APIImpl implements API {
                     break;
                 }
             }
+        }
+        return orderedResults;
+    }
+    //returns all runs    
+    public synchronized ArrayList<ExperimentResult> getAllRuns(int idExperiment, int idSolverConfig) throws Exception {
+        ConfigurationScenario cs = getConfigScenario(idExperiment);
+        ArrayList<ExperimentResult> orderedResults = new ArrayList<ExperimentResult>();
+        List<ExperimentResult> results = ExperimentResultDAO.getAllBySolverConfiguration(SolverConfigurationDAO
+                .getSolverConfigurationById(idSolverConfig));
+        //for (InstanceSeed isp : cs.getCourse().getInstanceSeedList()) {
+            for (ExperimentResult res : results) {
+             //   if (res.getInstanceId() == isp.instance.getId() && res.getSeed() == isp.seed) {
+                    orderedResults.add(res);
+          //          break;
+            //    }
+            //}
         }
         return orderedResults;
     }
