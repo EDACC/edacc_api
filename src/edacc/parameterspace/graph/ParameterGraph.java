@@ -843,7 +843,7 @@ public class ParameterGraph {
         Set<AndNode> assigned_and_nodes = new HashSet<AndNode>();
         Set<Parameter> params = new HashSet<Parameter>(config.getParameter_instances().keySet());
 
-        for (Parameter p: params) {
+        /*for (Parameter p: params) {
             for (AndNode n: getAndNodes()) {
                 if (n == startNode) continue;
                 if (n.getParameter().equals(p) && n.getDomain().contains(config.getParameterValue(p))) {
@@ -859,9 +859,44 @@ public class ParameterGraph {
                 System.err.println("Mandatory parameter " + n.getParameter().getName() + " has no value.");
                 valid = false;;
             }
-        }
+        }*/
+        
+        Set<Parameter> checkedParameters = new HashSet<Parameter>();
         
         assigned_and_nodes.add(startNode);
+        Queue<Node> q = new LinkedList<Node>();
+        q.addAll(adjacentNodes(startNode));
+        while (!q.isEmpty()) {
+            Node n = q.remove();
+            checkedParameters.add(n.getParameter());
+            
+            if (incomingEdgesDone(n, assigned_and_nodes)) {
+                boolean parameterSet = false;
+                for (Node subNode: adjacentNodes(n)) {
+                    AndNode subAndNode = (AndNode)subNode;
+                    if (subAndNode.getDomain().contains(config.getParameterValue(subAndNode.getParameter()))) {
+                        assigned_and_nodes.add(subAndNode);
+                        q.addAll(adjacentNodes(subAndNode));
+                        parameterSet = true;
+                    }
+                }
+                if (!parameterSet) {
+                    System.err.println("Parameter " + n.getParameter().getName() + " missing value.");
+                    return false;
+                }
+            }
+        }
+        
+        for (Parameter p: config.getParameter_instances().keySet()) {
+            if (!checkedParameters.contains(p) && config.getParameterValue(p) != null && config.getParameterValue(p) != FlagDomain.FLAGS.OFF) {
+                System.err.println("Parameter " + p.getName() + " is set but shouldn't be.");
+                return false;
+            }
+        }
+        
+        
+        
+        /*assigned_and_nodes.add(startNode);
         
         for (OrNode n: assigned_or_nodes) {
             if (!incomingEdgesDone(n, assigned_and_nodes)) {
@@ -869,9 +904,9 @@ public class ParameterGraph {
                 valid = false;
             }
             
-        }
+        }*/
 
-        return valid;
+        return true;
 	}
 	
 	/**

@@ -50,6 +50,7 @@ public class FlagDomain extends Domain {
 	
 	@Override
 	public boolean contains(Object value) {
+	    //if (value == null && values.contains(FLAGS.OFF)) return true;
 		if (!(value instanceof FLAGS)) return false;
 		return values.contains(value);
 	}

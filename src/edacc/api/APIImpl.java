@@ -439,9 +439,12 @@ public class APIImpl implements API {
             String parameter_name = param.getParameter().getName();
             if (param.isConfigurable()) {
                 if (!param.getParameter().getHasValue()) { // this is a flag
-                                                           // which is ON in
-                                                           // this solver config
-                    config.setParameterValue(parameter_name, FlagDomain.FLAGS.ON);
+                    if (!solver_config_param_map.containsKey(param.getParameter().getName())) {
+                        config.setParameterValue(parameter_name, FlagDomain.FLAGS.OFF);
+                    } else {
+                        config.setParameterValue(parameter_name, FlagDomain.FLAGS.ON);
+                    }
+                    
                 } else { // standard parameter with a value
                     if (solver_config_param_map.get(param.getParameter().getName()) == null) continue;
                     
