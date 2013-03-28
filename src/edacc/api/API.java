@@ -354,13 +354,23 @@ public interface API {
 
     /**
      * Returns all jobs of the solver configuration specified by the
-     * idSolverConfig argument.
+     * idSolverConfig argument which are on the course.
      * 
      * @param idExperiment
      * @param idSolverConfig
      * @return
      */
     public List<ExperimentResult> getRuns(int idExperiment, int idSolverConfig) throws Exception;
+    
+    /**
+     * Returns all jobs of the solver configuration specified by the
+     * idSolverConfig argument.
+     * 
+     * @param idExperiment
+     * @param idSolverConfig
+     * @return
+     */
+    public List<ExperimentResult> getAllRuns(int idExperiment, int idSolverConfig) throws Exception;
 
     /**
      * returns the length of the instance-seed course of the configuration
