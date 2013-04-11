@@ -328,14 +328,14 @@ public class ParameterGraph {
 		for (Parameter p: config.getParameter_instances().keySet()) {
 		    if (fixedParameters.containsKey(p)) continue;
 			for (Object v: p.getDomain().getDiscreteValues()) {
-				if (old_assigned_and_nodes.get(p) == null) continue; // this parameter wasn't actually set
+				if (old_assigned_and_nodes.get(p) == null || config.getParameterValue(p) == FlagDomain.FLAGS.OFF) continue; // this parameter wasn't actually set
 				if (old_assigned_and_nodes.get(p).getDomain().contains(v)) { // same AND node
 					if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(p, v);
 					if (calculateChecksums) neighbour.updateChecksum();
 					nbh.add(neighbour);
-				} else { // different AND node
+				}/* else { // different AND node
 					ParameterConfiguration neighbour = new ParameterConfiguration(config);
 					neighbour.setParameterValue(p, v);
 					
@@ -363,6 +363,7 @@ public class ParameterGraph {
 					assigned_and_nodes.add(new_and_node);
 					
 					// find now unsatisfied OR-nodes and reset their parameter values to null
+					System.err.println("Resetting parameters starting from " + p.getName() + " " + old_assigned_and_nodes.get(p).getDomain());
 					AndNode old_and_node = old_assigned_and_nodes.get(p);
 					Set<Node> closure = new HashSet<Node>();
 					Queue<Node> Q = new LinkedList<Node>();
@@ -430,7 +431,7 @@ public class ParameterGraph {
 
 					if (calculateChecksums) neighbour.updateChecksum();
 					nbh.add(neighbour);
-				}
+				}*/
 			}
 		}
 
@@ -452,7 +453,6 @@ public class ParameterGraph {
      */
     public List<ParameterConfiguration> getGaussianNeighbourhood(ParameterConfiguration config,
             Random rng, Map<Parameter, Float> standardDeviation, int numSamples, Map<Parameter, Float> samplesFactor, boolean gaussianOrdinal) {
-        //Map<Parameter, OrNode> assigned_or_nodes = new HashMap<Parameter, OrNode>();
         Map<Parameter, AndNode> old_assigned_and_nodes = new HashMap<Parameter, AndNode>();
         for (Parameter p: config.getParameter_instances().keySet()) {
             for (AndNode n: getAndNodes()) {
@@ -477,14 +477,14 @@ public class ParameterGraph {
             }
              
             for (Object v: domain_vals) {
-                if (old_assigned_and_nodes.get(p) == null) continue; // this parameter wasn't actually set
+                if (old_assigned_and_nodes.get(p) == null || config.getParameterValue(p) == FlagDomain.FLAGS.OFF) continue; // this parameter wasn't actually set
                 if (old_assigned_and_nodes.get(p).getDomain().contains(v)) { // same AND node
                     if (valuesEqual(v, config.getParameterValue(p))) continue; // same value as current -> skip
                     ParameterConfiguration neighbour = new ParameterConfiguration(config);
                     neighbour.setParameterValue(p, v);
                     if (calculateChecksums) neighbour.updateChecksum();
                     nbh.add(neighbour);
-                } else { // different AND node
+                }/* else { // different AND node
                     ParameterConfiguration neighbour = new ParameterConfiguration(config);
                     neighbour.setParameterValue(p, v);
                     
@@ -512,6 +512,7 @@ public class ParameterGraph {
                     assigned_and_nodes.add(new_and_node);
                     
                     // find now unsatisfied OR-nodes and reset their parameter values to null
+                    System.err.println("Resetting parameters starting from " + p.getName() + " " + old_assigned_and_nodes.get(p).getDomain());
                     AndNode old_and_node = old_assigned_and_nodes.get(p);
                     Set<Node> closure = new HashSet<Node>();
                     Queue<Node> Q = new LinkedList<Node>();
@@ -579,7 +580,7 @@ public class ParameterGraph {
 
                     if (calculateChecksums) neighbour.updateChecksum();
                     nbh.add(neighbour);
-                }
+                }*/
             }
         }
 
@@ -889,7 +890,7 @@ public class ParameterGraph {
         
         for (Parameter p: config.getParameter_instances().keySet()) {
             if (!checkedParameters.contains(p) && config.getParameterValue(p) != null && config.getParameterValue(p) != FlagDomain.FLAGS.OFF) {
-                System.err.println("Parameter " + p.getName() + " is set but shouldn't be.");
+                System.err.println("Parameter " + p.getName() + " is set but shouldn't be. Value: " + config.getParameterValue(p));
                 return false;
             }
         }
