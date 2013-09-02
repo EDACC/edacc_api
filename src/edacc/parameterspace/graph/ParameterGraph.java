@@ -215,6 +215,10 @@ public class ParameterGraph {
 	public ParameterConfiguration getRandomConfiguration(Random rng) {
 		ParameterConfiguration config = new ParameterConfiguration(this.parameters);
 		
+		for (Parameter fp: fixedParameters.keySet()) {
+		    config.setParameterValue(fp, fixedParameters.get(fp));
+		}
+		
 		Set<AndNode> done_and = new HashSet<AndNode>();
 		done_and.add(this.startNode);
 		Set<OrNode> done_or = new HashSet<OrNode>();
@@ -233,7 +237,7 @@ public class ParameterGraph {
 			OrNode or_node = randomElement(openOrNodes, rng);
 			L.remove(or_node);
 			done_or.add(or_node);
-			
+
 			Set<AndNode> adjacentAndNodes = new HashSet<AndNode>();
 			for (Node n: adjacentNodes(or_node)) {
 			    adjacentAndNodes.add((AndNode)n);
@@ -260,9 +264,6 @@ public class ParameterGraph {
             }
 		}
 		
-		for (Parameter fp: fixedParameters.keySet()) {
-		    config.setParameterValue(fp, fixedParameters.get(fp));
-		}
 		
 		if (calculateChecksums) config.updateChecksum();
 		return config;
@@ -979,7 +980,7 @@ public class ParameterGraph {
                     Domain parentDomain = andNode.getParameter().getDomain();
                     Domain constrainedParentDomain = andNode.getDomain();
                     
-                    if (parentDomain instanceof CategoricalDomain) {
+					if (parentDomain instanceof CategoricalDomain) {
                         List<String> sortedValues = new LinkedList<String>(((CategoricalDomain)parentDomain).getCategories());
                         Collections.sort(sortedValues);
                         
@@ -1033,4 +1034,5 @@ public class ParameterGraph {
 	    }
 	    return config;
 	}
+	
 }
